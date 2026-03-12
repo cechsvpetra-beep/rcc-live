@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RCC Admin</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#111;
+  color:white;
+  margin:0;
+  padding:20px;
+}
+h1{
+  margin-top:0;
+}
+.box{
+  background:#1a1a1a;
+  border:1px solid #444;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:20px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #444;
+  padding:8px;
+}
+th{
+  background:#222;
+}
+input,select,button{
+  width:100%;
+  padding:8px;
+  box-sizing:border-box;
+  border-radius:6px;
+  border:none;
+}
+button{
+  background:#2ecc71;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:hover{
+  background:#27ae60;
+}
+.sectors{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.danger{
+  background:#e74c3c;
+}
+.danger:hover{
+  background:#c0392b;
+}
+.small-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.small-row button{
+  max-width:240px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>RCC Admin</h1>
+
+<div class="box">
+  <h2>Aktívne sektory</h2>
+
+  <div class="sectors">
+    <label><input type="checkbox" value="A" class="sector"> A</label>
+    <label><input type="checkbox" value="B" class="sector"> B</label>
+    <label><input type="checkbox" value="C" class="sector"> C</label>
+    <label><input type="checkbox" value="D" class="sector"> D</label>
+    <label><input type="checkbox" value="E" class="sector"> E</label>
+  </div>
+
+  <div class="small-row">
+    <button onclick="saveSectors()">Uložiť sektory</button>
+    <button class="danger" onclick="resetRace()">RESET PRETEKU</button>
+  </div>
+</div>
+
+<div class="box">
+  <h2>Tímy</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Názov tímu</th>
+        <th>Sektor</th>
+        <th>Stanovište</th>
+        <th>Uložiť</th>
+      </tr>
+    </thead>
+    <tbody id="teams"></tbody>
+  </table>
+</div>
+
+<script>
+async function loadSettings(){
+  const res = await fetch("/settings");
+  const data = await res.json();
+  const active = data.activeSectors;
+
+  document.querySelectorAll(".sector").forEach(c=>{
+    c.checked = active.includes(c.value);
+  });
+}
+
+async function saveSectors(){
+  const active = Array.from(document.querySelectorAll(".sector"))
+    .filter(x=>x.checked)
+    .map(x=>x.value);
+
+  await fetch("/settings/sectors",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body:JSON.stringify({activeSectors:active})
+  });
+
+  alert("Sektory uložené");
+}
+
+async function resetRace(){
+  const ok = confirm("Naozaj chceš resetovať celý pretek? Vymažú sa všetky úlovky.");
+  if(!ok) return;
+
+  const res = await fetch("/reset", {
+    method:"POST"
+  });
+
+  const data = await res.json();
+
+  if(data.ok){
+    alert("Pretek bol resetovaný");
+  }else{
+    alert("Chyba pri resetovaní");
+  }
+}
+
+async function loadTeams(){
+  const res = await fetch("/teams");
+  const teams = await res.json();
+
+  const body = document.getElementById("teams");
+  body.innerHTML="";
+
+  teams.forEach(t=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${t.id}</td>
+      <td><input id="name-${t.id}" value="${t.name}"></td>
+      <td>
+        <select id="sector-${t.id}">
+          <option value="A" ${t.sector=="A"?"selected":""}>A</option>
+          <option value="B" ${t.sector=="B"?"selected":""}>B</option>
+          <option value="C" ${t.sector=="C"?"selected":""}>C</option>
+          <option value="D" ${t.sector=="D"?"selected":""}>D</option>
+          <option value="E" ${t.sector=="E"?"selected":""}>E</option>
+        </select>
+      </td>
+      <td><input type="number" id="peg-${t.id}" value="${t.peg}"></td>
+      <td><button onclick="saveTeam(${t.id})">Uložiť</button></td>
+    `;
+
+    body.appendChild(tr);
+  });
+}
+
+async function saveTeam(id){
+  const name = document.getElementById("name-"+id).value;
+  const sector = document.getElementById("sector-"+id).value;
+  const peg = document.getElementById("peg-"+id).value;
+
+  await fetch("/teams/update",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body:JSON.stringify({
+      id,
+      name,
+      sector,
+      peg
+    })
+  });
+
+  alert("Tím uložený");
+}
+
+loadSettings();
+loadTeams();
+</script>
+
+</body>
+</html>

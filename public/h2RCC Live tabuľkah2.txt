@@ -1,0 +1,23 @@
+<h2>RCC Live tabuľka</h2>
+
+<table border="1" id="t"></table>
+
+<script>
+
+const ws=new WebSocket("ws://"+location.host);
+
+ws.onmessage=e=>{
+ const d=JSON.parse(e.data).lb;
+
+ t.innerHTML="<tr><th>#</th><th>Tím</th><th>kg</th><th>Kusy</th></tr>"+
+ d.map((r,i)=>
+ `<tr>
+ <td>${i+1}</td>
+ <td>${r.name}</td>
+ <td>${r.total}</td>
+ <td>${r.count}</td>
+ </tr>`
+ ).join("");
+}
+
+</script>

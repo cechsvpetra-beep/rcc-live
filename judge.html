@@ -1,0 +1,104 @@
+<script>
+
+const teamSelect = document.getElementById("team");
+const msg = document.getElementById("msg");
+
+const teams = [];
+
+for(let i=1;i<=50;i++){
+
+  let sector;
+
+  if(i<=10) sector="A";
+  else if(i<=20) sector="B";
+  else if(i<=30) sector="C";
+  else if(i<=40) sector="D";
+  else sector="E";
+
+  teams.push({
+    id:i,
+    name:"Tím "+i,
+    sector
+  });
+
+}
+
+const sectorSelect = document.createElement("select");
+sectorSelect.style.marginBottom="10px";
+
+["A","B","C","D","E"].forEach(s=>{
+  const o=document.createElement("option");
+  o.value=s;
+  o.textContent="Sektor "+s;
+  sectorSelect.appendChild(o);
+});
+
+teamSelect.parentNode.insertBefore(sectorSelect, teamSelect);
+
+function updateTeams(){
+
+  const sector=sectorSelect.value;
+
+  teamSelect.innerHTML="";
+
+  teams
+  .filter(t=>t.sector===sector)
+  .forEach(t=>{
+    const option=document.createElement("option");
+    option.value=t.id;
+    option.textContent=t.name;
+    teamSelect.appendChild(option);
+  });
+
+}
+
+sectorSelect.onchange=updateTeams;
+
+updateTeams();
+
+async function saveCatch(){
+
+  const team = teamSelect.value;
+  const weight = document.getElementById("weight").value;
+  const photo = document.getElementById("photo").files[0];
+
+  if(!weight){
+    msg.textContent="Zadaj váhu";
+    msg.style.color="orange";
+    return;
+  }
+
+  const formData=new FormData();
+
+  formData.append("team",team);
+  formData.append("weight",weight);
+
+  if(photo){
+    formData.append("photo",photo);
+  }
+
+  const res=await fetch("/catch",{
+    method:"POST",
+    body:formData
+  });
+
+  const text=await res.text();
+
+  if(text==="ok"){
+
+    msg.textContent="Úlovok uložený";
+    msg.style.color="#2ecc71";
+
+    document.getElementById("weight").value="";
+    document.getElementById("photo").value="";
+
+  }else{
+
+    msg.textContent="Chyba";
+    msg.style.color="red";
+
+  }
+
+}
+
+</script>

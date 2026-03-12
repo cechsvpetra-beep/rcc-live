@@ -1,0 +1,330 @@
+{
+  "catches": [
+    {
+      "teamId": 2,
+      "weight": 5.55,
+      "photo": null,
+      "time": "2026-03-10T15:56:40.538Z"
+    },
+    {
+      "teamId": 21,
+      "weight": 55,
+      "photo": "/uploads/1773157549345-677529455.jpg",
+      "time": "2026-03-10T15:45:49.351Z"
+    },
+    {
+      "teamId": 12,
+      "weight": 5.33,
+      "photo": "/uploads/1773157500761-574041811.jpg",
+      "time": "2026-03-10T15:45:00.772Z"
+    },
+    {
+      "teamId": 2,
+      "weight": 10.5,
+      "photo": "/uploads/1773155986882-350901078.jpg",
+      "time": "2026-03-10T15:19:46.914Z"
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Tím 1",
+      "sector": "A",
+      "peg": 1
+    },
+    {
+      "id": 2,
+      "name": "Tím 2",
+      "sector": "A",
+      "peg": 2
+    },
+    {
+      "id": 3,
+      "name": "Tím 3",
+      "sector": "A",
+      "peg": 3
+    },
+    {
+      "id": 4,
+      "name": "Tím 4",
+      "sector": "A",
+      "peg": 4
+    },
+    {
+      "id": 5,
+      "name": "Tím 5",
+      "sector": "A",
+      "peg": 5
+    },
+    {
+      "id": 6,
+      "name": "Tím 6",
+      "sector": "A",
+      "peg": 6
+    },
+    {
+      "id": 7,
+      "name": "Tím 7",
+      "sector": "A",
+      "peg": 7
+    },
+    {
+      "id": 8,
+      "name": "Tím 8",
+      "sector": "A",
+      "peg": 8
+    },
+    {
+      "id": 9,
+      "name": "Tím 9",
+      "sector": "A",
+      "peg": 9
+    },
+    {
+      "id": 10,
+      "name": "Tím 10",
+      "sector": "A",
+      "peg": 10
+    },
+    {
+      "id": 11,
+      "name": "Tím 11",
+      "sector": "B",
+      "peg": 11
+    },
+    {
+      "id": 12,
+      "name": "Tím 12",
+      "sector": "B",
+      "peg": 12
+    },
+    {
+      "id": 13,
+      "name": "Tím 13",
+      "sector": "B",
+      "peg": 13
+    },
+    {
+      "id": 14,
+      "name": "Tím 14",
+      "sector": "B",
+      "peg": 14
+    },
+    {
+      "id": 15,
+      "name": "Tím 15",
+      "sector": "B",
+      "peg": 15
+    },
+    {
+      "id": 16,
+      "name": "Tím 16",
+      "sector": "B",
+      "peg": 16
+    },
+    {
+      "id": 17,
+      "name": "Tím 17",
+      "sector": "B",
+      "peg": 17
+    },
+    {
+      "id": 18,
+      "name": "Tím 18",
+      "sector": "B",
+      "peg": 18
+    },
+    {
+      "id": 19,
+      "name": "Tím 19",
+      "sector": "B",
+      "peg": 19
+    },
+    {
+      "id": 20,
+      "name": "Tím 20",
+      "sector": "B",
+      "peg": 20
+    },
+    {
+      "id": 21,
+      "name": "Tím 21",
+      "sector": "C",
+      "peg": 21
+    },
+    {
+      "id": 22,
+      "name": "Tím 22",
+      "sector": "C",
+      "peg": 22
+    },
+    {
+      "id": 23,
+      "name": "Tím 23",
+      "sector": "C",
+      "peg": 23
+    },
+    {
+      "id": 24,
+      "name": "Tím 24",
+      "sector": "C",
+      "peg": 24
+    },
+    {
+      "id": 25,
+      "name": "Tím 25",
+      "sector": "C",
+      "peg": 25
+    },
+    {
+      "id": 26,
+      "name": "Tím 26",
+      "sector": "C",
+      "peg": 26
+    },
+    {
+      "id": 27,
+      "name": "Tím 27",
+      "sector": "C",
+      "peg": 27
+    },
+    {
+      "id": 28,
+      "name": "Tím 28",
+      "sector": "C",
+      "peg": 28
+    },
+    {
+      "id": 29,
+      "name": "Tím 29",
+      "sector": "C",
+      "peg": 29
+    },
+    {
+      "id": 30,
+      "name": "Tím 30",
+      "sector": "C",
+      "peg": 30
+    },
+    {
+      "id": 31,
+      "name": "Tím 31",
+      "sector": "D",
+      "peg": 31
+    },
+    {
+      "id": 32,
+      "name": "Tím 32",
+      "sector": "D",
+      "peg": 32
+    },
+    {
+      "id": 33,
+      "name": "Tím 33",
+      "sector": "D",
+      "peg": 33
+    },
+    {
+      "id": 34,
+      "name": "Tím 34",
+      "sector": "D",
+      "peg": 34
+    },
+    {
+      "id": 35,
+      "name": "Tím 35",
+      "sector": "D",
+      "peg": 35
+    },
+    {
+      "id": 36,
+      "name": "Tím 36",
+      "sector": "D",
+      "peg": 36
+    },
+    {
+      "id": 37,
+      "name": "Tím 37",
+      "sector": "D",
+      "peg": 37
+    },
+    {
+      "id": 38,
+      "name": "Tím 38",
+      "sector": "D",
+      "peg": 38
+    },
+    {
+      "id": 39,
+      "name": "Tím 39",
+      "sector": "D",
+      "peg": 39
+    },
+    {
+      "id": 40,
+      "name": "Tím 40",
+      "sector": "D",
+      "peg": 40
+    },
+    {
+      "id": 41,
+      "name": "Tím 41",
+      "sector": "E",
+      "peg": 41
+    },
+    {
+      "id": 42,
+      "name": "Tím 42",
+      "sector": "E",
+      "peg": 42
+    },
+    {
+      "id": 43,
+      "name": "Tím 43",
+      "sector": "E",
+      "peg": 43
+    },
+    {
+      "id": 44,
+      "name": "Tím 44",
+      "sector": "E",
+      "peg": 44
+    },
+    {
+      "id": 45,
+      "name": "Tím 45",
+      "sector": "E",
+      "peg": 45
+    },
+    {
+      "id": 46,
+      "name": "Tím 46",
+      "sector": "E",
+      "peg": 46
+    },
+    {
+      "id": 47,
+      "name": "Tím 47",
+      "sector": "E",
+      "peg": 47
+    },
+    {
+      "id": 48,
+      "name": "Tím 48",
+      "sector": "E",
+      "peg": 48
+    },
+    {
+      "id": 49,
+      "name": "Tím 49",
+      "sector": "E",
+      "peg": 49
+    },
+    {
+      "id": 50,
+      "name": "Tím 50",
+      "sector": "E",
+      "peg": 50
+    }
+  ]
+}
