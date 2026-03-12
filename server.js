@@ -94,9 +94,15 @@ const upload = multer({ storage });
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// Hlavná adresa otvorí live tabuľku
 app.get("/", (req, res) => {
   res.redirect("/live.html");
+});
+
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    time: new Date().toISOString()
+  });
 });
 
 function getActiveSectors() {
@@ -207,20 +213,30 @@ function recentCatches() {
     });
 }
 
-function broadcast() {
-  const data = JSON.stringify({
+function getPayload() {
+  return {
     lb: leaderboard(),
     topFish: topFish(),
     recent: recentCatches(),
     teams: teams,
     sectorRankings: sectorRankings(),
     activeSectors: getActiveSectors()
-  });
+  };
+}
+
+function broadcast() {
+  const data = JSON.stringify(getPayload());
 
   wss.clients.forEach(c => {
-    if (c.readyState === 1) c.send(data);
+    if (c.readyState === WebSocket.OPEN) {
+      c.send(data);
+    }
   });
 }
+
+app.get("/api/state", (req, res) => {
+  res.json(getPayload());
+});
 
 app.get("/teams", (req, res) => {
   res.json(teams);
@@ -385,14 +401,7 @@ app.get("/export/pdf", (req, res) => {
 });
 
 wss.on("connection", ws => {
-  ws.send(JSON.stringify({
-    lb: leaderboard(),
-    topFish: topFish(),
-    recent: recentCatches(),
-    teams: teams,
-    sectorRankings: sectorRankings(),
-    activeSectors: getActiveSectors()
-  }));
+  ws.send(JSON.stringify(getPayload()));
 });
 
 const PORT = process.env.PORT || 5173;
