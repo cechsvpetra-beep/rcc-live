@@ -92,7 +92,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
+
+// Hlavná adresa otvorí live tabuľku
+app.get("/", (req, res) => {
+  res.redirect("/live.html");
+});
 
 function getActiveSectors() {
   return settings.activeSectors || ["A", "B", "C", "D", "E"];
@@ -133,13 +138,11 @@ function sectorRankings() {
 
   active.forEach(sector => {
     const raw = filteredLeaderboard(sector);
-
     let officialRank = 0;
 
     result[sector] = raw.map((t, i) => {
       let officialSectorRank = null;
 
-      // tím z celkového TOP 3 nemôže byť 1-2-3 v sektore
       if (!blockedIds.has(t.id)) {
         officialRank += 1;
         officialSectorRank = officialRank;
@@ -155,6 +158,7 @@ function sectorRankings() {
 
   return result;
 }
+
 function topFish() {
   const activeTeamIds = new Set(
     teams.filter(t => getActiveSectors().includes(t.sector)).map(t => t.id)
