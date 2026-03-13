@@ -1,28 +1,66 @@
 {
-  "catches": [
-    {
-      "team": 2,
-      "weight": 5.55,
-      "photo": null,
-      "time": "2026-03-10T15:56:40.538Z"
-    },
-    {
-      "team": 21,
-      "weight": 55,
-      "photo": "/uploads/1773157549345-677529455.jpg",
-      "time": "2026-03-10T15:45:49.351Z"
-    },
-    {
-      "team": 12,
-      "weight": 5.33,
-      "photo": "/uploads/1773157500761-574041811.jpg",
-      "time": "2026-03-10T15:45:00.772Z"
-    },
-    {
-      "team": 2,
-      "weight": 10.5,
-      "photo": "/uploads/1773155986882-350901078.jpg",
-      "time": "2026-03-10T15:19:46.914Z"
-    }
-  ]
+  "sectors": {
+    "A": { "code": "A", "name": "Sektor A" },
+    "B": { "code": "B", "name": "Sektor B" },
+    "C": { "code": "C", "name": "Sektor C" },
+    "D": { "code": "D", "name": "Sektor D" },
+    "E": { "code": "E", "name": "Sektor E" }
+  },
+  "teams": [
+    { "id": 1, "name": "Tím 1", "sector": "A", "peg": "1", "active": true },
+    { "id": 2, "name": "Tím 2", "sector": "A", "peg": "2", "active": true },
+    { "id": 3, "name": "Tím 3", "sector": "A", "peg": "3", "active": true },
+    { "id": 4, "name": "Tím 4", "sector": "A", "peg": "4", "active": true },
+    { "id": 5, "name": "Tím 5", "sector": "A", "peg": "5", "active": true },
+    { "id": 6, "name": "Tím 6", "sector": "A", "peg": "6", "active": true },
+    { "id": 7, "name": "Tím 7", "sector": "A", "peg": "7", "active": true },
+    { "id": 8, "name": "Tím 8", "sector": "A", "peg": "8", "active": true },
+    { "id": 9, "name": "Tím 9", "sector": "A", "peg": "9", "active": true },
+    { "id": 10, "name": "Tím 10", "sector": "A", "peg": "10", "active": true },
+
+    { "id": 11, "name": "Tím 11", "sector": "B", "peg": "11", "active": true },
+    { "id": 12, "name": "Tím 12", "sector": "B", "peg": "12", "active": true },
+    { "id": 13, "name": "Tím 13", "sector": "B", "peg": "13", "active": true },
+    { "id": 14, "name": "Tím 14", "sector": "B", "peg": "14", "active": true },
+    { "id": 15, "name": "Tím 15", "sector": "B", "peg": "15", "active": true },
+    { "id": 16, "name": "Tím 16", "sector": "B", "peg": "16", "active": true },
+    { "id": 17, "name": "Tím 17", "sector": "B", "peg": "17", "active": true },
+    { "id": 18, "name": "Tím 18", "sector": "B", "peg": "18", "active": true },
+    { "id": 19, "name": "Tím 19", "sector": "B", "peg": "19", "active": true },
+    { "id": 20, "name": "Tím 20", "sector": "B", "peg": "20", "active": true },
+
+    { "id": 21, "name": "Tím 21", "sector": "C", "peg": "21", "active": false },
+    { "id": 22, "name": "Tím 22", "sector": "C", "peg": "22", "active": false },
+    { "id": 23, "name": "Tím 23", "sector": "C", "peg": "23", "active": false },
+    { "id": 24, "name": "Tím 24", "sector": "C", "peg": "24", "active": false },
+    { "id": 25, "name": "Tím 25", "sector": "C", "peg": "25", "active": false },
+    { "id": 26, "name": "Tím 26", "sector": "C", "peg": "26", "active": false },
+    { "id": 27, "name": "Tím 27", "sector": "C", "peg": "27", "active": false },
+    { "id": 28, "name": "Tím 28", "sector": "C", "peg": "28", "active": false },
+    { "id": 29, "name": "Tím 29", "sector": "C", "peg": "29", "active": false },
+    { "id": 30, "name": "Tím 30", "sector": "C", "peg": "30", "active": false },
+
+    { "id": 31, "name": "Tím 31", "sector": "D", "peg": "31", "active": false },
+    { "id": 32, "name": "Tím 32", "sector": "D", "peg": "32", "active": false },
+    { "id": 33, "name": "Tím 33", "sector": "D", "peg": "33", "active": false },
+    { "id": 34, "name": "Tím 34", "sector": "D", "peg": "34", "active": false },
+    { "id": 35, "name": "Tím 35", "sector": "D", "peg": "35", "active": false },
+    { "id": 36, "name": "Tím 36", "sector": "D", "peg": "36", "active": false },
+    { "id": 37, "name": "Tím 37", "sector": "D", "peg": "37", "active": false },
+    { "id": 38, "name": "Tím 38", "sector": "D", "peg": "38", "active": false },
+    { "id": 39, "name": "Tím 39", "sector": "D", "peg": "39", "active": false },
+    { "id": 40, "name": "Tím 40", "sector": "D", "peg": "40", "active": false },
+
+    { "id": 41, "name": "Tím 41", "sector": "E", "peg": "41", "active": false },
+    { "id": 42, "name": "Tím 42", "sector": "E", "peg": "42", "active": false },
+    { "id": 43, "name": "Tím 43", "sector": "E", "peg": "43", "active": false },
+    { "id": 44, "name": "Tím 44", "sector": "E", "peg": "44", "active": false },
+    { "id": 45, "name": "Tím 45", "sector": "E", "peg": "45", "active": false },
+    { "id": 46, "name": "Tím 46", "sector": "E", "peg": "46", "active": false },
+    { "id": 47, "name": "Tím 47", "sector": "E", "peg": "47", "active": false },
+    { "id": 48, "name": "Tím 48", "sector": "E", "peg": "48", "active": false },
+    { "id": 49, "name": "Tím 49", "sector": "E", "peg": "49", "active": false },
+    { "id": 50, "name": "Tím 50", "sector": "E", "peg": "50", "active": false }
+  ],
+  "catches": []
 }

@@ -11,61 +11,51 @@ app.use(express.static(path.join(__dirname, "public")));
 const DATA_FILE = path.join(__dirname, "data.json");
 
 /* ===============================
-   ZOZNAM TÍMOV
-================================ */
-
-const teams = {
-  1: { name: "CT Mr. Fishing I.", sector: "Palkov", peg: "Palkov 1" },
-  2: { name: "CT Zemník – Bodovka Slovakia", sector: "Palkov", peg: "Palkov 2" },
-  3: { name: "CT MIKBAITS SK", sector: "Kamenec", peg: "Kamenec 4" },
-  4: { name: "CT Starfishing / Munch Baits", sector: "Hôrka", peg: "Hôrka 1" },
-  5: { name: "CT Squama / MsO SRZ Lučenec", sector: "Palkov", peg: "Palkov 3" },
-  6: { name: "CT Carp Servis Václavík II.", sector: "Palkov", peg: "Palkov 7" },
-  7: { name: "CT AKBAITS III. Karp Klub Bytom", sector: "Palkov", peg: "Palkov 5" },
-  8: { name: "CT Dr. Baits I.", sector: "Kamenec", peg: "Kamenec 5" },
-  9: { name: "CT Fishing Star CZ", sector: "Palkov", peg: "Palkov 4" },
-
-  10: { name: "Tím 10", sector: "A", peg: "10" },
-  11: { name: "Tím 11", sector: "A", peg: "11" },
-  12: { name: "Tím 12", sector: "A", peg: "12" },
-  13: { name: "Tím 13", sector: "B", peg: "13" },
-  14: { name: "Tím 14", sector: "B", peg: "14" },
-  15: { name: "Tím 15", sector: "B", peg: "15" },
-  16: { name: "Tím 16", sector: "B", peg: "16" },
-  17: { name: "Tím 17", sector: "C", peg: "17" },
-  18: { name: "Tím 18", sector: "C", peg: "18" },
-  19: { name: "Tím 19", sector: "C", peg: "19" },
-  20: { name: "Tím 20", sector: "C", peg: "20" },
-  21: { name: "Tím 21", sector: "C", peg: "21" },
-  22: { name: "Tím 22", sector: "C", peg: "22" },
-  23: { name: "Tím 23", sector: "C", peg: "23" },
-  24: { name: "Tím 24", sector: "C", peg: "24" },
-  25: { name: "Tím 25", sector: "C", peg: "25" },
-  26: { name: "Tím 26", sector: "C", peg: "26" },
-  27: { name: "Tím 27", sector: "C", peg: "27" },
-  28: { name: "Tím 28", sector: "C", peg: "28" }
-};
-
-/* ===============================
    POMOCNÉ FUNKCIE
 ================================ */
 
+function defaultData() {
+  return {
+    sectors: {
+      A: { code: "A", name: "Sektor A" },
+      B: { code: "B", name: "Sektor B" },
+      C: { code: "C", name: "Sektor C" },
+      D: { code: "D", name: "Sektor D" },
+      E: { code: "E", name: "Sektor E" }
+    },
+    teams: Array.from({ length: 50 }, (_, i) => ({
+      id: i + 1,
+      name: `Tím ${i + 1}`,
+      sector: i < 10 ? "A" : i < 20 ? "B" : i < 30 ? "C" : i < 40 ? "D" : "E",
+      peg: String(i + 1),
+      active: i < 20
+    })),
+    catches: []
+  };
+}
+
 function loadData() {
   if (!fs.existsSync(DATA_FILE)) {
-    return { catches: [] };
+    const data = defaultData();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8");
+    return data;
   }
 
   try {
     const raw = fs.readFileSync(DATA_FILE, "utf8");
     const parsed = JSON.parse(raw);
 
-    if (!parsed.catches || !Array.isArray(parsed.catches)) {
-      return { catches: [] };
-    }
+    const base = defaultData();
 
-    return parsed;
+    return {
+      sectors: parsed.sectors || base.sectors,
+      teams: Array.isArray(parsed.teams) ? parsed.teams : base.teams,
+      catches: Array.isArray(parsed.catches) ? parsed.catches : []
+    };
   } catch (e) {
-    return { catches: [] };
+    const data = defaultData();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8");
+    return data;
   }
 }
 
@@ -75,6 +65,95 @@ function saveData(data) {
 
 function getCatchTeamId(c) {
   return Number(c.team ?? c.teamId ?? 0);
+}
+
+function getActiveTeams(data) {
+  return data.teams.filter(t => t.active);
+}
+
+function getTeamById(data, teamId) {
+  return data.teams.find(t => Number(t.id) === Number(teamId));
+}
+
+function getSectorDisplayName(data, sectorCode) {
+  return data.sectors?.[sectorCode]?.name || sectorCode || "-";
+}
+
+function buildState(data) {
+  const activeTeams = getActiveTeams(data);
+  const activeTeamIds = new Set(activeTeams.map(t => Number(t.id)));
+
+  const stats = {};
+  const teamCatches = {};
+
+  activeTeams.forEach(team => {
+    stats[team.id] = {
+      id: Number(team.id),
+      name: team.name,
+      sector: getSectorDisplayName(data, team.sector),
+      sectorCode: team.sector,
+      peg: team.peg,
+      total: 0,
+      count: 0,
+      biggest: 0
+    };
+    teamCatches[team.id] = [];
+  });
+
+  data.catches.forEach((c) => {
+    const teamId = getCatchTeamId(c);
+    if (!activeTeamIds.has(teamId)) return;
+
+    const weight = Number(c.weight || 0);
+
+    stats[teamId].total += weight;
+    stats[teamId].count += 1;
+
+    if (weight > stats[teamId].biggest) {
+      stats[teamId].biggest = weight;
+    }
+
+    teamCatches[teamId].push({
+      number: teamCatches[teamId].length + 1,
+      weight,
+      photo: c.photo || null,
+      time: c.time || null
+    });
+  });
+
+  const leaderboard = Object.values(stats).sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    if (b.biggest !== a.biggest) return b.biggest - a.biggest;
+    return a.id - b.id;
+  });
+
+  let topFish = null;
+
+  data.catches.forEach((c) => {
+    const teamId = getCatchTeamId(c);
+    if (!activeTeamIds.has(teamId)) return;
+
+    const weight = Number(c.weight || 0);
+    const team = getTeamById(data, teamId);
+
+    if (!topFish || weight > Number(topFish.weight || 0)) {
+      topFish = {
+        weight,
+        team: team ? team.name : ("Tím " + teamId)
+      };
+    }
+  });
+
+  const totalWeight = leaderboard.reduce((sum, t) => sum + Number(t.total || 0), 0);
+  const totalFish = leaderboard.reduce((sum, t) => sum + Number(t.count || 0), 0);
+
+  return {
+    lb: leaderboard,
+    teamCatches,
+    topFish,
+    totalWeight,
+    totalFish
+  };
 }
 
 /* ===============================
@@ -89,10 +168,26 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-/* ===============================
-   ZÁPIS ÚLOVKU
-================================ */
+/* zoznam tímov pre judge/admin */
+app.get("/api/teams", (req, res) => {
+  const data = loadData();
+  const teams = getActiveTeams(data).map(t => ({
+    id: t.id,
+    name: t.name,
+    sector: t.sector,
+    sectorName: getSectorDisplayName(data, t.sector),
+    peg: t.peg
+  }));
+  res.json(teams);
+});
 
+/* sektory */
+app.get("/api/sectors", (req, res) => {
+  const data = loadData();
+  res.json(data.sectors);
+});
+
+/* zápis úlovku */
 app.post("/api/catch", (req, res) => {
   const data = loadData();
 
@@ -101,6 +196,11 @@ app.post("/api/catch", (req, res) => {
 
   if (!teamValue || !weightValue) {
     return res.status(400).json({ ok: false, error: "missing team or weight" });
+  }
+
+  const team = getTeamById(data, teamValue);
+  if (!team || !team.active) {
+    return res.status(400).json({ ok: false, error: "team is not active" });
   }
 
   data.catches.push({
@@ -115,85 +215,42 @@ app.post("/api/catch", (req, res) => {
   res.json({ ok: true });
 });
 
-/* ===============================
-   LIVE STAV
-================================ */
-
+/* live stav */
 app.get("/api/state", (req, res) => {
   const data = loadData();
-
-  const stats = {};
-  const teamCatches = {};
-
-  data.catches.forEach((c) => {
-    const teamId = getCatchTeamId(c);
-    if (!teamId) return;
-
-    if (!stats[teamId]) {
-      stats[teamId] = {
-        id: teamId,
-        name: teams[teamId]?.name || ("Tím " + teamId),
-        sector: teams[teamId]?.sector || "-",
-        peg: teams[teamId]?.peg || "-",
-        total: 0,
-        count: 0,
-        biggest: 0
-      };
-    }
-
-    stats[teamId].total += Number(c.weight || 0);
-    stats[teamId].count += 1;
-
-    if (Number(c.weight || 0) > stats[teamId].biggest) {
-      stats[teamId].biggest = Number(c.weight || 0);
-    }
-
-    if (!teamCatches[teamId]) {
-      teamCatches[teamId] = [];
-    }
-
-    teamCatches[teamId].push({
-      number: teamCatches[teamId].length + 1,
-      weight: Number(c.weight || 0),
-      photo: c.photo || null,
-      time: c.time || null
-    });
-  });
-
-  const leaderboard = Object.values(stats).sort((a, b) => {
-    if (b.total !== a.total) return b.total - a.total;
-    return b.biggest - a.biggest;
-  });
-
-  let topFish = null;
-
-  data.catches.forEach((c) => {
-    const teamId = getCatchTeamId(c);
-    const weight = Number(c.weight || 0);
-
-    if (!topFish || weight > Number(topFish.weight || 0)) {
-      topFish = {
-        weight,
-        team: teams[teamId]?.name || ("Tím " + teamId)
-      };
-    }
-  });
-
-  const totalWeight = data.catches.reduce((sum, c) => sum + Number(c.weight || 0), 0);
-  const totalFish = data.catches.length;
-
-  res.json({
-    lb: leaderboard,
-    teamCatches,
-    topFish,
-    totalWeight,
-    totalFish
-  });
+  res.json(buildState(data));
 });
 
-/* ===============================
-   SERVER
-================================ */
+/* voliteľne: rýchla editácia tímov a sektorov cez JSON POST */
+app.post("/api/setup", (req, res) => {
+  const current = loadData();
+
+  const sectors = req.body.sectors || current.sectors;
+  const teams = Array.isArray(req.body.teams) ? req.body.teams : current.teams;
+
+  const cleanedTeams = teams.slice(0, 50).map((t, index) => ({
+    id: Number(t.id ?? (index + 1)),
+    name: String(t.name ?? `Tím ${index + 1}`),
+    sector: String(t.sector ?? "A"),
+    peg: String(t.peg ?? (index + 1)),
+    active: Boolean(t.active)
+  }));
+
+  const data = {
+    sectors: {
+      A: sectors.A || current.sectors.A,
+      B: sectors.B || current.sectors.B,
+      C: sectors.C || current.sectors.C,
+      D: sectors.D || current.sectors.D,
+      E: sectors.E || current.sectors.E
+    },
+    teams: cleanedTeams,
+    catches: current.catches
+  };
+
+  saveData(data);
+  res.json({ ok: true });
+});
 
 app.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
