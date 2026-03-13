@@ -30,8 +30,7 @@ html, body{
   height:100%;
   overflow:hidden;
   font-family:Arial,sans-serif;
-  background:
-    radial-gradient(circle at top left, #15304b 0%, #0a1420 35%, #060d15 100%);
+  background:radial-gradient(circle at top left, #15304b 0%, #0a1420 35%, #060d15 100%);
   color:var(--text);
 }
 
@@ -54,11 +53,33 @@ body{
   margin-bottom:12px;
 }
 
-h1{
+.brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.brandLogo{
+  width:84px;
+  height:84px;
+  object-fit:contain;
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.brandText h1{
   margin:0;
   font-size:44px;
   line-height:1;
   letter-spacing:.4px;
+}
+
+.brandText .sub{
+  margin-top:6px;
+  font-size:18px;
+  color:var(--muted);
+  letter-spacing:.5px;
 }
 
 .clock{
@@ -321,7 +342,14 @@ h1{
 
 <div class="top">
   <div class="titleRow">
-    <h1>RCC LIVE TV</h1>
+    <div class="brand">
+      <img src="/logo.png" alt="RCC logo" class="brandLogo">
+      <div class="brandText">
+        <h1>RCC LIVE TV</h1>
+        <div class="sub">Ružín Carp Classic</div>
+      </div>
+    </div>
+
     <div class="clock">
       <div class="clockTime" id="clockTime">00:00:00</div>
       <div class="clockDate" id="clockDate">--</div>

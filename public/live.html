@@ -40,10 +40,33 @@ body{
   flex-wrap:wrap;
 }
 
-h1{
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brandLogo{
+  width:68px;
+  height:68px;
+  object-fit:contain;
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 8px 18px rgba(0,0,0,.2);
+}
+
+.brandText h1{
   margin:0;
   font-size:24px;
-  line-height:1.2;
+  line-height:1.1;
+}
+
+.brandText .sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+  letter-spacing:.4px;
 }
 
 .topActions{
@@ -452,7 +475,8 @@ tbody tr.top3{
 
 @media (max-width:760px){
   body{ padding:12px; }
-  h1{ font-size:20px; }
+  .brandLogo{ width:52px; height:52px; }
+  .brandText h1{ font-size:20px; }
   .stat .value{ font-size:21px; }
   .lastCatchText{ font-size:15px; }
   .desktopTableWrap{ display:none; }
@@ -463,15 +487,68 @@ tbody tr.top3{
   .catchImg{ height:220px; }
   .detailHero{ flex-direction:column; align-items:flex-start; }
 }
+
+@media print{
+  body{
+    background:white !important;
+    color:black !important;
+    padding:0;
+  }
+
+  .topActions,
+  #backBtn,
+  .status,
+  .lastCatch{
+    display:none !important;
+  }
+
+  .desktopTableWrap,
+  table{
+    display:table !important;
+    width:100% !important;
+    overflow:visible !important;
+  }
+
+  .mobileCards,
+  #detailView{
+    display:none !important;
+  }
+
+  .topbar,
+  .stat,
+  .desktopTableWrap{
+    box-shadow:none !important;
+    border:1px solid #ccc !important;
+  }
+
+  th, td{
+    color:black !important;
+    border-color:#ccc !important;
+  }
+
+  .weight,
+  .teamName,
+  .smallMeta,
+  .stat .sub{
+    color:black !important;
+  }
+}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <h1>RCC Live tabuľka</h1>
+  <div class="brand">
+    <img src="/logo.png" alt="RCC logo" class="brandLogo">
+    <div class="brandText">
+      <h1>RCC Live tabuľka</h1>
+      <div class="sub">Ružín Carp Classic</div>
+    </div>
+  </div>
 
   <div class="topActions">
     <button class="btn secondary hidden" id="backBtn" onclick="showMain()">← Späť</button>
+    <button class="btn secondary" onclick="exportPDF()">Export PDF</button>
     <button class="btn secondary" onclick="window.location.reload()">Obnoviť</button>
   </div>
 </div>
@@ -579,6 +656,10 @@ function fmtTime(iso){
   }catch{
     return iso;
   }
+}
+
+function exportPDF(){
+  window.print();
 }
 
 function teamPhotoHtml(photo){
