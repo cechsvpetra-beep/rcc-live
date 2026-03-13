@@ -1,210 +1,329 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RCC Admin</title>
 
 <style>
+:root{
+  --bg:#0b0f14;
+  --panel:#121a25;
+  --panel2:#16202c;
+  --line:#243244;
+  --text:#eef4fb;
+  --muted:#9db0c5;
+  --green:#76ff9f;
+  --green2:#21d36d;
+  --danger:#ff6e6e;
+}
+
+*{box-sizing:border-box}
+
 body{
-  font-family:Arial;
-  background:#111;
-  color:white;
   margin:0;
-  padding:20px;
+  font-family:Arial,sans-serif;
+  background:radial-gradient(circle at top left,#112034 0%, #0b0f14 45%, #091019 100%);
+  color:var(--text);
+  padding:16px;
 }
-h1{
-  margin-top:0;
+
+h1,h2{
+  margin:0 0 14px 0;
 }
-.box{
-  background:#1a1a1a;
-  border:1px solid #444;
+
+.wrap{
+  max-width:1400px;
+  margin:0 auto;
+}
+
+.card{
+  background:linear-gradient(180deg,#121923 0%, #0f151e 100%);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+
+.grid5{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(160px,1fr));
+  gap:12px;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:6px;
+  font-weight:bold;
+}
+
+input, select{
+  width:100%;
+  background:#0f1620;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.btn{
+  border:none;
   border-radius:12px;
-  padding:15px;
-  margin-bottom:20px;
+  padding:12px 16px;
+  cursor:pointer;
+  font-weight:bold;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#08110c;
 }
+
+.btn.secondary{
+  background:#243141;
+  color:var(--text);
+}
+
+.btn.danger{
+  background:linear-gradient(135deg,#ff8a8a,#ff5a5a);
+  color:white;
+}
+
+.info{
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+.tableWrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
 }
-th,td{
-  border:1px solid #444;
-  padding:8px;
+
+th, td{
+  padding:12px 10px;
+  border-bottom:1px solid #1e2a38;
+  text-align:left;
+  vertical-align:middle;
 }
+
 th{
-  background:#222;
+  background:#131c27;
+  color:#b8c7d7;
+  font-size:13px;
+  text-transform:uppercase;
 }
-input,select,button{
-  width:100%;
-  padding:8px;
-  box-sizing:border-box;
-  border-radius:6px;
-  border:none;
+
+.status{
+  margin-top:10px;
+  font-size:14px;
+  color:var(--green);
 }
-button{
-  background:#2ecc71;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+
+.checkbox{
+  transform:scale(1.2);
 }
-button:hover{
-  background:#27ae60;
-}
-.sectors{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  margin-bottom:10px;
-}
-.danger{
-  background:#e74c3c;
-}
-.danger:hover{
-  background:#c0392b;
-}
-.small-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.small-row button{
-  max-width:240px;
+
+@media (max-width:900px){
+  .grid5{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
-
 <body>
+<div class="wrap">
 
-<h1>RCC Admin</h1>
+  <div class="card">
+    <h1>RCC Admin</h1>
+    <div class="info">Tu nastavíš názvy sektorov, aktívne tímy, názvy tímov a stanovištia bez zásahu do kódu.</div>
 
-<div class="box">
-  <h2>Aktívne sektory</h2>
+    <div class="actions">
+      <button class="btn" onclick="saveSetup()">Uložiť nastavenie</button>
+      <button class="btn secondary" onclick="loadSetup()">Obnoviť dáta</button>
+      <button class="btn danger" onclick="resetCatches()">Vymazať všetky úlovky</button>
+      <a class="btn secondary" href="/live.html" style="text-decoration:none;display:inline-flex;align-items:center;">Otvoriť live</a>
+      <a class="btn secondary" href="/judge.html" style="text-decoration:none;display:inline-flex;align-items:center;">Otvoriť judge</a>
+    </div>
 
-  <div class="sectors">
-    <label><input type="checkbox" value="A" class="sector"> A</label>
-    <label><input type="checkbox" value="B" class="sector"> B</label>
-    <label><input type="checkbox" value="C" class="sector"> C</label>
-    <label><input type="checkbox" value="D" class="sector"> D</label>
-    <label><input type="checkbox" value="E" class="sector"> E</label>
+    <div id="status" class="status"></div>
   </div>
 
-  <div class="small-row">
-    <button onclick="saveSectors()">Uložiť sektory</button>
-    <button class="danger" onclick="resetRace()">RESET PRETEKU</button>
+  <div class="card">
+    <h2>Názvy sektorov</h2>
+    <div class="grid5">
+      <div>
+        <label>Sektor A</label>
+        <input id="sectorA" type="text">
+      </div>
+      <div>
+        <label>Sektor B</label>
+        <input id="sectorB" type="text">
+      </div>
+      <div>
+        <label>Sektor C</label>
+        <input id="sectorC" type="text">
+      </div>
+      <div>
+        <label>Sektor D</label>
+        <input id="sectorD" type="text">
+      </div>
+      <div>
+        <label>Sektor E</label>
+        <input id="sectorE" type="text">
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="box">
-  <h2>Tímy</h2>
+  <div class="card">
+    <h2>Tímy</h2>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Aktívny</th>
+            <th>Názov tímu</th>
+            <th>Sektor</th>
+            <th>Stanovište</th>
+          </tr>
+        </thead>
+        <tbody id="teamBody"></tbody>
+      </table>
+    </div>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Názov tímu</th>
-        <th>Sektor</th>
-        <th>Stanovište</th>
-        <th>Uložiť</th>
-      </tr>
-    </thead>
-    <tbody id="teams"></tbody>
-  </table>
 </div>
 
 <script>
-async function loadSettings(){
-  const res = await fetch("/settings");
-  const data = await res.json();
-  const active = data.activeSectors;
+let setupData = null;
 
-  document.querySelectorAll(".sector").forEach(c=>{
-    c.checked = active.includes(c.value);
+function setStatus(text, ok = true){
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.style.color = ok ? "#76ff9f" : "#ff8080";
+}
+
+function renderTeams(teams){
+  const body = document.getElementById("teamBody");
+  body.innerHTML = "";
+
+  teams.forEach(team => {
+    body.innerHTML += `
+      <tr>
+        <td>${team.id}</td>
+        <td><input class="checkbox" type="checkbox" id="active_${team.id}" ${team.active ? "checked" : ""}></td>
+        <td><input type="text" id="name_${team.id}" value="${escapeHtml(team.name)}"></td>
+        <td>
+          <select id="sector_${team.id}">
+            <option value="A" ${team.sector === "A" ? "selected" : ""}>A</option>
+            <option value="B" ${team.sector === "B" ? "selected" : ""}>B</option>
+            <option value="C" ${team.sector === "C" ? "selected" : ""}>C</option>
+            <option value="D" ${team.sector === "D" ? "selected" : ""}>D</option>
+            <option value="E" ${team.sector === "E" ? "selected" : ""}>E</option>
+          </select>
+        </td>
+        <td><input type="text" id="peg_${team.id}" value="${escapeHtml(String(team.peg))}"></td>
+      </tr>
+    `;
   });
 }
 
-async function saveSectors(){
-  const active = Array.from(document.querySelectorAll(".sector"))
-    .filter(x=>x.checked)
-    .map(x=>x.value);
-
-  await fetch("/settings/sectors",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json"},
-    body:JSON.stringify({activeSectors:active})
-  });
-
-  alert("Sektory uložené");
+function escapeHtml(text){
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
-async function resetRace(){
-  const ok = confirm("Naozaj chceš resetovať celý pretek? Vymažú sa všetky úlovky.");
-  if(!ok) return;
+async function loadSetup(){
+  setStatus("Načítavam…");
+  const res = await fetch("/api/admin/setup", { cache: "no-store" });
+  setupData = await res.json();
 
-  const res = await fetch("/reset", {
-    method:"POST"
+  document.getElementById("sectorA").value = setupData.sectors.A.name || "Sektor A";
+  document.getElementById("sectorB").value = setupData.sectors.B.name || "Sektor B";
+  document.getElementById("sectorC").value = setupData.sectors.C.name || "Sektor C";
+  document.getElementById("sectorD").value = setupData.sectors.D.name || "Sektor D";
+  document.getElementById("sectorE").value = setupData.sectors.E.name || "Sektor E";
+
+  renderTeams(setupData.teams);
+  setStatus("Dáta načítané");
+}
+
+async function saveSetup(){
+  const teams = [];
+
+  for(let i = 1; i <= 50; i++){
+    teams.push({
+      id: i,
+      active: document.getElementById("active_" + i).checked,
+      name: document.getElementById("name_" + i).value.trim() || ("Tím " + i),
+      sector: document.getElementById("sector_" + i).value,
+      peg: document.getElementById("peg_" + i).value.trim() || String(i)
+    });
+  }
+
+  const payload = {
+    sectors: {
+      A: { code: "A", name: document.getElementById("sectorA").value.trim() || "Sektor A" },
+      B: { code: "B", name: document.getElementById("sectorB").value.trim() || "Sektor B" },
+      C: { code: "C", name: document.getElementById("sectorC").value.trim() || "Sektor C" },
+      D: { code: "D", name: document.getElementById("sectorD").value.trim() || "Sektor D" },
+      E: { code: "E", name: document.getElementById("sectorE").value.trim() || "Sektor E" }
+    },
+    teams
+  };
+
+  const res = await fetch("/api/admin/setup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
   });
 
-  const data = await res.json();
+  const out = await res.json();
 
-  if(data.ok){
-    alert("Pretek bol resetovaný");
-  }else{
-    alert("Chyba pri resetovaní");
+  if(out.ok){
+    setStatus("Nastavenie uložené");
+  } else {
+    setStatus("Chyba pri ukladaní", false);
   }
 }
 
-async function loadTeams(){
-  const res = await fetch("/teams");
-  const teams = await res.json();
+async function resetCatches(){
+  const yes = confirm("Naozaj chceš vymazať všetky úlovky?");
+  if(!yes) return;
 
-  const body = document.getElementById("teams");
-  body.innerHTML="";
-
-  teams.forEach(t=>{
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${t.id}</td>
-      <td><input id="name-${t.id}" value="${t.name}"></td>
-      <td>
-        <select id="sector-${t.id}">
-          <option value="A" ${t.sector=="A"?"selected":""}>A</option>
-          <option value="B" ${t.sector=="B"?"selected":""}>B</option>
-          <option value="C" ${t.sector=="C"?"selected":""}>C</option>
-          <option value="D" ${t.sector=="D"?"selected":""}>D</option>
-          <option value="E" ${t.sector=="E"?"selected":""}>E</option>
-        </select>
-      </td>
-      <td><input type="number" id="peg-${t.id}" value="${t.peg}"></td>
-      <td><button onclick="saveTeam(${t.id})">Uložiť</button></td>
-    `;
-
-    body.appendChild(tr);
-  });
-}
-
-async function saveTeam(id){
-  const name = document.getElementById("name-"+id).value;
-  const sector = document.getElementById("sector-"+id).value;
-  const peg = document.getElementById("peg-"+id).value;
-
-  await fetch("/teams/update",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json"},
-    body:JSON.stringify({
-      id,
-      name,
-      sector,
-      peg
-    })
+  const res = await fetch("/api/admin/reset-catches", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
   });
 
-  alert("Tím uložený");
+  const out = await res.json();
+
+  if(out.ok){
+    setStatus("Všetky úlovky boli vymazané");
+  } else {
+    setStatus("Chyba pri mazaní úlovkov", false);
+  }
 }
 
-loadSettings();
-loadTeams();
+loadSetup();
 </script>
-
 </body>
 </html>
