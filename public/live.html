@@ -8,17 +8,18 @@
 <style>
 :root{
   --bg:#0b0f14;
-  --panel:#121821;
-  --panel2:#18212c;
-  --line:#243041;
-  --text:#eef3f8;
-  --muted:#9fb0c3;
-  --green:#6dff9a;
-  --green2:#1fd16d;
-  --gold:#f5c451;
-  --silver:#c8d0db;
-  --bronze:#d19152;
-  --danger:#ff6b6b;
+  --bg2:#0e1520;
+  --panel:#121a25;
+  --panel2:#16202c;
+  --line:#243244;
+  --text:#eef4fb;
+  --muted:#9db0c5;
+  --green:#76ff9f;
+  --green2:#21d36d;
+  --gold:#f4c84d;
+  --silver:#d4dbe4;
+  --bronze:#d4955a;
+  --danger:#ff6e6e;
 }
 
 *{
@@ -27,10 +28,10 @@
 
 body{
   margin:0;
-  background:linear-gradient(180deg,#0b0f14 0%, #101722 100%);
-  color:var(--text);
   font-family:Arial,sans-serif;
-  padding:20px;
+  background:radial-gradient(circle at top left,#112034 0%, var(--bg) 45%, #091019 100%);
+  color:var(--text);
+  padding:16px;
 }
 
 .topbar{
@@ -38,14 +39,14 @@ body{
   justify-content:space-between;
   align-items:center;
   gap:12px;
-  margin-bottom:18px;
+  margin-bottom:16px;
   flex-wrap:wrap;
 }
 
 h1{
   margin:0;
-  font-size:34px;
-  letter-spacing:.3px;
+  font-size:24px;
+  line-height:1.2;
 }
 
 .topActions{
@@ -56,18 +57,18 @@ h1{
 
 .btn{
   border:none;
-  border-radius:10px;
-  padding:12px 16px;
+  border-radius:12px;
+  padding:10px 14px;
   cursor:pointer;
   font-weight:bold;
   color:#08110c;
   background:linear-gradient(135deg,var(--green),var(--green2));
-  box-shadow:0 6px 18px rgba(31,209,109,.22);
+  box-shadow:0 8px 18px rgba(33,211,109,.22);
 }
 
 .btn.secondary{
   color:var(--text);
-  background:#222c38;
+  background:#243141;
   box-shadow:none;
 }
 
@@ -77,53 +78,75 @@ h1{
 
 .stats{
   display:grid;
-  grid-template-columns:repeat(3,minmax(240px,1fr));
-  gap:16px;
-  margin-bottom:18px;
+  grid-template-columns:repeat(3,minmax(200px,1fr));
+  gap:14px;
+  margin-bottom:14px;
 }
 
 .stat{
-  background:linear-gradient(180deg,#131b24 0%, #101721 100%);
+  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
   border:1px solid var(--line);
   border-radius:16px;
-  padding:18px 20px;
-  min-height:118px;
-  box-shadow:0 10px 26px rgba(0,0,0,.22);
+  padding:16px 18px;
+  min-height:102px;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
 }
 
 .stat .label{
   color:var(--muted);
-  font-size:15px;
-  margin-bottom:8px;
+  font-size:13px;
   font-weight:bold;
+  margin-bottom:8px;
 }
 
 .stat .value{
-  font-size:34px;
-  font-weight:800;
+  font-size:24px;
+  font-weight:900;
   line-height:1.05;
-  color:#ffffff;
 }
 
 .stat .sub{
   margin-top:6px;
   color:var(--green);
-  font-size:15px;
+  font-size:14px;
   font-weight:bold;
+}
+
+.lastCatch{
+  margin-bottom:14px;
+  background:linear-gradient(90deg,rgba(33,211,109,.18),rgba(33,211,109,.05));
+  border:1px solid rgba(33,211,109,.24);
+  border-radius:14px;
+  padding:14px 16px;
+}
+
+.lastCatchTitle{
+  color:var(--green);
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  margin-bottom:6px;
+}
+
+.lastCatchText{
+  font-size:17px;
+  font-weight:bold;
+  line-height:1.35;
 }
 
 .status{
   color:var(--muted);
-  margin:2px 0 14px 0;
-  font-size:14px;
+  font-size:13px;
+  margin:6px 0 12px 0;
 }
 
-.tableWrap{
+.desktopTableWrap{
   background:linear-gradient(180deg,#101721 0%, #0e141d 100%);
   border:1px solid var(--line);
   border-radius:16px;
   overflow:auto;
-  box-shadow:0 10px 28px rgba(0,0,0,.2);
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
 }
 
 table{
@@ -133,24 +156,21 @@ table{
 
 th,td{
   padding:15px 12px;
-  border-bottom:1px solid #1d2835;
+  border-bottom:1px solid #1e2a38;
   text-align:left;
   vertical-align:middle;
 }
 
 th{
   background:#131c27;
-  color:#b8c6d8;
-  font-size:14px;
+  color:#b8c7d7;
+  font-size:13px;
   text-transform:uppercase;
   letter-spacing:.5px;
-  position:sticky;
-  top:0;
-  z-index:1;
 }
 
 td{
-  font-size:17px;
+  font-size:16px;
 }
 
 tbody tr{
@@ -158,34 +178,34 @@ tbody tr{
 }
 
 tbody tr:hover{
-  background:#141d28;
+  background:#131c28;
 }
 
 tbody tr.top1{
-  background:linear-gradient(90deg,rgba(245,196,81,.20),rgba(245,196,81,.05));
+  background:linear-gradient(90deg,rgba(244,200,77,.18),rgba(244,200,77,.04));
 }
 
 tbody tr.top2{
-  background:linear-gradient(90deg,rgba(200,208,219,.16),rgba(200,208,219,.04));
+  background:linear-gradient(90deg,rgba(212,219,228,.16),rgba(212,219,228,.04));
 }
 
 tbody tr.top3{
-  background:linear-gradient(90deg,rgba(209,145,82,.18),rgba(209,145,82,.04));
+  background:linear-gradient(90deg,rgba(212,149,90,.18),rgba(212,149,90,.04));
 }
 
 .rankCell{
-  width:86px;
-  font-weight:800;
-  font-size:20px;
+  width:80px;
+  font-weight:900;
+  font-size:18px;
 }
 
 .medal{
   display:inline-block;
-  min-width:38px;
+  min-width:34px;
 }
 
 .teamName{
-  font-weight:800;
+  font-weight:900;
   color:#ffffff;
   cursor:pointer;
 }
@@ -196,74 +216,132 @@ tbody tr.top3{
 
 .smallMeta{
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
   margin-top:4px;
 }
 
 .weight{
-  font-weight:800;
   color:var(--green);
+  font-weight:900;
   white-space:nowrap;
-  font-size:18px;
 }
 
 .detailBtn{
   border:none;
   border-radius:10px;
   padding:10px 14px;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
-  color:#0c130f;
+  color:#08110c;
   background:linear-gradient(135deg,var(--green),var(--green2));
 }
 
-.detailBtn:disabled{
-  background:#334050;
-  color:#8694a6;
-  cursor:default;
+.mobileCards{
+  display:none;
+  gap:12px;
+  flex-direction:column;
+}
+
+.teamCard{
+  background:linear-gradient(180deg,#121923 0%, #0f151e 100%);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+
+.teamCard.top1{
+  border-color:rgba(244,200,77,.55);
+  box-shadow:0 0 0 1px rgba(244,200,77,.25) inset, 0 10px 24px rgba(0,0,0,.18);
+}
+
+.teamCard.top2{
+  border-color:rgba(212,219,228,.55);
+}
+
+.teamCard.top3{
+  border-color:rgba(212,149,90,.55);
+}
+
+.teamCardHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.teamCardRank{
+  font-size:22px;
+  font-weight:900;
+  min-width:42px;
+}
+
+.teamCardName{
+  font-size:18px;
+  font-weight:900;
+  line-height:1.2;
+  cursor:pointer;
+}
+
+.teamCardName:hover{
+  color:var(--green);
+}
+
+.teamCardMeta{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:6px;
+  line-height:1.45;
+}
+
+.teamCardWeight{
+  font-size:26px;
+  font-weight:900;
+  color:var(--green);
+  white-space:nowrap;
+}
+
+.teamCardBottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
 }
 
 #detailView{
   margin-top:8px;
 }
 
-.detailHeader{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:16px;
-  margin-bottom:16px;
-  flex-wrap:wrap;
-}
-
 .detailHero{
-  background:linear-gradient(180deg,#131b24 0%, #101721 100%);
+  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
   border:1px solid var(--line);
   border-radius:16px;
-  padding:20px;
-  flex:1;
-  min-width:280px;
+  padding:18px;
+  margin-bottom:14px;
 }
 
 .detailTitle{
   margin:0 0 8px 0;
-  font-size:32px;
+  font-size:30px;
 }
 
 .detailMeta{
   color:var(--muted);
-  font-size:16px;
+  font-size:15px;
 }
 
 .summary{
   display:grid;
   grid-template-columns:repeat(3,minmax(180px,1fr));
   gap:14px;
-  margin:0 0 18px 0;
+  margin-bottom:16px;
 }
 
 .sumBox{
-  background:linear-gradient(180deg,#131b24 0%, #101721 100%);
+  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
   border:1px solid var(--line);
   border-radius:14px;
   padding:16px;
@@ -271,20 +349,20 @@ tbody tr.top3{
 
 .sumBox .label{
   color:var(--muted);
-  font-size:14px;
+  font-size:13px;
   margin-bottom:6px;
   font-weight:bold;
 }
 
 .sumBox .value{
-  font-size:28px;
-  font-weight:800;
+  font-size:26px;
+  font-weight:900;
 }
 
 .catchGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:16px;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px;
 }
 
 .catchCard{
@@ -300,7 +378,7 @@ tbody tr.top3{
   height:210px;
   object-fit:cover;
   display:block;
-  background:#1b2532;
+  background:#192432;
 }
 
 .catchInside{
@@ -317,46 +395,64 @@ tbody tr.top3{
 .catchMeta{
   color:var(--muted);
   font-size:14px;
-  line-height:1.55;
-}
-
-.lastCatch{
-  margin-bottom:16px;
-  background:linear-gradient(90deg,rgba(31,209,109,.16),rgba(31,209,109,.06));
-  border:1px solid rgba(31,209,109,.28);
-  border-radius:14px;
-  padding:14px 16px;
-}
-
-.lastCatchTitle{
-  color:var(--green);
-  font-weight:900;
-  font-size:13px;
-  letter-spacing:.8px;
-  text-transform:uppercase;
-  margin-bottom:6px;
-}
-
-.lastCatchText{
-  font-size:18px;
-  font-weight:bold;
+  line-height:1.5;
 }
 
 .empty{
   color:var(--muted);
-  padding:20px 0;
   font-size:18px;
+  padding:18px 0;
 }
 
-@media (max-width:900px){
+@media (max-width:980px){
   .stats{
     grid-template-columns:1fr;
   }
   .summary{
     grid-template-columns:1fr;
   }
+}
+
+@media (max-width:760px){
+  body{
+    padding:12px;
+  }
+
   h1{
-    font-size:28px;
+    font-size:20px;
+  }
+
+  .stat .value{
+    font-size:21px;
+  }
+
+  .lastCatchText{
+    font-size:15px;
+  }
+
+  .desktopTableWrap{
+    display:none;
+  }
+
+  .mobileCards{
+    display:flex;
+  }
+
+  .btn{
+    padding:10px 12px;
+    font-size:14px;
+  }
+
+  .detailTitle{
+    font-size:24px;
+  }
+
+  .catchGrid{
+    grid-template-columns:1fr;
+  }
+
+  .catchImg{
+    height:220px;
   }
 }
 </style>
@@ -367,13 +463,12 @@ tbody tr.top3{
   <h1>RCC Live tabuľka</h1>
 
   <div class="topActions">
-    <button class="btn secondary hidden" id="backBtn" onclick="showMain()">← Späť na tabuľku</button>
+    <button class="btn secondary hidden" id="backBtn" onclick="showMain()">← Späť</button>
     <button class="btn secondary" onclick="window.location.reload()">Obnoviť</button>
   </div>
 </div>
 
 <div id="mainView">
-
   <div class="stats">
     <div class="stat">
       <div class="label">Celková váha rýb</div>
@@ -392,14 +487,14 @@ tbody tr.top3{
     </div>
   </div>
 
-  <div class="lastCatch" id="lastCatchBox">
+  <div class="lastCatch">
     <div class="lastCatchTitle">Posledný úlovok</div>
     <div class="lastCatchText" id="lastCatchText">Zatiaľ bez úlovku</div>
   </div>
 
   <div class="status" id="statusText">Načítavam live dáta…</div>
 
-  <div class="tableWrap">
+  <div class="desktopTableWrap">
     <table>
       <thead>
         <tr>
@@ -414,14 +509,14 @@ tbody tr.top3{
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+
+  <div class="mobileCards" id="mobileCards"></div>
 </div>
 
 <div id="detailView" class="hidden">
-  <div class="detailHeader">
-    <div class="detailHero">
-      <h2 class="detailTitle" id="teamName">Tím</h2>
-      <div class="detailMeta" id="teamMeta">Sektor — | Stanovište —</div>
-    </div>
+  <div class="detailHero">
+    <h2 class="detailTitle" id="teamName">Tím</h2>
+    <div class="detailMeta" id="teamMeta">Sektor — | Stanovište —</div>
   </div>
 
   <div class="summary">
@@ -455,7 +550,7 @@ function medalForPlace(index){
   if(index === 0) return "🥇";
   if(index === 1) return "🥈";
   if(index === 2) return "🥉";
-  return index + 1;
+  return (index + 1);
 }
 
 function rowClass(index){
@@ -535,10 +630,38 @@ function renderTable(){
         <td>${t.sector}</td>
         <td>${t.peg}</td>
         <td class="weight">${Number(t.total).toFixed(2)} kg</td>
-        <td>
-          <button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button>
-        </td>
+        <td><button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button></td>
       </tr>
+    `;
+  });
+}
+
+function renderMobileCards(){
+  const wrap = document.getElementById("mobileCards");
+  wrap.innerHTML = "";
+
+  state.lb.forEach((t, i) => {
+    wrap.innerHTML += `
+      <div class="teamCard ${rowClass(i)}">
+        <div class="teamCardHead">
+          <div>
+            <div class="teamCardRank">${medalForPlace(i)}</div>
+          </div>
+          <div style="flex:1;">
+            <div class="teamCardName" onclick="showTeam(${t.id})">${t.name}</div>
+            <div class="teamCardMeta">
+              Sektor ${t.sector} • Stanovište ${t.peg}<br>
+              ${t.count} úlovkov • najväčšia ${Number(t.biggest).toFixed(2)} kg
+            </div>
+          </div>
+          <div class="teamCardWeight">${Number(t.total).toFixed(2)} kg</div>
+        </div>
+
+        <div class="teamCardBottom">
+          <div style="color:var(--muted);font-size:13px;">Poradie ${i + 1}</div>
+          <button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button>
+        </div>
+      </div>
     `;
   });
 }
@@ -593,6 +716,7 @@ async function load(){
     state = await r.json();
 
     renderTable();
+    renderMobileCards();
     renderStats();
     renderLastCatch();
 
@@ -605,6 +729,5 @@ async function load(){
 load();
 setInterval(load, 4000);
 </script>
-
 </body>
 </html>
