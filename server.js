@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -9,10 +10,24 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const DATA_FILE = path.join(__dirname, "data.json");
+const TEAM_PHOTO_DIR = path.join(__dirname, "public", "teamphotos");
 
-/* ===============================
-   POMOCNÉ FUNKCIE
-================================ */
+if (!fs.existsSync(TEAM_PHOTO_DIR)) {
+  fs.mkdirSync(TEAM_PHOTO_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, TEAM_PHOTO_DIR);
+  },
+  filename: function (req, file, cb) {
+    const teamId = Number(req.body.teamId || 0);
+    const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+    cb(null, `team-${teamId}-${Date.now()}${ext}`);
+  }
+});
+
+const upload = multer({ storage });
 
 function defaultData() {
   return {
@@ -28,7 +43,8 @@ function defaultData() {
       name: `Tím ${i + 1}`,
       sector: i < 10 ? "A" : i < 20 ? "B" : i < 30 ? "C" : i < 40 ? "D" : "E",
       peg: String(i + 1),
-      active: i < 20
+      active: i < 20,
+      photo: null
     })),
     catches: []
   };
@@ -46,9 +62,18 @@ function loadData() {
     const parsed = JSON.parse(raw);
     const base = defaultData();
 
+    const teams = Array.isArray(parsed.teams) ? parsed.teams : base.teams;
+
     return {
       sectors: parsed.sectors || base.sectors,
-      teams: Array.isArray(parsed.teams) ? parsed.teams : base.teams,
+      teams: teams.map((t, index) => ({
+        id: Number(t.id ?? index + 1),
+        name: String(t.name ?? `Tím ${index + 1}`),
+        sector: ["A", "B", "C", "D", "E"].includes(t.sector) ? t.sector : "A",
+        peg: String(t.peg ?? index + 1),
+        active: Boolean(t.active),
+        photo: t.photo || null
+      })),
       catches: Array.isArray(parsed.catches) ? parsed.catches : []
     };
   } catch (e) {
@@ -92,6 +117,7 @@ function buildState(data) {
       sector: getSectorDisplayName(data, team.sector),
       sectorCode: team.sector,
       peg: team.peg,
+      photo: team.photo || null,
       total: 0,
       count: 0,
       biggest: 0
@@ -155,10 +181,6 @@ function buildState(data) {
   };
 }
 
-/* ===============================
-   ROUTES
-================================ */
-
 app.get("/", (req, res) => {
   res.redirect("/live.html");
 });
@@ -174,7 +196,8 @@ app.get("/api/teams", (req, res) => {
     name: t.name,
     sector: t.sector,
     sectorName: getSectorDisplayName(data, t.sector),
-    peg: t.peg
+    peg: t.peg,
+    photo: t.photo || null
   }));
   res.json(teams);
 });
@@ -199,36 +222,28 @@ app.post("/api/admin/setup", (req, res) => {
   const incomingTeams = Array.isArray(req.body.teams) ? req.body.teams : current.teams;
 
   const sectors = {
-    A: {
-      code: "A",
-      name: String(incomingSectors?.A?.name || current.sectors.A.name || "Sektor A")
-    },
-    B: {
-      code: "B",
-      name: String(incomingSectors?.B?.name || current.sectors.B.name || "Sektor B")
-    },
-    C: {
-      code: "C",
-      name: String(incomingSectors?.C?.name || current.sectors.C.name || "Sektor C")
-    },
-    D: {
-      code: "D",
-      name: String(incomingSectors?.D?.name || current.sectors.D.name || "Sektor D")
-    },
-    E: {
-      code: "E",
-      name: String(incomingSectors?.E?.name || current.sectors.E.name || "Sektor E")
-    }
+    A: { code: "A", name: String(incomingSectors?.A?.name || current.sectors.A.name || "Sektor A") },
+    B: { code: "B", name: String(incomingSectors?.B?.name || current.sectors.B.name || "Sektor B") },
+    C: { code: "C", name: String(incomingSectors?.C?.name || current.sectors.C.name || "Sektor C") },
+    D: { code: "D", name: String(incomingSectors?.D?.name || current.sectors.D.name || "Sektor D") },
+    E: { code: "E", name: String(incomingSectors?.E?.name || current.sectors.E.name || "Sektor E") }
   };
 
   const teams = Array.from({ length: 50 }, (_, index) => {
-    const existing = incomingTeams.find(t => Number(t.id) === index + 1) || current.teams.find(t => Number(t.id) === index + 1) || {};
+    const existing =
+      incomingTeams.find(t => Number(t.id) === index + 1) ||
+      current.teams.find(t => Number(t.id) === index + 1) ||
+      {};
+
+    const currentTeam = current.teams.find(t => Number(t.id) === index + 1);
+
     return {
       id: index + 1,
       name: String(existing.name || `Tím ${index + 1}`),
       sector: ["A", "B", "C", "D", "E"].includes(existing.sector) ? existing.sector : "A",
       peg: String(existing.peg || (index + 1)),
-      active: Boolean(existing.active)
+      active: Boolean(existing.active),
+      photo: existing.photo || currentTeam?.photo || null
     };
   });
 
@@ -240,6 +255,36 @@ app.post("/api/admin/setup", (req, res) => {
 
   saveData(data);
   res.json({ ok: true });
+});
+
+app.post("/api/admin/team-photo", upload.single("photo"), (req, res) => {
+  const data = loadData();
+  const teamId = Number(req.body.teamId || 0);
+
+  if (!teamId) {
+    return res.status(400).json({ ok: false, error: "missing teamId" });
+  }
+
+  const team = getTeamById(data, teamId);
+  if (!team) {
+    return res.status(404).json({ ok: false, error: "team not found" });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ ok: false, error: "missing photo" });
+  }
+
+  if (team.photo) {
+    const oldPath = path.join(__dirname, "public", team.photo.replace(/^\//, ""));
+    if (fs.existsSync(oldPath)) {
+      try { fs.unlinkSync(oldPath); } catch (e) {}
+    }
+  }
+
+  team.photo = "/teamphotos/" + req.file.filename;
+  saveData(data);
+
+  res.json({ ok: true, photo: team.photo });
 });
 
 app.post("/api/admin/reset-catches", (req, res) => {

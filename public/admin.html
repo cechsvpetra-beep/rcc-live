@@ -138,6 +138,31 @@ th{
   transform:scale(1.2);
 }
 
+.teamThumb{
+  width:70px;
+  height:50px;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid #2b3a4d;
+  background:#101722;
+}
+
+.placeholder{
+  width:70px;
+  height:50px;
+  border-radius:8px;
+  border:1px dashed #2b3a4d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ea0b3;
+  font-size:12px;
+}
+
+.fileInput{
+  min-width:180px;
+}
+
 @media (max-width:900px){
   .grid5{
     grid-template-columns:1fr;
@@ -150,7 +175,7 @@ th{
 
   <div class="card">
     <h1>RCC Admin</h1>
-    <div class="info">Tu nastavíš názvy sektorov, aktívne tímy, názvy tímov a stanovištia bez zásahu do kódu.</div>
+    <div class="info">Tu nastavíš názvy sektorov, aktívne tímy, názvy tímov, stanovištia a nahráš foto tímu.</div>
 
     <div class="actions">
       <button class="btn" onclick="saveSetup()">Uložiť nastavenie</button>
@@ -200,6 +225,8 @@ th{
             <th>Názov tímu</th>
             <th>Sektor</th>
             <th>Stanovište</th>
+            <th>Foto</th>
+            <th>Nahrať foto</th>
           </tr>
         </thead>
         <tbody id="teamBody"></tbody>
@@ -216,6 +243,21 @@ function setStatus(text, ok = true){
   const el = document.getElementById("status");
   el.textContent = text;
   el.style.color = ok ? "#76ff9f" : "#ff8080";
+}
+
+function escapeHtml(text){
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function photoCell(photo){
+  if(photo){
+    return `<img class="teamThumb" src="${photo}" alt="Foto tímu">`;
+  }
+  return `<div class="placeholder">bez foto</div>`;
 }
 
 function renderTeams(teams){
@@ -238,17 +280,16 @@ function renderTeams(teams){
           </select>
         </td>
         <td><input type="text" id="peg_${team.id}" value="${escapeHtml(String(team.peg))}"></td>
+        <td id="photoPreview_${team.id}">${photoCell(team.photo)}</td>
+        <td>
+          <input class="fileInput" type="file" id="photo_${team.id}" accept="image/*">
+          <div style="margin-top:8px;">
+            <button class="btn secondary" onclick="uploadTeamPhoto(${team.id})">Nahrať foto</button>
+          </div>
+        </td>
       </tr>
     `;
   });
-}
-
-function escapeHtml(text){
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 async function loadSetup(){
@@ -270,12 +311,14 @@ async function saveSetup(){
   const teams = [];
 
   for(let i = 1; i <= 50; i++){
+    const existing = setupData.teams.find(t => Number(t.id) === i) || {};
     teams.push({
       id: i,
       active: document.getElementById("active_" + i).checked,
       name: document.getElementById("name_" + i).value.trim() || ("Tím " + i),
       sector: document.getElementById("sector_" + i).value,
-      peg: document.getElementById("peg_" + i).value.trim() || String(i)
+      peg: document.getElementById("peg_" + i).value.trim() || String(i),
+      photo: existing.photo || null
     });
   }
 
@@ -299,9 +342,43 @@ async function saveSetup(){
   const out = await res.json();
 
   if(out.ok){
+    setupData.teams = teams;
     setStatus("Nastavenie uložené");
   } else {
     setStatus("Chyba pri ukladaní", false);
+  }
+}
+
+async function uploadTeamPhoto(teamId){
+  const fileInput = document.getElementById("photo_" + teamId);
+  const file = fileInput.files[0];
+
+  if(!file){
+    setStatus("Najprv vyber foto tímu", false);
+    return;
+  }
+
+  const form = new FormData();
+  form.append("teamId", teamId);
+  form.append("photo", file);
+
+  const res = await fetch("/api/admin/team-photo", {
+    method: "POST",
+    body: form
+  });
+
+  const out = await res.json();
+
+  if(out.ok){
+    const team = setupData.teams.find(t => Number(t.id) === Number(teamId));
+    if(team){
+      team.photo = out.photo;
+    }
+    document.getElementById("photoPreview_" + teamId).innerHTML = photoCell(out.photo);
+    fileInput.value = "";
+    setStatus("Foto tímu nahraté");
+  } else {
+    setStatus("Chyba pri nahrávaní foto tímu", false);
   }
 }
 

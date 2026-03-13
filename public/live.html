@@ -19,17 +19,14 @@
   --gold:#f4c84d;
   --silver:#d4dbe4;
   --bronze:#d4955a;
-  --danger:#ff6e6e;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:radial-gradient(circle at top left,#112034 0%, var(--bg) 45%, #091019 100%);
+  background:radial-gradient(circle at top left,#112034 0%, #0b0f14 45%, #091019 100%);
   color:var(--text);
   padding:16px;
 }
@@ -236,6 +233,48 @@ tbody tr.top3{
   background:linear-gradient(135deg,var(--green),var(--green2));
 }
 
+.teamThumb{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid #233140;
+  background:#101722;
+}
+
+.teamThumbLarge{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #233140;
+  background:#101722;
+}
+
+.thumbPlaceholder{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  border:2px dashed #314256;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ea0b3;
+  font-size:11px;
+}
+
+.thumbPlaceholderLarge{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  border:3px dashed #314256;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ea0b3;
+  font-size:14px;
+}
+
 .mobileCards{
   display:none;
   gap:12px;
@@ -252,7 +291,6 @@ tbody tr.top3{
 
 .teamCard.top1{
   border-color:rgba(244,200,77,.55);
-  box-shadow:0 0 0 1px rgba(244,200,77,.25) inset, 0 10px 24px rgba(0,0,0,.18);
 }
 
 .teamCard.top2{
@@ -321,6 +359,9 @@ tbody tr.top3{
   border-radius:16px;
   padding:18px;
   margin-bottom:14px;
+  display:flex;
+  gap:16px;
+  align-items:center;
 }
 
 .detailTitle{
@@ -405,55 +446,22 @@ tbody tr.top3{
 }
 
 @media (max-width:980px){
-  .stats{
-    grid-template-columns:1fr;
-  }
-  .summary{
-    grid-template-columns:1fr;
-  }
+  .stats{ grid-template-columns:1fr; }
+  .summary{ grid-template-columns:1fr; }
 }
 
 @media (max-width:760px){
-  body{
-    padding:12px;
-  }
-
-  h1{
-    font-size:20px;
-  }
-
-  .stat .value{
-    font-size:21px;
-  }
-
-  .lastCatchText{
-    font-size:15px;
-  }
-
-  .desktopTableWrap{
-    display:none;
-  }
-
-  .mobileCards{
-    display:flex;
-  }
-
-  .btn{
-    padding:10px 12px;
-    font-size:14px;
-  }
-
-  .detailTitle{
-    font-size:24px;
-  }
-
-  .catchGrid{
-    grid-template-columns:1fr;
-  }
-
-  .catchImg{
-    height:220px;
-  }
+  body{ padding:12px; }
+  h1{ font-size:20px; }
+  .stat .value{ font-size:21px; }
+  .lastCatchText{ font-size:15px; }
+  .desktopTableWrap{ display:none; }
+  .mobileCards{ display:flex; }
+  .btn{ padding:10px 12px; font-size:14px; }
+  .detailTitle{ font-size:24px; }
+  .catchGrid{ grid-template-columns:1fr; }
+  .catchImg{ height:220px; }
+  .detailHero{ flex-direction:column; align-items:flex-start; }
 }
 </style>
 </head>
@@ -502,6 +510,7 @@ tbody tr.top3{
           <th>Tím</th>
           <th>Sektor</th>
           <th>Stanovište</th>
+          <th>Foto</th>
           <th>Celková váha</th>
           <th>Úlovky</th>
         </tr>
@@ -515,8 +524,11 @@ tbody tr.top3{
 
 <div id="detailView" class="hidden">
   <div class="detailHero">
-    <h2 class="detailTitle" id="teamName">Tím</h2>
-    <div class="detailMeta" id="teamMeta">Sektor — | Stanovište —</div>
+    <div id="detailTeamPhoto"></div>
+    <div>
+      <h2 class="detailTitle" id="teamName">Tím</h2>
+      <div class="detailMeta" id="teamMeta">Sektor — | Stanovište —</div>
+    </div>
   </div>
 
   <div class="summary">
@@ -569,6 +581,20 @@ function fmtTime(iso){
   }
 }
 
+function teamPhotoHtml(photo){
+  if(photo){
+    return `<img class="teamThumb" src="${photo}" alt="Foto tímu">`;
+  }
+  return `<div class="thumbPlaceholder">bez foto</div>`;
+}
+
+function teamPhotoLargeHtml(photo){
+  if(photo){
+    return `<img class="teamThumbLarge" src="${photo}" alt="Foto tímu">`;
+  }
+  return `<div class="thumbPlaceholderLarge">bez foto</div>`;
+}
+
 function showMain(){
   document.getElementById("detailView").classList.add("hidden");
   document.getElementById("mainView").classList.remove("hidden");
@@ -586,6 +612,7 @@ function showTeam(id){
   document.getElementById("detailTotal").innerText = Number(team.total).toFixed(2) + " kg";
   document.getElementById("detailCount").innerText = team.count;
   document.getElementById("detailBiggest").innerText = Number(team.biggest).toFixed(2) + " kg";
+  document.getElementById("detailTeamPhoto").innerHTML = teamPhotoLargeHtml(team.photo);
 
   document.getElementById("mainView").classList.add("hidden");
   document.getElementById("detailView").classList.remove("hidden");
@@ -629,6 +656,7 @@ function renderTable(){
         </td>
         <td>${t.sector}</td>
         <td>${t.peg}</td>
+        <td>${teamPhotoHtml(t.photo)}</td>
         <td class="weight">${Number(t.total).toFixed(2)} kg</td>
         <td><button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button></td>
       </tr>
@@ -644,9 +672,8 @@ function renderMobileCards(){
     wrap.innerHTML += `
       <div class="teamCard ${rowClass(i)}">
         <div class="teamCardHead">
-          <div>
-            <div class="teamCardRank">${medalForPlace(i)}</div>
-          </div>
+          <div class="teamCardRank">${medalForPlace(i)}</div>
+          <div>${teamPhotoHtml(t.photo)}</div>
           <div style="flex:1;">
             <div class="teamCardName" onclick="showTeam(${t.id})">${t.name}</div>
             <div class="teamCardMeta">
