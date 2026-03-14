@@ -19,6 +19,7 @@
   --gold:#f4c84d;
   --silver:#d4dbe4;
   --bronze:#d4955a;
+  --blue:#63b3ff;
 }
 
 *{box-sizing:border-box}
@@ -97,9 +98,33 @@ body{
   margin-top:4px;
 }
 
+.filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.filterBtn{
+  border:1px solid var(--line);
+  background:#101722;
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 16px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:16px;
+}
+
+.filterBtn.active{
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#08110c;
+  border-color:transparent;
+}
+
 .stats{
   display:grid;
-  grid-template-columns:2fr 1.3fr 1.6fr 2.2fr;
+  grid-template-columns:2fr 1.2fr 1.6fr 2.4fr;
   gap:14px;
 }
 
@@ -141,7 +166,7 @@ body{
   flex:1;
   min-height:0;
   display:grid;
-  grid-template-columns:1.6fr .9fr;
+  grid-template-columns:1.65fr .95fr;
   gap:16px;
   padding:16px 22px 16px 22px;
 }
@@ -159,7 +184,7 @@ body{
 
 .boardHeader{
   display:grid;
-  grid-template-columns:100px 1.8fr .9fr .9fr 1fr;
+  grid-template-columns:100px 1.8fr .95fr .95fr 1.1fr;
   gap:0;
   background:#111c28;
   border-bottom:1px solid #203043;
@@ -185,13 +210,14 @@ body{
 
 .row{
   display:grid;
-  grid-template-columns:100px 1.8fr .9fr .9fr 1fr;
+  grid-template-columns:100px 1.8fr .95fr .95fr 1.1fr;
   gap:0;
   align-items:center;
   padding:18px 18px;
   border-bottom:1px solid rgba(36,50,68,.8);
   font-size:24px;
   background:rgba(8,15,23,.58);
+  transition:transform .45s ease, background .35s ease, box-shadow .35s ease;
 }
 
 .row.top1{
@@ -202,6 +228,36 @@ body{
 }
 .row.top3{
   background:linear-gradient(90deg,rgba(212,149,90,.22),rgba(212,149,90,.05));
+}
+
+.row.changed{
+  animation:rowFlash 1.8s ease;
+}
+
+.row.up{
+  animation:rowUp 1.2s ease;
+}
+
+.row.down{
+  animation:rowDown 1.2s ease;
+}
+
+@keyframes rowFlash{
+  0%{ box-shadow:0 0 0 rgba(120,255,159,0); }
+  35%{ box-shadow:0 0 30px rgba(120,255,159,.55) inset; }
+  100%{ box-shadow:0 0 0 rgba(120,255,159,0); }
+}
+
+@keyframes rowUp{
+  0%{ transform:translateX(-20px); }
+  40%{ transform:translateX(10px); }
+  100%{ transform:translateX(0); }
+}
+
+@keyframes rowDown{
+  0%{ transform:translateX(20px); }
+  40%{ transform:translateX(-10px); }
+  100%{ transform:translateX(0); }
 }
 
 .place{
@@ -318,6 +374,31 @@ body{
   white-space:nowrap;
 }
 
+.top3FishTable{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.top3FishTable th,
+.top3FishTable td{
+  padding:10px 8px;
+  border-bottom:1px solid rgba(35,50,68,.8);
+  text-align:left;
+  font-size:16px;
+}
+
+.top3FishTable th{
+  color:var(--muted);
+  text-transform:uppercase;
+  font-size:12px;
+  letter-spacing:.6px;
+}
+
+.top3FishTable td.sum{
+  color:var(--green);
+  font-weight:900;
+}
+
 .footer{
   padding:10px 22px 14px 22px;
   color:var(--muted);
@@ -327,14 +408,19 @@ body{
   align-items:center;
 }
 
-.blink{
-  animation:blinkRow 1.5s ease-in-out 2;
+@media (max-width:1600px){
+  .brandText h1{ font-size:36px; }
+  .teamName{ font-size:24px; }
+  .weight{ font-size:26px; }
 }
 
-@keyframes blinkRow{
-  0%{ box-shadow:0 0 0 rgba(120,255,159,0); }
-  50%{ box-shadow:0 0 26px rgba(120,255,159,.55) inset; }
-  100%{ box-shadow:0 0 0 rgba(120,255,159,0); }
+@media (max-width:1200px){
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+  .middle{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
@@ -354,6 +440,15 @@ body{
       <div class="clockTime" id="clockTime">00:00:00</div>
       <div class="clockDate" id="clockDate">--</div>
     </div>
+  </div>
+
+  <div class="filters">
+    <button class="filterBtn active" onclick="setSector('all')">Všetko</button>
+    <button class="filterBtn" onclick="setSector('A')">A</button>
+    <button class="filterBtn" onclick="setSector('B')">B</button>
+    <button class="filterBtn" onclick="setSector('C')">C</button>
+    <button class="filterBtn" onclick="setSector('D')">D</button>
+    <button class="filterBtn" onclick="setSector('E')">E</button>
   </div>
 
   <div class="stats">
@@ -403,6 +498,19 @@ body{
     </div>
 
     <div class="panel">
+      <div class="panelTitle">TOP 3 ryby tímov</div>
+      <table class="top3FishTable">
+        <thead>
+          <tr>
+            <th>Tím</th>
+            <th>Súčet</th>
+          </tr>
+        </thead>
+        <tbody id="top3FishBody"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
       <div class="panelTitle">Stav vysielania</div>
       <div style="font-size:24px;font-weight:900;" id="statusText">Načítavam dáta…</div>
       <div style="margin-top:12px;color:var(--muted);font-size:16px;">
@@ -419,10 +527,44 @@ body{
 
 <script>
 let state = null;
-let previousTopTeamId = null;
+let currentSector = "all";
+let previousRankMap = {};
 let scrollPos = 0;
 let scrollSpeed = 0.55;
 let pauseUntil = 0;
+
+function setSector(sector){
+  currentSector = sector;
+
+  document.querySelectorAll(".filterBtn").forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll(".filterBtn").forEach(btn => {
+    if (
+      (sector === "all" && btn.textContent === "Všetko") ||
+      (sector !== "all" && btn.textContent === sector)
+    ) {
+      btn.classList.add("active");
+    }
+  });
+
+  scrollPos = 0;
+  renderStats();
+  renderLastCatch();
+  renderTop3();
+  renderTop3FishTeams();
+  renderBoard();
+}
+
+function filteredLeaderboard(){
+  if(!state || !state.lb) return [];
+  if(currentSector === "all") return state.lb;
+  return state.lb.filter(t => t.sectorCode === currentSector || t.sector === currentSector);
+}
+
+function filteredTop3Teams(){
+  let data = state?.top3teams || [];
+  if(currentSector === "all") return data;
+  return data.filter(t => t.sectorCode === currentSector || t.sector === currentSector);
+}
 
 function medalForPlace(index){
   if(index === 0) return "🥇";
@@ -460,12 +602,12 @@ function updateClock(){
 
 function renderStats(){
   document.getElementById("totalWeight").textContent =
-    Number(state.totalWeight || 0).toFixed(2) + " kg";
+    Number(state?.totalWeight || 0).toFixed(2) + " kg";
 
   document.getElementById("totalFish").textContent =
-    state.totalFish || 0;
+    state?.totalFish || 0;
 
-  if(state.topFish){
+  if(state?.topFish){
     document.getElementById("topFishWeight").textContent =
       Number(state.topFish.weight).toFixed(2) + " kg";
     document.getElementById("topFishTeam").textContent =
@@ -480,7 +622,7 @@ function getLastCatch(){
   let last = null;
   let lastTeam = null;
 
-  Object.keys(state.teamCatches || {}).forEach(teamId => {
+  Object.keys(state?.teamCatches || {}).forEach(teamId => {
     const arr = state.teamCatches[teamId] || [];
     arr.forEach(c => {
       if(!last || new Date(c.time) > new Date(last.time)){
@@ -514,7 +656,7 @@ function renderTop3(){
   const wrap = document.getElementById("top3List");
   wrap.innerHTML = "";
 
-  const top3 = (state.lb || []).slice(0, 3);
+  const top3 = filteredLeaderboard().slice(0, 3);
 
   if(!top3.length){
     wrap.innerHTML = `<div style="color:#9cb0c5;">Zatiaľ bez poradia</div>`;
@@ -534,11 +676,34 @@ function renderTop3(){
   });
 }
 
+function renderTop3FishTeams(){
+  const body = document.getElementById("top3FishBody");
+  body.innerHTML = "";
+
+  const data = filteredTop3Teams().slice(0, 8);
+
+  if(!data.length){
+    body.innerHTML = `<tr><td colspan="2" style="color:#9cb0c5;">Bez dát</td></tr>`;
+    return;
+  }
+
+  data.forEach(team => {
+    body.innerHTML += `
+      <tr>
+        <td>${team.name}</td>
+        <td class="sum">${Number(team.top3sum || 0).toFixed(2)} kg</td>
+      </tr>
+    `;
+  });
+}
+
 function renderBoard(){
   const scroller = document.getElementById("boardScroller");
+  const data = filteredLeaderboard();
+
   scroller.innerHTML = "";
 
-  if(!state.lb || !state.lb.length){
+  if(!data.length){
     scroller.innerHTML = `
       <div style="padding:28px;font-size:28px;color:#9cb0c5;">
         Zatiaľ bez aktívnych tímov.
@@ -547,9 +712,21 @@ function renderBoard(){
     return;
   }
 
-  state.lb.forEach((team, index) => {
+  const currentRankMap = {};
+  data.forEach((team, index) => {
+    currentRankMap[team.id] = index + 1;
+  });
+
+  data.forEach((team, index) => {
+    const oldRank = previousRankMap[team.id];
+    let motionClass = "";
+
+    if(oldRank && oldRank !== index + 1){
+      motionClass = oldRank > index + 1 ? "up changed" : "down changed";
+    }
+
     scroller.innerHTML += `
-      <div class="row ${rowClass(index)} ${index === 0 && Number(team.id) !== Number(previousTopTeamId) && previousTopTeamId !== null ? "blink" : ""}">
+      <div class="row ${rowClass(index)} ${motionClass}">
         <div class="place">${medalForPlace(index)}</div>
         <div class="teamBlock">
           <div class="teamName">${team.name}</div>
@@ -562,8 +739,8 @@ function renderBoard(){
     `;
   });
 
-  if(state.lb.length > 8){
-    state.lb.forEach((team, index) => {
+  if(data.length > 8){
+    data.forEach((team, index) => {
       scroller.innerHTML += `
         <div class="row ${rowClass(index)}" style="opacity:.92;">
           <div class="place">${medalForPlace(index)}</div>
@@ -579,7 +756,7 @@ function renderBoard(){
     });
   }
 
-  previousTopTeamId = state.lb[0]?.id ?? null;
+  previousRankMap = currentRankMap;
 }
 
 function animateBoard(){
@@ -625,11 +802,12 @@ async function load(){
     renderStats();
     renderLastCatch();
     renderTop3();
+    renderTop3FishTeams();
     renderBoard();
 
     document.getElementById("statusText").textContent = "Live dáta aktualizované";
     document.getElementById("footerInfo").textContent =
-      `Počet tímov: ${state.lb?.length || 0} • Posledná aktualizácia: ${new Date().toLocaleTimeString("sk-SK")}`;
+      `Počet tímov: ${filteredLeaderboard().length} • Posledná aktualizácia: ${new Date().toLocaleTimeString("sk-SK")}`;
   }catch(e){
     document.getElementById("statusText").textContent = "Chyba načítania live dát";
   }

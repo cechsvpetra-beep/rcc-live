@@ -19,6 +19,7 @@
   --gold:#f4c84d;
   --silver:#d4dbe4;
   --bronze:#d4955a;
+  --blue:#63b3ff;
 }
 
 *{box-sizing:border-box}
@@ -500,6 +501,73 @@ tbody tr.top3{
   font-weight:900;
 }
 
+.graphCard{
+  background:linear-gradient(180deg,#101721 0%, #0e141d 100%);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+  margin-bottom:16px;
+}
+
+.graphHeader{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.graphSub{
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:12px;
+}
+
+.chartWrap{
+  width:100%;
+  overflow:auto;
+}
+
+.chartSvg{
+  width:100%;
+  min-width:520px;
+  height:240px;
+  display:block;
+}
+
+.axisText{
+  fill:#9db0c5;
+  font-size:12px;
+}
+
+.gridLine{
+  stroke:#243244;
+  stroke-width:1;
+}
+
+.linePath{
+  fill:none;
+  stroke:var(--blue);
+  stroke-width:4;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+
+.point{
+  fill:var(--green);
+  stroke:#0b0f14;
+  stroke-width:3;
+}
+
+.pointLabel{
+  fill:#eef4fb;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.bar{
+  fill:rgba(99,179,255,.20);
+}
+
 .catchGrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -565,6 +633,7 @@ tbody tr.top3{
   .catchImg{ height:220px; }
   .detailHero{ flex-direction:column; align-items:flex-start; }
   .top3Detail{ grid-template-columns:1fr; }
+  .chartSvg{ min-width:420px; height:220px; }
 }
 
 @media print{
@@ -584,6 +653,7 @@ tbody tr.top3{
 
   .desktopTableWrap,
   .sectionCard,
+  .graphCard,
   table{
     display:block !important;
     width:100% !important;
@@ -750,6 +820,14 @@ tbody tr.top3{
     </div>
   </div>
 
+  <div class="graphCard">
+    <div class="graphHeader">LIVE graf vývoja váhy tímu</div>
+    <div class="graphSub">Priebežný rast celkovej váhy po každom zapísanom úlovku</div>
+    <div class="chartWrap">
+      <svg class="chartSvg" id="teamChart" viewBox="0 0 900 240" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
   <div class="catchGrid" id="catchGrid"></div>
 </div>
 
@@ -792,8 +870,7 @@ function setSector(sector){
   currentSector = sector;
 
   document.querySelectorAll(".filterBtn").forEach(btn => btn.classList.remove("active"));
-  const buttons = document.querySelectorAll(".filterBtn");
-  buttons.forEach(btn => {
+  document.querySelectorAll(".filterBtn").forEach(btn => {
     if (
       (sector === "all" && btn.textContent === "Všetko") ||
       (sector !== "all" && btn.textContent === sector)
@@ -827,6 +904,81 @@ function showMain(){
   document.getElementById("backBtn").classList.add("hidden");
 }
 
+function filteredLeaderboard(){
+  if(!state || !state.lb) return [];
+  if(currentSector === "all") return state.lb;
+  return state.lb.filter(t => t.sectorCode === currentSector || t.sector === currentSector);
+}
+
+function renderTeamChart(catches){
+  const svg = document.getElementById("teamChart");
+  const width = 900;
+  const height = 240;
+  const left = 55;
+  const right = 20;
+  const top = 15;
+  const bottom = 36;
+  const innerW = width - left - right;
+  const innerH = height - top - bottom;
+
+  const sorted = [...catches].sort((a,b) => new Date(a.time) - new Date(b.time));
+
+  svg.innerHTML = "";
+
+  if(!sorted.length){
+    svg.innerHTML = `
+      <text x="50%" y="50%" text-anchor="middle" class="axisText">Tím zatiaľ nemá žiadny vývoj váhy</text>
+    `;
+    return;
+  }
+
+  let running = 0;
+  const points = sorted.map((c, i) => {
+    running += Number(c.weight || 0);
+    return {
+      xIndex: i + 1,
+      catchWeight: Number(c.weight || 0),
+      total: running
+    };
+  });
+
+  const maxY = Math.max(...points.map(p => p.total), 1);
+  const ySteps = 4;
+
+  for(let i = 0; i <= ySteps; i++){
+    const y = top + (innerH / ySteps) * i;
+    const val = ((maxY / ySteps) * (ySteps - i)).toFixed(2);
+
+    svg.innerHTML += `<line x1="${left}" y1="${y}" x2="${width-right}" y2="${y}" class="gridLine"></line>`;
+    svg.innerHTML += `<text x="${left-10}" y="${y+4}" text-anchor="end" class="axisText">${val}</text>`;
+  }
+
+  let path = "";
+
+  points.forEach((p, i) => {
+    const x = left + ((points.length === 1 ? innerW / 2 : (innerW / (points.length - 1)) * i));
+    const y = top + innerH - ((p.total / maxY) * innerH);
+
+    p.x = x;
+    p.y = y;
+
+    path += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+
+    const barX = x - 14;
+    const barY = y;
+    const barH = top + innerH - y;
+    svg.innerHTML += `<rect x="${barX}" y="${barY}" width="28" height="${barH}" class="bar"></rect>`;
+  });
+
+  svg.innerHTML += `<path d="${path}" class="linePath"></path>`;
+
+  points.forEach((p, i) => {
+    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="6" class="point"></circle>`;
+    svg.innerHTML += `<text x="${p.x}" y="${p.y - 12}" text-anchor="middle" class="pointLabel">${p.total.toFixed(2)}</text>`;
+    svg.innerHTML += `<text x="${p.x}" y="${height - 12}" text-anchor="middle" class="axisText">#${i + 1}</text>`;
+  });
+}
+
 function showTeam(id){
   if(!state) return;
 
@@ -849,6 +1001,8 @@ function showTeam(id){
   document.getElementById("mainView").classList.add("hidden");
   document.getElementById("detailView").classList.remove("hidden");
   document.getElementById("backBtn").classList.remove("hidden");
+
+  renderTeamChart(catches);
 
   const grid = document.getElementById("catchGrid");
   grid.innerHTML = "";
@@ -874,12 +1028,6 @@ function showTeam(id){
       </div>
     `;
   });
-}
-
-function filteredLeaderboard(){
-  if(!state || !state.lb) return [];
-  if(currentSector === "all") return state.lb;
-  return state.lb.filter(t => t.sectorCode === currentSector || t.sector === currentSector);
 }
 
 function renderTable(){
