@@ -734,25 +734,6 @@ tbody tr.top3{
     <button class="filterBtn" onclick="setSector('E')">E</button>
   </div>
 
-  <div class="desktopTableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Poradie</th>
-          <th>Tím</th>
-          <th>Sektor</th>
-          <th>Stanovište</th>
-          <th>Foto</th>
-          <th>Celková váha</th>
-          <th>Úlovky</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-
-  <div class="mobileCards" id="mobileCards"></div>
-
   <div class="sectionCard">
     <div class="sectionHeader">
       <h2>TOP 3 ryby tímov</h2>
@@ -773,6 +754,25 @@ tbody tr.top3{
       <tbody id="top3teamsBody"></tbody>
     </table>
   </div>
+
+  <div class="desktopTableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Poradie</th>
+          <th>Tím</th>
+          <th>Sektor</th>
+          <th>Stanovište</th>
+          <th>Foto</th>
+          <th>Celková váha</th>
+          <th>Úlovky</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="mobileCards" id="mobileCards"></div>
 </div>
 
 <div id="detailView" class="hidden">
@@ -879,9 +879,9 @@ function setSector(sector){
     }
   });
 
+  renderTop3Teams();
   renderTable();
   renderMobileCards();
-  renderTop3Teams();
 }
 
 function teamPhotoHtml(photo){
@@ -1173,11 +1173,11 @@ async function load(){
     const r = await fetch("/api/state", { cache:"no-store" });
     state = await r.json();
 
-    renderTable();
-    renderMobileCards();
     renderStats();
     renderLastCatch();
     renderTop3Teams();
+    renderTable();
+    renderMobileCards();
 
     setStatus("Live dáta aktualizované");
   }catch(e){
