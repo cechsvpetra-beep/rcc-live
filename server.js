@@ -6,28 +6,16 @@ const multer = require("multer");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const DATA_FILE = path.join(__dirname, "data.json");
 const TEAM_PHOTO_DIR = path.join(__dirname, "public", "teamphotos");
+const CATCH_PHOTO_DIR = path.join(__dirname, "public", "uploads");
 
-if (!fs.existsSync(TEAM_PHOTO_DIR)) {
-  fs.mkdirSync(TEAM_PHOTO_DIR, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, TEAM_PHOTO_DIR);
-  },
-  filename: function (req, file, cb) {
-    const teamId = Number(req.body.teamId || 0);
-    const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
-    cb(null, `team-${teamId}-${Date.now()}${ext}`);
-  }
-});
-
-const upload = multer({ storage });
+if (!fs.existsSync(TEAM_PHOTO_DIR)) fs.mkdirSync(TEAM_PHOTO_DIR, { recursive: true });
+if (!fs.existsSync(CATCH_PHOTO_DIR)) fs.mkdirSync(CATCH_PHOTO_DIR, { recursive: true });
 
 function defaultData() {
   return {
@@ -59,22 +47,26 @@ function loadData() {
 
   try {
     const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw || "{}");
     const base = defaultData();
 
-    const teams = Array.isArray(parsed.teams) ? parsed.teams : base.teams;
+    const parsedTeams = Array.isArray(parsed.teams) ? parsed.teams : base.teams;
+    const parsedCatches = Array.isArray(parsed.catches) ? parsed.catches : [];
 
     return {
       sectors: parsed.sectors || base.sectors,
-      teams: teams.map((t, index) => ({
-        id: Number(t.id ?? index + 1),
-        name: String(t.name ?? `Tím ${index + 1}`),
-        sector: ["A", "B", "C", "D", "E"].includes(t.sector) ? t.sector : "A",
-        peg: String(t.peg ?? index + 1),
-        active: Boolean(t.active),
-        photo: t.photo || null
-      })),
-      catches: Array.isArray(parsed.catches) ? parsed.catches : []
+      teams: Array.from({ length: 50 }, (_, index) => {
+        const found = parsedTeams.find(t => Number(t?.id) === index + 1) || base.teams[index];
+        return {
+          id: index + 1,
+          name: String(found?.name || `Tím ${index + 1}`),
+          sector: ["A", "B", "C", "D", "E"].includes(found?.sector) ? found.sector : "A",
+          peg: String(found?.peg ?? (index + 1)),
+          active: Boolean(found?.active),
+          photo: found?.photo || null
+        };
+      }),
+      catches: parsedCatches.filter(Boolean)
     };
   } catch (e) {
     const data = defaultData();
@@ -87,25 +79,58 @@ function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8");
 }
 
-function getCatchTeamId(c) {
-  return Number(c.team ?? c.teamId ?? 0);
+function getTeamById(data, teamId) {
+  return data.teams.find(t => Number(t.id) === Number(teamId));
+}
+
+function getSectorDisplayName(data, sectorCode) {
+  return data.sectors?.[sectorCode]?.name || `Sektor ${sectorCode || "-"}`;
+}
+
+function getCatchTeamId(catchItem) {
+  if (!catchItem || typeof catchItem !== "object") return 0;
+  return Number(catchItem.teamId ?? catchItem.team ?? 0);
+}
+
+function getCatchWeight(catchItem) {
+  if (!catchItem || typeof catchItem !== "object") return 0;
+  return Number(catchItem.weight ?? 0);
+}
+
+function getCatchPhoto(catchItem) {
+  if (!catchItem || typeof catchItem !== "object") return null;
+  return catchItem.photo || null;
+}
+
+function getCatchTime(catchItem) {
+  if (!catchItem || typeof catchItem !== "object") return null;
+  return catchItem.time || null;
 }
 
 function getActiveTeams(data) {
   return data.teams.filter(t => t.active);
 }
 
-function getTeamById(data, teamId) {
-  return data.teams.find(t => Number(t.id) === Number(teamId));
-}
+function normalizeCatches(data) {
+  if (!Array.isArray(data.catches)) return [];
 
-function getSectorDisplayName(data, sectorCode) {
-  return data.sectors?.[sectorCode]?.name || sectorCode || "-";
+  return data.catches
+    .filter(Boolean)
+    .filter(c => typeof c === "object")
+    .map(c => ({
+      teamId: getCatchTeamId(c),
+      team: getCatchTeamId(c),
+      weight: getCatchWeight(c),
+      photo: getCatchPhoto(c),
+      time: getCatchTime(c) || new Date().toISOString()
+    }))
+    .filter(c => Number(c.teamId) > 0 && Number(c.weight) > 0);
 }
 
 function buildState(data) {
   const activeTeams = getActiveTeams(data);
   const activeTeamIds = new Set(activeTeams.map(t => Number(t.id)));
+  const catches = normalizeCatches(data);
 
   const stats = {};
   const teamCatches = {};
@@ -120,14 +145,17 @@ function buildState(data) {
       photo: team.photo || null,
       total: 0,
       count: 0,
-      biggest: 0
+      biggest: 0,
+      top3: [],
+      top3sum: 0
     };
     teamCatches[team.id] = [];
   });
 
-  data.catches.forEach((c) => {
-    const teamId = getCatchTeamId(c);
+  catches.forEach(c => {
+    const teamId = Number(c.teamId);
     if (!activeTeamIds.has(teamId)) return;
+    if (!stats[teamId]) return;
 
     const weight = Number(c.weight || 0);
 
@@ -146,16 +174,29 @@ function buildState(data) {
     });
   });
 
+  Object.keys(teamCatches).forEach(teamId => {
+    const sorted = [...teamCatches[teamId]].sort((a, b) => Number(b.weight) - Number(a.weight));
+    const top3 = sorted.slice(0, 3).map(x => Number(x.weight || 0));
+    stats[teamId].top3 = top3;
+    stats[teamId].top3sum = top3.reduce((a, b) => a + b, 0);
+  });
+
   const leaderboard = Object.values(stats).sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
     if (b.biggest !== a.biggest) return b.biggest - a.biggest;
     return a.id - b.id;
   });
 
+  const top3teams = [...Object.values(stats)].sort((a, b) => {
+    if (b.top3sum !== a.top3sum) return b.top3sum - a.top3sum;
+    if (b.biggest !== a.biggest) return b.biggest - a.biggest;
+    return a.id - b.id;
+  });
+
   let topFish = null;
 
-  data.catches.forEach((c) => {
-    const teamId = getCatchTeamId(c);
+  catches.forEach(c => {
+    const teamId = Number(c.teamId);
     if (!activeTeamIds.has(teamId)) return;
 
     const weight = Number(c.weight || 0);
@@ -164,7 +205,7 @@ function buildState(data) {
     if (!topFish || weight > Number(topFish.weight || 0)) {
       topFish = {
         weight,
-        team: team ? team.name : ("Tím " + teamId)
+        team: team ? team.name : `Tím ${teamId}`
       };
     }
   });
@@ -177,9 +218,35 @@ function buildState(data) {
     teamCatches,
     topFish,
     totalWeight,
-    totalFish
+    totalFish,
+    top3teams
   };
 }
+
+const teamPhotoStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, TEAM_PHOTO_DIR);
+  },
+  filename: function (req, file, cb) {
+    const teamId = Number(req.body.teamId || 0);
+    const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+    cb(null, `team-${teamId}-${Date.now()}${ext}`);
+  }
+});
+
+const catchPhotoStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, CATCH_PHOTO_DIR);
+  },
+  filename: function (req, file, cb) {
+    const teamId = Number(req.body.teamId || req.body.team || 0);
+    const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+    cb(null, `catch-${teamId}-${Date.now()}${ext}`);
+  }
+});
+
+const uploadTeamPhoto = multer({ storage: teamPhotoStorage });
+const uploadCatchPhoto = multer({ storage: catchPhotoStorage });
 
 app.get("/", (req, res) => {
   res.redirect("/live.html");
@@ -187,6 +254,11 @@ app.get("/", (req, res) => {
 
 app.get("/health", (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
+});
+
+app.get("/api/sectors", (req, res) => {
+  const data = loadData();
+  res.json(data.sectors);
 });
 
 app.get("/api/teams", (req, res) => {
@@ -200,11 +272,6 @@ app.get("/api/teams", (req, res) => {
     photo: t.photo || null
   }));
   res.json(teams);
-});
-
-app.get("/api/sectors", (req, res) => {
-  const data = loadData();
-  res.json(data.sectors);
 });
 
 app.get("/api/admin/setup", (req, res) => {
@@ -231,33 +298,33 @@ app.post("/api/admin/setup", (req, res) => {
 
   const teams = Array.from({ length: 50 }, (_, index) => {
     const existing =
-      incomingTeams.find(t => Number(t.id) === index + 1) ||
-      current.teams.find(t => Number(t.id) === index + 1) ||
+      incomingTeams.find(t => Number(t?.id) === index + 1) ||
+      current.teams.find(t => Number(t?.id) === index + 1) ||
       {};
 
     const currentTeam = current.teams.find(t => Number(t.id) === index + 1);
 
     return {
       id: index + 1,
-      name: String(existing.name || `Tím ${index + 1}`),
-      sector: ["A", "B", "C", "D", "E"].includes(existing.sector) ? existing.sector : "A",
-      peg: String(existing.peg || (index + 1)),
-      active: Boolean(existing.active),
-      photo: existing.photo || currentTeam?.photo || null
+      name: String(existing?.name || `Tím ${index + 1}`),
+      sector: ["A", "B", "C", "D", "E"].includes(existing?.sector) ? existing.sector : "A",
+      peg: String(existing?.peg || (index + 1)),
+      active: Boolean(existing?.active),
+      photo: existing?.photo || currentTeam?.photo || null
     };
   });
 
   const data = {
     sectors,
     teams,
-    catches: current.catches
+    catches: normalizeCatches(current)
   };
 
   saveData(data);
   res.json({ ok: true });
 });
 
-app.post("/api/admin/team-photo", upload.single("photo"), (req, res) => {
+app.post("/api/admin/team-photo", uploadTeamPhoto.single("photo"), (req, res) => {
   const data = loadData();
   const teamId = Number(req.body.teamId || 0);
 
@@ -294,25 +361,32 @@ app.post("/api/admin/reset-catches", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/catch", (req, res) => {
+app.post("/api/catch", uploadCatchPhoto.single("photo"), (req, res) => {
   const data = loadData();
 
-  const teamValue = Number(req.body.team ?? req.body.teamId);
-  const weightValue = Number(req.body.weight);
+  const teamId = Number(req.body.teamId || req.body.team || 0);
+  const weight = Number(req.body.weight || 0);
 
-  if (!teamValue || !weightValue) {
+  if (!teamId || !weight) {
     return res.status(400).json({ ok: false, error: "missing team or weight" });
   }
 
-  const team = getTeamById(data, teamValue);
+  const team = getTeamById(data, teamId);
   if (!team || !team.active) {
     return res.status(400).json({ ok: false, error: "team is not active" });
   }
 
+  let photoPath = null;
+  if (req.file) {
+    photoPath = "/uploads/" + req.file.filename;
+  }
+
+  data.catches = normalizeCatches(data);
   data.catches.push({
-    team: teamValue,
-    weight: weightValue,
-    photo: req.body.photo || null,
+    teamId,
+    team: teamId,
+    weight,
+    photo: photoPath,
     time: new Date().toISOString()
   });
 
