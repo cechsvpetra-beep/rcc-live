@@ -349,6 +349,36 @@ tbody tr.top3{
   font-size:13px;
 }
 
+.top3Table tbody tr.place1{
+  background:linear-gradient(90deg, rgba(244,200,77,.30), rgba(90,66,0,.20));
+  box-shadow:inset 0 0 18px rgba(244,200,77,.16);
+}
+
+.top3Table tbody tr.place2{
+  background:linear-gradient(90deg, rgba(212,219,228,.22), rgba(58,58,58,.18));
+  box-shadow:inset 0 0 18px rgba(212,219,228,.10);
+}
+
+.top3Table tbody tr.place3{
+  background:linear-gradient(90deg, rgba(212,149,90,.24), rgba(90,42,0,.16));
+  box-shadow:inset 0 0 18px rgba(212,149,90,.10);
+}
+
+.top3Table tbody tr.place1 td:first-child{
+  color:var(--gold);
+  font-weight:900;
+}
+
+.top3Table tbody tr.place2 td:first-child{
+  color:var(--silver);
+  font-weight:900;
+}
+
+.top3Table tbody tr.place3 td:first-child{
+  color:var(--bronze);
+  font-weight:900;
+}
+
 .mobileCards{
   display:none;
   gap:12px;
@@ -740,7 +770,7 @@ tbody tr.top3{
       <div class="sub">Vyhodnotenie tímu podľa súčtu 3 najväčších rýb</div>
     </div>
 
-    <table>
+    <table class="top3Table">
       <thead>
         <tr>
           <th>Poradie</th>
@@ -850,6 +880,13 @@ function rowClass(index){
   if(index === 0) return "top1";
   if(index === 1) return "top2";
   if(index === 2) return "top3";
+  return "";
+}
+
+function top3RowClass(index){
+  if(index === 0) return "place1";
+  if(index === 1) return "place2";
+  if(index === 2) return "place3";
   return "";
 }
 
@@ -1103,9 +1140,11 @@ function renderTop3Teams(){
     data = data.filter(t => t.sectorCode === currentSector || t.sector === currentSector);
   }
 
-  data.forEach((t, i) => {
+  const top3 = data.slice(0, 3);
+
+  top3.forEach((t, i) => {
     body.innerHTML += `
-      <tr class="${rowClass(i)}">
+      <tr class="${top3RowClass(i)}">
         <td class="rankCell"><span class="medal">${medalForPlace(i)}</span></td>
         <td>
           <div class="teamName" onclick="showTeam(${t.id})">${t.name}</div>
@@ -1119,7 +1158,7 @@ function renderTop3Teams(){
     `;
   });
 
-  if(!data.length){
+  if(!top3.length){
     body.innerHTML = `<tr><td colspan="6" class="empty">Zatiaľ nie sú dáta pre TOP 3 ryby tímov.</td></tr>`;
   }
 }
