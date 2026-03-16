@@ -1,223 +1,117 @@
-<!DOCTYPE html>
-<html lang="sk">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RCC zápis úlovku</title>
-
-<style>
-:root{
-  --bg:#0b0f14;
-  --panel:#141414;
-  --line:#243244;
-  --text:#eef4fb;
-  --muted:#9db0c5;
-  --green:#3bc96f;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding:36px 16px;
-  font-family:Arial,sans-serif;
-  background:#05070a;
-  color:var(--text);
-}
-
-.card{
-  width:100%;
-  max-width:350px;
-  background:#171717;
-  border-radius:16px;
-  padding:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
-}
-
-h1{
-  margin:0 0 16px 0;
-  font-size:24px;
-}
-
-label{
-  display:block;
-  font-size:13px;
-  margin:10px 0 6px 0;
-  font-weight:bold;
-}
-
-select,
-input[type="number"],
-input[type="file"]{
-  width:100%;
-  border-radius:8px;
-  border:1px solid #2c2c2c;
-  padding:10px 12px;
-  font-size:15px;
-}
-
-button{
-  margin-top:18px;
-  width:100%;
-  border:none;
-  border-radius:10px;
-  padding:12px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  background:var(--green);
-  color:white;
-}
-
-.status{
-  margin-top:10px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-.ok{
-  color:#6dff9c;
-}
-
-.err{
-  color:#ff8484;
-}
-</style>
-</head>
-<body>
-
-<div class="card">
-  <h1>Zápis úlovku</h1>
-
-  <form id="catchForm">
-    <label for="sector">Sektor</label>
-    <select id="sector" required>
-      <option value="">Vyber sektor</option>
-    </select>
-
-    <label for="team">Tím</label>
-    <select id="team" required>
-      <option value="">Vyber tím</option>
-    </select>
-
-    <label for="weight">Váha (kg)</label>
-    <input id="weight" type="number" step="0.01" min="0.01" required>
-
-    <label for="photo">Fotka</label>
-    <input id="photo" type="file" accept="image/*">
-
-    <button type="submit">Uložiť úlovok</button>
-  </form>
-
-  <div class="status" id="status">Načítavam dáta…</div>
-</div>
-
 <script>
+let sectors = [];
 let teams = [];
-let sectors = {};
 
-async function loadData(){
-  try{
-    const [teamsRes, sectorsRes] = await Promise.all([
-      fetch("/api/teams", { cache: "no-store" }),
-      fetch("/api/sectors", { cache: "no-store" })
+async function initJudge() {
+  try {
+    const [sectorsRes, setupRes] = await Promise.all([
+      fetch("/api/sectors", { cache: "no-store" }),
+      fetch("/api/admin/setup", { cache: "no-store" })
     ]);
 
-    teams = await teamsRes.json();
     sectors = await sectorsRes.json();
+    const data = await setupRes.json();
+    teams = Array.isArray(data.teams) ? data.teams : [];
 
     renderSectors();
-    renderTeams();
-
-    setStatus("Online režim", "ok");
-  }catch(e){
-    setStatus("Chyba načítania dát", "err");
+    setStatus("Dáta načítané");
+  } catch (e) {
+    console.error(e);
+    setStatus("Chyba načítania dát");
   }
 }
 
-function setStatus(text, cls=""){
+function setStatus(text) {
   const el = document.getElementById("status");
-  el.textContent = text;
-  el.className = "status " + cls;
+  if (el) el.innerText = text;
 }
 
-function renderSectors(){
-  const sectorSelect = document.getElementById("sector");
-  sectorSelect.innerHTML = `<option value="">Vyber sektor</option>`;
+function renderSectors() {
+  const select = document.getElementById("sector");
+  if (!select) return;
 
-  const usedSectors = [...new Set(teams.map(t => t.sector))];
+  select.innerHTML = `<option value="">Vyber sektor</option>`;
 
-  usedSectors.forEach(code => {
-    const name = sectors?.[code]?.name || ("Sektor " + code);
-    sectorSelect.innerHTML += `<option value="${code}">${name}</option>`;
+  sectors.forEach((s) => {
+    select.innerHTML += `
+      <option value="${s.code}">
+        ${escapeHtml(s.name)}
+      </option>
+    `;
   });
+
+  renderTeams();
 }
 
-function renderTeams(){
-  const sector = document.getElementById("sector").value;
+function sectorChanged() {
+  renderTeams();
+}
+
+function renderTeams() {
+  const sector = document.getElementById("sector")?.value || "";
   const teamSelect = document.getElementById("team");
+  if (!teamSelect) return;
+
   teamSelect.innerHTML = `<option value="">Vyber tím</option>`;
 
-  let filtered = teams;
-  if (sector) {
-    filtered = teams.filter(t => t.sector === sector);
-  }
-
-  filtered.forEach(team => {
-    teamSelect.innerHTML += `<option value="${team.id}">${team.name} • ${team.sectorName} • Stanovište ${team.peg}</option>`;
-  });
+  teams
+    .filter(t => t && t.active)
+    .filter(t => !sector || t.sector === sector)
+    .forEach((t) => {
+      teamSelect.innerHTML += `
+        <option value="${t.id}">
+          ${escapeHtml(t.name)} • Stanovište ${escapeHtml(String(t.peg))}
+        </option>
+      `;
+    });
 }
 
-document.getElementById("sector").addEventListener("change", renderTeams);
+async function saveCatch() {
+  const sector = document.getElementById("sector")?.value || "";
+  const teamId = document.getElementById("team")?.value || "";
+  const weight = document.getElementById("weight")?.value || "";
 
-document.getElementById("catchForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const sector = document.getElementById("sector").value;
-  const team = document.getElementById("team").value;
-  const weight = document.getElementById("weight").value;
-  const photoInput = document.getElementById("photo");
-
-  if(!sector || !team || !weight){
-    setStatus("Vyplň sektor, tím a váhu", "err");
+  if (!sector || !teamId || !weight) {
+    setStatus("Vyplň sektor, tím a váhu");
     return;
   }
 
-  const form = new FormData();
-  form.append("teamId", team);
-  form.append("team", team);
-  form.append("weight", weight);
-
-  if(photoInput.files[0]){
-    form.append("photo", photoInput.files[0]);
-  }
-
-  try{
+  try {
     const res = await fetch("/api/catch", {
       method: "POST",
-      body: form
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        teamId: Number(teamId),
+        weight: Number(weight)
+      })
     });
 
     const out = await res.json();
 
-    if(out.ok){
-      setStatus("Úlovok uložený", "ok");
-      document.getElementById("weight").value = "";
-      document.getElementById("photo").value = "";
-    }else{
-      setStatus(out.error || "Chyba pri ukladaní", "err");
+    if (out.ok) {
+      const weightInput = document.getElementById("weight");
+      const photoInput = document.getElementById("photo");
+      if (weightInput) weightInput.value = "";
+      if (photoInput) photoInput.value = "";
+      setStatus("Úlovok uložený");
+    } else {
+      setStatus(out.error || "Chyba pri ukladaní");
     }
-  }catch(e){
-    setStatus("Server neodpovedá", "err");
+  } catch (e) {
+    console.error(e);
+    setStatus("Server neodpovedá");
   }
-});
+}
 
-loadData();
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+initJudge();
 </script>
-
-</body>
-</html>
