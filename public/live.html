@@ -24,6 +24,10 @@
 
 *{box-sizing:border-box}
 
+html{
+  scroll-behavior:smooth;
+}
+
 body{
   margin:0;
   font-family:Arial,sans-serif;
@@ -194,6 +198,20 @@ body{
   margin-bottom:18px;
 }
 
+.desktopTableWrap.autoScroll{
+  max-height:650px;
+  overflow:auto;
+}
+
+.desktopTableWrap.autoScroll::-webkit-scrollbar{
+  width:8px;
+}
+
+.desktopTableWrap.autoScroll::-webkit-scrollbar-thumb{
+  background:#2b3c50;
+  border-radius:999px;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -212,6 +230,9 @@ th{
   font-size:13px;
   text-transform:uppercase;
   letter-spacing:.5px;
+  position:sticky;
+  top:0;
+  z-index:2;
 }
 
 td{
@@ -239,7 +260,7 @@ tbody tr.top3{
 }
 
 .rankCell{
-  width:80px;
+  width:120px;
   font-weight:900;
   font-size:18px;
 }
@@ -785,11 +806,11 @@ tbody tr.top3{
     </table>
   </div>
 
-  <div class="desktopTableWrap">
+  <div class="desktopTableWrap" id="leaderboardWrap">
     <table>
       <thead>
         <tr>
-          <th>Poradie</th>
+          <th>Celkové poradie</th>
           <th>Tím</th>
           <th>Sektor</th>
           <th>Stanovište</th>
@@ -864,6 +885,9 @@ tbody tr.top3{
 <script>
 let state = null;
 let currentSector = "all";
+let autoScrollInterval = null;
+let autoScrollDirection = 1;
+let autoScrollPause = false;
 
 function setStatus(text){
   document.getElementById("statusText").textContent = text;
@@ -919,6 +943,7 @@ function setSector(sector){
   renderTop3Teams();
   renderTable();
   renderMobileCards();
+  restartAutoScroll();
 }
 
 function teamPhotoHtml(photo){
@@ -939,6 +964,7 @@ function showMain(){
   document.getElementById("detailView").classList.add("hidden");
   document.getElementById("mainView").classList.remove("hidden");
   document.getElementById("backBtn").classList.add("hidden");
+  restartAutoScroll();
 }
 
 function filteredLeaderboard(){
@@ -1022,6 +1048,8 @@ function showTeam(id){
   const team = state.lb.find(t => Number(t.id) === Number(id));
   const catches = state.teamCatches[id] || [];
   const top3 = team.top3 || [];
+
+  stopAutoScroll();
 
   document.getElementById("teamName").innerText = team.name;
   document.getElementById("teamMeta").innerText = "Sektor " + team.sector + " | Stanovište " + team.peg;
@@ -1118,7 +1146,7 @@ function renderMobileCards(){
         </div>
 
         <div class="teamCardBottom">
-          <div style="color:var(--muted);font-size:13px;">Poradie ${i + 1}</div>
+          <div style="color:var(--muted);font-size:13px;">Celkové poradie ${i + 1}</div>
           <button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button>
         </div>
       </div>
@@ -1207,6 +1235,61 @@ function renderLastCatch(){
   box.textContent = `${lastTeam} • ${Number(last.weight).toFixed(2)} kg • ${fmtTime(last.time)}`;
 }
 
+function stopAutoScroll(){
+  if(autoScrollInterval){
+    clearInterval(autoScrollInterval);
+    autoScrollInterval = null;
+  }
+}
+
+function restartAutoScroll(){
+  stopAutoScroll();
+
+  if(window.innerWidth <= 760) return;
+  if(document.getElementById("detailView").classList.contains("hidden") === false) return;
+
+  const wrap = document.getElementById("leaderboardWrap");
+  if(!wrap) return;
+
+  const data = filteredLeaderboard();
+
+  if(data.length <= 8){
+    wrap.classList.remove("autoScroll");
+    wrap.scrollTop = 0;
+    return;
+  }
+
+  wrap.classList.add("autoScroll");
+  wrap.scrollTop = 0;
+  autoScrollDirection = 1;
+  autoScrollPause = false;
+
+  autoScrollInterval = setInterval(() => {
+    if(autoScrollPause) return;
+
+    const maxScroll = wrap.scrollHeight - wrap.clientHeight;
+    if(maxScroll <= 0) return;
+
+    wrap.scrollTop += autoScrollDirection * 1;
+
+    if(wrap.scrollTop >= maxScroll){
+      wrap.scrollTop = maxScroll;
+      autoScrollPause = true;
+      setTimeout(() => {
+        autoScrollDirection = -1;
+        autoScrollPause = false;
+      }, 1500);
+    } else if(wrap.scrollTop <= 0){
+      wrap.scrollTop = 0;
+      autoScrollPause = true;
+      setTimeout(() => {
+        autoScrollDirection = 1;
+        autoScrollPause = false;
+      }, 1500);
+    }
+  }, 35);
+}
+
 async function load(){
   try{
     const r = await fetch("/api/state", { cache:"no-store" });
@@ -1217,12 +1300,15 @@ async function load(){
     renderTop3Teams();
     renderTable();
     renderMobileCards();
+    restartAutoScroll();
 
     setStatus("Live dáta aktualizované");
   }catch(e){
     setStatus("Chyba načítania live dát");
   }
 }
+
+window.addEventListener("resize", restartAutoScroll);
 
 load();
 setInterval(load, 4000);
