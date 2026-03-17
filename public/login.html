@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RCC Login</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:radial-gradient(circle at top left,#112034 0%, #0b0f14 60%);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:#101826;
+    border:1px solid #243244;
+    padding:30px;
+    border-radius:16px;
+    width:320px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid #2c3b4d;
+    background:#0b1220;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#22c55e;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#error{
+    color:#ff6b6b;
+    margin-top:10px;
+}
+
+.logo{
+    width:80px;
+    margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<img src="/logo.png" class="logo">
+
+<h1>RCC Login</h1>
+
+<input id="username" placeholder="Meno">
+<input id="password" type="password" placeholder="Heslo">
+
+<button onclick="login()">PRIHLÁSIŤ</button>
+
+<div id="error"></div>
+
+</div>
+
+<script>
+async function login(){
+
+    const username = document.getElementById("username").value
+    const password = document.getElementById("password").value
+
+    const res = await fetch("/api/login",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({username,password})
+    })
+
+    const data = await res.json()
+
+    if(!data.ok){
+        document.getElementById("error").innerText = "Zlé meno alebo heslo"
+        return
+    }
+
+    // presmerovanie podľa role
+    if(data.role === "admin"){
+        window.location.href = "/admin.html"
+    }else{
+        window.location.href = "/judge.html"
+    }
+
+}
+</script>
+
+</body>
+</html>
