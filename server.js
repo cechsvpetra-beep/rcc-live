@@ -7,9 +7,6 @@ const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-/* =========================
-   CESTY A PRIEČINKY
-========================= */
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_FILE = path.join(__dirname, "data.json");
 const UPLOADS_DIR = path.join(PUBLIC_DIR, "uploads");
@@ -22,9 +19,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-/* =========================
-   SESSION
-========================= */
 app.use(session({
   secret: "rcc_secret_123",
   resave: false,
@@ -35,26 +29,17 @@ app.use(session({
   }
 }));
 
-/* =========================
-   USERS
-========================= */
 const USERS = [
   { username: "admin",  password: "admin123", role: "admin" },
-  { username: "judge1", password: "1234",     role: "judge" },
-  { username: "judge2", password: "1234",     role: "judge" },
-  { username: "judge3", password: "1234",     role: "judge" }
+  { username: "judge1", password: "1234", role: "judge" },
+  { username: "judge2", password: "1234", role: "judge" },
+  { username: "judge3", password: "1234", role: "judge" }
 ];
 
-/* =========================
-   BASIC MIDDLEWARE
-========================= */
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static(PUBLIC_DIR));
 
-/* =========================
-   DEFAULT DATA
-========================= */
 function defaultData() {
   return {
     sectors: {
@@ -126,9 +111,6 @@ function getTeamById(data, id) {
   return data.teams.find(t => Number(t.id) === Number(id));
 }
 
-/* =========================
-   AUTH
-========================= */
 function requireLogin(req, res, next) {
   if (!req.session.user) {
     return res.redirect("/login.html");
@@ -143,9 +125,6 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-/* =========================
-   LOGIN API
-========================= */
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
 
@@ -173,9 +152,6 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-/* =========================
-   CHRÁNENÉ STRÁNKY
-========================= */
 app.get("/admin.html", requireAdmin, (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "admin.html"));
 });
@@ -184,25 +160,18 @@ app.get("/judge.html", requireLogin, (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, "judge.html"));
 });
 
-/* =========================
-   MULTER UPLOAD
-========================= */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, UPLOADS_DIR);
   },
   filename: (req, file, cb) => {
-    const safeName = String(file.originalname || "file")
-      .replace(/[^\w.\-]+/g, "_");
+    const safeName = String(file.originalname || "file").replace(/[^\w.\-]+/g, "_");
     cb(null, `${Date.now()}_${safeName}`);
   }
 });
 
 const upload = multer({ storage });
 
-/* =========================
-   TEAM PHOTO UPLOAD
-========================= */
 app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res) => {
   try {
     const teamId = Number(req.params.id);
@@ -217,7 +186,6 @@ app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res)
       return res.json({ ok: false, error: "Chýba súbor" });
     }
 
-    // zmaž starú fotku tímu, ak je v /uploads
     if (team.photo && team.photo.startsWith("/uploads/")) {
       const oldPath = path.join(PUBLIC_DIR, team.photo.replace(/^\//, ""));
       if (fs.existsSync(oldPath)) {
@@ -238,9 +206,6 @@ app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res)
   }
 });
 
-/* =========================
-   CATCH ADD
-========================= */
 app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
   try {
     const data = loadData();
@@ -275,9 +240,6 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
   }
 });
 
-/* =========================
-   ADMIN SETUP
-========================= */
 app.get("/api/admin/setup", requireAdmin, (req, res) => {
   const data = loadData();
   res.json(data);
@@ -316,9 +278,6 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
   }
 });
 
-/* =========================
-   SECTORS API
-========================= */
 app.get("/api/sectors", (req, res) => {
   const data = loadData();
   const sectors = Object.values(data.sectors || {})
@@ -328,9 +287,6 @@ app.get("/api/sectors", (req, res) => {
   res.json(sectors);
 });
 
-/* =========================
-   STATE API
-========================= */
 app.get("/api/state", (req, res) => {
   const data = loadData();
 
@@ -420,9 +376,6 @@ app.get("/api/state", (req, res) => {
   });
 });
 
-/* =========================
-   BASIC ROUTES
-========================= */
 app.get("/", (req, res) => {
   res.redirect("/live.html");
 });
@@ -431,9 +384,6 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-/* =========================
-   START
-========================= */
 app.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
 });
