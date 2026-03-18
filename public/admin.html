@@ -213,7 +213,14 @@ const SECTOR_CODES = ["A","B","C","D","E","F","G","H"];
 
 async function loadAdmin() {
   try {
-    const meRes = await fetch("/api/me", { cache: "no-store" });
+    const meRes = await fetch("/api/me");
+const me = await meRes.json();
+
+if(!me || me.role !== "admin"){
+  window.location.href = "/login.html";
+  return;
+}
+const meRes = await fetch("/api/me", { cache: "no-store" });
     const me = await meRes.json();
 
     if (!me || me.role !== "admin") {
