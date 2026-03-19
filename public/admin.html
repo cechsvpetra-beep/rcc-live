@@ -267,8 +267,10 @@ label.inline{
   }
   .rowTeam,
   .catchCard,
-  .catchTools{
+  .catchTools,
+  .footerActions{
     grid-template-columns:1fr;
+    display:grid;
   }
 }
 </style>
@@ -280,7 +282,7 @@ label.inline{
     <img src="/logo.png" alt="RCC logo" class="logo">
     <div>
       <h1>Admin – RCC</h1>
-      <div class="sub">Sektory, tímy, stanovištia, aktivácia, fotky tímov a úprava úlovkov</div>
+      <div class="sub">Sektory, tímy, stanovištia, aktivácia, fotky tímov, úprava úlovkov a obnova zo zálohy</div>
     </div>
   </div>
 
@@ -305,6 +307,16 @@ label.inline{
 
   <div class="footerActions">
     <button onclick="saveAdmin()">ULOŽIŤ</button>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Obnova zo zálohy</h2>
+  <div class="sectionSub">Vyber JSON zálohu a obnov dáta aj z mobilu. Pred obnovou sa uloží núdzová kópia aktuálnych dát.</div>
+
+  <div class="footerActions">
+    <input id="restoreBackupFile" type="file" accept=".json,application/json">
+    <button class="secondary" onclick="restoreBackup()">Obnoviť zo zálohy</button>
   </div>
 </div>
 
@@ -386,51 +398,54 @@ function setStatus(text, isError = false) {
 }
 
 function normalizeData() {
-  if (!adminData) adminData = {};
+  if (!adminData || typeof adminData !== "object") {
+    adminData = {};
+  }
 
   if (!adminData.sectors || typeof adminData.sectors !== "object") {
     adminData.sectors = {};
   }
 
   SECTOR_CODES.forEach((code, index) => {
-    if (!adminData.sectors[code]) {
-      adminData.sectors[code] = {
-        code,
-        name: "Sektor " + code,
-        visible: index < 4
-      };
-    } else {
-      adminData.sectors[code].code = code;
-      adminData.sectors[code].name = adminData.sectors[code].name || ("Sektor " + code);
-      adminData.sectors[code].visible = Boolean(adminData.sectors[code].visible);
-    }
+    const existing = adminData.sectors[code] || {};
+    adminData.sectors[code] = {
+      code,
+      name: typeof existing.name === "string" && existing.name.trim() !== ""
+        ? existing.name
+        : ("Sektor " + code),
+      visible: existing.visible !== undefined
+        ? Boolean(existing.visible)
+        : index < 4
+    };
   });
 
   if (!Array.isArray(adminData.teams)) {
     adminData.teams = [];
   }
 
-  if (adminData.teams.length < 50) {
-    for (let i = adminData.teams.length + 1; i <= 50; i++) {
-      adminData.teams.push({
-        id: i,
-        name: "Tím " + i,
-        sector: "A",
-        peg: String(i),
-        active: i <= 20,
-        photo: null
-      });
-    }
-  }
+  const seenIds = new Set();
 
-  adminData.teams = adminData.teams.map((t, index) => ({
-    id: Number(t.id || index + 1),
-    name: t.name || ("Tím " + (index + 1)),
-    sector: SECTOR_CODES.includes(t.sector) ? t.sector : "A",
-    peg: String(t.peg || (index + 1)),
-    active: Boolean(t.active),
-    photo: t.photo || null
-  })).sort((a, b) => a.id - b.id);
+  adminData.teams = adminData.teams
+    .map((t) => {
+      const id = Number(t?.id || 0);
+      if (!id || seenIds.has(id)) return null;
+      seenIds.add(id);
+
+      return {
+        id,
+        name: typeof t?.name === "string" && t.name.trim() !== ""
+          ? t.name
+          : ("Tím " + id),
+        sector: SECTOR_CODES.includes(t?.sector) ? t.sector : "A",
+        peg: t?.peg !== undefined && t?.peg !== null && String(t.peg).trim() !== ""
+          ? String(t.peg)
+          : String(id),
+        active: Boolean(t?.active),
+        photo: t?.photo || null
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.id - b.id);
 }
 
 function renderSectors() {
@@ -468,6 +483,11 @@ function renderTeams() {
   if (!wrap) return;
 
   wrap.innerHTML = "";
+
+  if (!Array.isArray(adminData.teams) || !adminData.teams.length) {
+    wrap.innerHTML = `<div class="empty">Nie sú dostupné žiadne tímy.</div>`;
+    return;
+  }
 
   adminData.teams.forEach(t => {
     wrap.innerHTML += `
@@ -566,6 +586,25 @@ function renderCatches() {
   }
 
   data.forEach(c => {
+    const activeTeams = adminData.teams.filter(t => t.active);
+    const selectedExists = activeTeams.some(t => Number(t.id) === Number(c.teamId));
+    const teamOptions = [
+      ...activeTeams.map(t => ({
+        id: Number(t.id),
+        label: `${t.name} – ${t.sector} / ${t.peg}`
+      }))
+    ];
+
+    if (!selectedExists) {
+      const currentTeam = adminData.teams.find(t => Number(t.id) === Number(c.teamId));
+      if (currentTeam) {
+        teamOptions.unshift({
+          id: Number(currentTeam.id),
+          label: `${currentTeam.name} – ${currentTeam.sector} / ${currentTeam.peg}`
+        });
+      }
+    }
+
     wrap.innerHTML += `
       <div class="catchCard">
         <div>
@@ -584,9 +623,8 @@ function renderCatches() {
         <div class="inlineCol">
           <div class="small">Tím</div>
           <select id="catchTeam_${c.id}">
-            ${adminData.teams
-              .filter(t => t.active)
-              .map(t => `<option value="${t.id}" ${Number(t.id) === Number(c.teamId) ? "selected" : ""}>${escapeHtml(t.name)} – ${escapeHtml(t.sector)} / ${escapeHtml(String(t.peg))}</option>`)
+            ${teamOptions
+              .map(t => `<option value="${t.id}" ${Number(t.id) === Number(c.teamId) ? "selected" : ""}>${escapeHtml(t.label)}</option>`)
               .join("")}
           </select>
         </div>
@@ -619,10 +657,12 @@ function renderPhotoThumb(photo) {
 }
 
 function changeSectorName(code, value) {
+  if (!adminData?.sectors?.[code]) return;
   adminData.sectors[code].name = value.trim() || ("Sektor " + code);
 }
 
 function changeSectorVisible(code, value) {
+  if (!adminData?.sectors?.[code]) return;
   adminData.sectors[code].visible = Boolean(value);
 }
 
@@ -684,6 +724,8 @@ async function uploadTeamPhoto(teamId, input) {
   } catch (e) {
     console.error(e);
     setStatus("Server neodpovedá pri uploade fotky", true);
+  } finally {
+    input.value = "";
   }
 }
 
@@ -693,7 +735,14 @@ async function saveAdmin() {
 
     const payload = {
       sectors: adminData.sectors,
-      teams: adminData.teams
+      teams: adminData.teams.map(t => ({
+        id: Number(t.id),
+        name: t.name,
+        sector: t.sector,
+        peg: t.peg,
+        active: Boolean(t.active),
+        photo: t.photo || null
+      }))
     };
 
     const res = await fetch("/api/admin/setup", {
@@ -705,15 +754,63 @@ async function saveAdmin() {
     const out = await res.json();
 
     if (out.ok) {
-      setStatus("ULOŽENÉ ✔");
+      await reloadAdminSetupOnly();
       await loadCatches();
+      renderSectors();
+      renderTeams();
+      renderCatchSectorFilter();
       renderCatches();
+      setStatus("ULOŽENÉ ✔");
     } else {
-      setStatus("Chyba ukladania", true);
+      setStatus(out.error || "Chyba ukladania", true);
     }
   } catch (e) {
     console.error(e);
     setStatus("Server neodpovedá", true);
+  }
+}
+
+async function restoreBackup() {
+  const input = document.getElementById("restoreBackupFile");
+  const file = input?.files?.[0];
+
+  if (!file) {
+    setStatus("Vyber JSON zálohu", true);
+    return;
+  }
+
+  const ok = confirm("Naozaj chceš obnoviť dáta zo zálohy? Aktuálne dáta budú prepísané.");
+  if (!ok) return;
+
+  try {
+    setStatus("Obnovujem dáta zo zálohy...");
+
+    const form = new FormData();
+    form.append("backup", file);
+
+    const res = await fetch("/api/admin/restore-backup", {
+      method: "POST",
+      body: form
+    });
+
+    const out = await res.json();
+
+    if (!out.ok) {
+      setStatus(out.error || "Obnova zo zálohy zlyhala", true);
+      return;
+    }
+
+    await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
+    renderSectors();
+    renderTeams();
+    renderCatchSectorFilter();
+    renderCatches();
+
+    setStatus("Záloha bola úspešne obnovená ✔");
+    input.value = "";
+  } catch (e) {
+    console.error(e);
+    setStatus("Server neodpovedá pri obnove zo zálohy", true);
   }
 }
 
