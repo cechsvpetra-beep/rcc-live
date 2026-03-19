@@ -55,7 +55,7 @@ function defaultData() {
     teams: Array.from({ length: 50 }, (_, i) => ({
       id: i + 1,
       name: `Tím ${i + 1}`,
-      sector: ["A","B","C","D","E","F","G","H"][Math.floor(i / 7)] || "A",
+      sector: ["A", "B", "C", "D", "E", "F", "G", "H"][Math.floor(i / 7)] || "A",
       peg: String(i + 1),
       active: i < 20,
       photo: null
@@ -86,7 +86,7 @@ function loadData() {
       return {
         id: i + 1,
         name: String(found?.name || `Tím ${i + 1}`),
-        sector: ["A","B","C","D","E","F","G","H"].includes(found?.sector) ? found.sector : "A",
+        sector: ["A", "B", "C", "D", "E", "F", "G", "H"].includes(found?.sector) ? found.sector : "A",
         peg: String(found?.peg ?? (i + 1)),
         active: Boolean(found?.active),
         photo: found?.photo || null
@@ -109,6 +109,24 @@ function saveData(data) {
 
 function getTeamById(data, id) {
   return data.teams.find(t => Number(t.id) === Number(id));
+}
+
+function getCatchById(data, id) {
+  return data.catches.find(c => Number(c.id) === Number(id));
+}
+
+function deletePhysicalFileFromPublic(publicPath) {
+  try {
+    if (!publicPath || typeof publicPath !== "string") return;
+    if (!publicPath.startsWith("/uploads/")) return;
+
+    const fullPath = path.join(PUBLIC_DIR, publicPath.replace(/^\//, ""));
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
+  } catch (e) {
+    console.error("Mazanie súboru zlyhalo:", e);
+  }
 }
 
 function requireLogin(req, res, next) {
@@ -186,11 +204,8 @@ app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res)
       return res.json({ ok: false, error: "Chýba súbor" });
     }
 
-    if (team.photo && team.photo.startsWith("/uploads/")) {
-      const oldPath = path.join(PUBLIC_DIR, team.photo.replace(/^\//, ""));
-      if (fs.existsSync(oldPath)) {
-        try { fs.unlinkSync(oldPath); } catch (e) {}
-      }
+    if (team.photo) {
+      deletePhysicalFileFromPublic(team.photo);
     }
 
     team.photo = "/uploads/" + req.file.filename;
@@ -258,7 +273,7 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       return {
         id: i + 1,
         name: String(found?.name || `Tím ${i + 1}`),
-        sector: ["A","B","C","D","E","F","G","H"].includes(found?.sector) ? found.sector : "A",
+        sector: ["A", "B", "C", "D", "E", "F", "G", "H"].includes(found?.sector) ? found.sector : "A",
         peg: String(found?.peg ?? (i + 1)),
         active: Boolean(found?.active),
         photo: found?.photo || null
@@ -277,6 +292,100 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
     res.status(500).json({ ok: false, error: "Ukladanie admin dát zlyhalo" });
   }
 });
+
+/* =========================
+   ADMIN CATCHES
+========================= */
+
+app.get("/api/admin/catches", requireAdmin, (req, res) => {
+  try {
+    const data = loadData();
+
+    const catches = [...(data.catches || [])]
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .map(c => {
+        const team = getTeamById(data, c.teamId);
+
+        return {
+          id: c.id,
+          teamId: Number(c.teamId),
+          teamName: team?.name || `Tím ${c.teamId}`,
+          teamSector: team?.sector || "-",
+          teamPeg: team?.peg || "-",
+          weight: Number(c.weight || 0),
+          time: c.time,
+          photo: c.photo || null
+        };
+      });
+
+    res.json({ ok: true, catches });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, catches: [], error: "Načítanie úlovkov zlyhalo" });
+  }
+});
+
+app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
+  try {
+    const catchId = Number(req.params.id);
+    const teamId = Number(req.body.teamId || 0);
+    const weight = Number(req.body.weight || 0);
+
+    if (!catchId || !teamId || !weight) {
+      return res.json({ ok: false, error: "Chýba ID úlovku, tím alebo váha" });
+    }
+
+    const data = loadData();
+    const catchItem = getCatchById(data, catchId);
+    if (!catchItem) {
+      return res.json({ ok: false, error: "Úlovok neexistuje" });
+    }
+
+    const team = getTeamById(data, teamId);
+    if (!team) {
+      return res.json({ ok: false, error: "Tím neexistuje" });
+    }
+
+    catchItem.teamId = teamId;
+    catchItem.weight = weight;
+
+    saveData(data);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: "Úprava úlovku zlyhala" });
+  }
+});
+
+app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
+  try {
+    const catchId = Number(req.params.id);
+    const data = loadData();
+
+    const index = data.catches.findIndex(c => Number(c.id) === catchId);
+    if (index === -1) {
+      return res.json({ ok: false, error: "Úlovok neexistuje" });
+    }
+
+    const catchItem = data.catches[index];
+
+    if (catchItem.photo) {
+      deletePhysicalFileFromPublic(catchItem.photo);
+    }
+
+    data.catches.splice(index, 1);
+    saveData(data);
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: "Mazanie úlovku zlyhalo" });
+  }
+});
+
+/* =========================
+   PUBLIC API
+========================= */
 
 app.get("/api/sectors", (req, res) => {
   const data = loadData();
