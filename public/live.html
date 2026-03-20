@@ -57,13 +57,13 @@ body{
 }
 .titleBox h1{
   margin:0;
-  font-size:18px;
+  font-size:20px;
   line-height:1.1;
 }
 .titleBox .sub{
   margin-top:3px;
   color:var(--muted);
-  font-size:12px;
+  font-size:13px;
 }
 .actions{
   display:flex;
@@ -73,15 +73,17 @@ body{
 button{
   border:none;
   border-radius:12px;
-  padding:12px 16px;
+  padding:11px 15px;
   font-weight:700;
   cursor:pointer;
   background:#16263a;
   color:#fff;
+  font-size:14px;
 }
 button:hover{
   background:#21354f;
 }
+
 .stats{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
@@ -93,7 +95,7 @@ button:hover{
   border:1px solid var(--line);
   border-radius:14px;
   padding:14px;
-  min-height:72px;
+  min-height:74px;
 }
 .statLabel{
   color:#b6c6d9;
@@ -102,7 +104,7 @@ button:hover{
   margin-bottom:8px;
 }
 .statValue{
-  font-size:22px;
+  font-size:24px;
   font-weight:900;
 }
 .statSub{
@@ -117,6 +119,7 @@ button:hover{
   border-color:#34506d;
   background:linear-gradient(180deg,#102036 0%, #0a1422 100%);
 }
+
 .lastCatch{
   margin-bottom:10px;
   background:linear-gradient(90deg, rgba(34,197,94,.18), rgba(11,58,42,.65));
@@ -142,6 +145,7 @@ button:hover{
   color:#d9f7e5;
   font-size:14px;
 }
+
 .infoLine{
   min-height:18px;
   margin:8px 2px 14px 2px;
@@ -150,11 +154,13 @@ button:hover{
 }
 .infoLine.error{ color:var(--red); }
 .infoLine.ok{ color:#8dffb2; }
+
 .updated{
   margin-top:4px;
   color:var(--muted);
   font-size:12px;
 }
+
 .section{
   background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
@@ -168,13 +174,14 @@ button:hover{
 }
 .sectionHead h2{
   margin:0;
-  font-size:16px;
+  font-size:17px;
 }
 .sectionSub{
   margin-top:4px;
   color:var(--muted);
   font-size:12px;
 }
+
 .tableWrap{
   width:100%;
   overflow:auto;
@@ -185,7 +192,7 @@ table{
   min-width:900px;
 }
 th, td{
-  padding:12px 10px;
+  padding:11px 10px;
   border-bottom:1px solid rgba(255,255,255,.05);
   text-align:left;
   font-size:13px;
@@ -199,6 +206,7 @@ th{
 tbody tr:hover{
   background:rgba(255,255,255,.02);
 }
+
 .rank{
   font-weight:900;
   color:#d7e6f5;
@@ -245,6 +253,7 @@ tbody tr:hover{
   color:var(--muted);
   font-size:14px;
 }
+
 .rankCell{
   display:flex;
   align-items:center;
@@ -277,6 +286,7 @@ tbody tr:hover{
 .moveSame{
   color:transparent;
 }
+
 tr.rank-top-1{ background:var(--gold); }
 tr.rank-top-2{ background:var(--silver); }
 tr.rank-top-3{ background:var(--bronze); }
@@ -297,6 +307,7 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   color:#dce8f5;
   font-weight:800;
   cursor:pointer;
+  font-size:13px;
 }
 .tabBtn:hover{
   background:#1d3048;
@@ -484,6 +495,21 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   font-size:18px;
   font-weight:900;
 }
+
+.mobileSub{
+  display:none;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+  margin-top:3px;
+}
+.mobileWeight{
+  display:none;
+}
+.mobileCount{
+  display:none;
+}
+
 @keyframes popUp{
   0%{ transform:translateY(6px) scale(.8); opacity:.2; }
   70%{ transform:translateY(-2px) scale(1.15); opacity:1; }
@@ -504,13 +530,111 @@ tr.rank-fall{ animation:rowFall .9s ease; }
 }
 
 @media (max-width:900px){
+  .wrap{ padding:8px; }
+  .titleBox h1{ font-size:18px; }
   .stats{ grid-template-columns:1fr; }
+  .statValue{ font-size:22px; }
+  .lastCatchMain{ font-size:20px; }
   .detailStats{ grid-template-columns:1fr 1fr; }
   .bigFishGrid{ grid-template-columns:1fr; }
   .bigFishImage, .bigFishNoImage{ height:260px; }
-  .lastCatchMain{ font-size:20px; }
-  .wrap{ padding:8px; }
+
+  .tableWrap{ overflow:visible; }
+  table{
+    min-width:0;
+    width:100%;
+  }
+  th, td{
+    padding:9px 8px;
+    font-size:13px;
+  }
+
+  th.col-sector,
+  td.col-sector,
+  th.col-peg,
+  td.col-peg,
+  th.col-photo,
+  td.col-photo{
+    display:none;
+  }
+
+  th.col-rank,
+  td.col-rank{
+    width:68px;
+    white-space:nowrap;
+    vertical-align:top;
+  }
+
+  th.col-team,
+  td.col-team{
+    width:auto;
+  }
+
+  th.col-total,
+  td.col-total{
+    width:92px;
+    white-space:nowrap;
+    text-align:right;
+    vertical-align:top;
+  }
+
+  th.col-count,
+  td.col-count{
+    width:66px;
+    white-space:nowrap;
+    text-align:right;
+    vertical-align:top;
+  }
+
+  .mobileSub{
+    display:block;
+  }
+  .mobileWeight,
+  .mobileCount{
+    display:inline;
+  }
+
+  .teamName{
+    font-size:14px;
+  }
+
+  .badge{
+    font-size:11px;
+    padding:4px 7px;
+  }
+
+  .rankCell{
+    gap:5px;
+  }
+  .moveWrap{
+    min-width:34px;
+    gap:2px;
+  }
+  .moveDelta{
+    font-size:10px;
+  }
+
+  .tabs{
+    gap:6px;
+    padding:10px 10px 0 10px;
+  }
+  .tabBtn{
+    padding:8px 12px;
+    font-size:13px;
+  }
+
+  .sectionHead{
+    padding:12px 12px 9px 12px;
+  }
+  .sectionHead h2{
+    font-size:16px;
+  }
+
+  .catchGrid{
+    grid-template-columns:1fr;
+  }
 }
+
 @media print{
   .actions, .infoLine, .updated, .modalOverlay { display:none !important; }
   body{ background:#fff; color:#000; }
@@ -601,13 +725,13 @@ tr.rank-fall{ animation:rowFall .9s ease; }
         <table>
           <thead>
             <tr>
-              <th>Poradie</th>
-              <th>Tím</th>
-              <th>Sektor</th>
-              <th>Stanovište</th>
-              <th>Foto</th>
-              <th>Celková váha</th>
-              <th>Úlovky</th>
+              <th class="col-rank">Poradie</th>
+              <th class="col-team">Tím</th>
+              <th class="col-sector">Sektor</th>
+              <th class="col-peg">Stanovište</th>
+              <th class="col-photo">Foto</th>
+              <th class="col-total">Celková váha</th>
+              <th class="col-count">Úlovky</th>
             </tr>
           </thead>
           <tbody id="lbBody"></tbody>
@@ -900,20 +1024,25 @@ function renderLeaderboard(rows) {
     tr.className = `${topRankClass} ${moveClass}`.trim();
     tr.onclick = () => openTeamDetail(team.id);
     tr.innerHTML = `
-      <td>
+      <td class="col-rank">
         <div class="rankCell">
           ${moveHtml}
           <span class="rank">${currentRank}.</span>
         </div>
       </td>
-      <td>
+      <td class="col-team">
         <div class="teamName">${escapeHtml(team.name || "-")}</div>
+        <div class="mobileSub">Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}</div>
       </td>
-      <td>${escapeHtml(team.sectorCode || team.sector || "-")}</td>
-      <td>${escapeHtml(String(team.peg || "-"))}</td>
-      <td>${photoHtml}</td>
-      <td><span class="badge">${formatKg(Number(team.total || 0))}</span></td>
-      <td>${escapeHtml(String(team.count || 0))}</td>
+      <td class="col-sector">${escapeHtml(team.sectorCode || team.sector || "-")}</td>
+      <td class="col-peg">${escapeHtml(String(team.peg || "-"))}</td>
+      <td class="col-photo">${photoHtml}</td>
+      <td class="col-total">
+        <span class="badge">${formatKg(Number(team.total || 0))}</span>
+      </td>
+      <td class="col-count">
+        ${escapeHtml(String(team.count || 0))}
+      </td>
     `;
     body.appendChild(tr);
   });
