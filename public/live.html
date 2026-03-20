@@ -14,6 +14,11 @@
   --muted:#99abc1;
   --green:#22c55e;
   --red:#ff6b6b;
+  --gold:rgba(255, 215, 0, .10);
+  --silver:rgba(192, 192, 192, .10);
+  --bronze:rgba(205, 127, 50, .12);
+  --riseFlash:rgba(34,197,94,.12);
+  --fallFlash:rgba(255,107,107,.10);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -137,12 +142,8 @@ button:hover{
   color:var(--muted);
   font-size:13px;
 }
-.infoLine.error{
-  color:var(--red);
-}
-.infoLine.ok{
-  color:#8dffb2;
-}
+.infoLine.error{ color:var(--red); }
+.infoLine.ok{ color:#8dffb2; }
 .section{
   background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
@@ -237,30 +238,64 @@ tbody tr:hover{
   align-items:center;
   gap:8px;
 }
+.moveWrap{
+  min-width:42px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
 .moveArrow{
   font-size:14px;
   font-weight:900;
   line-height:1;
+  display:inline-block;
+}
+.moveDelta{
+  font-size:11px;
+  font-weight:800;
 }
 .moveUp{
   color:var(--green);
+  animation:popUp .45s ease;
 }
 .moveDown{
   color:var(--red);
+  animation:popDown .45s ease;
 }
 .moveSame{
   color:transparent;
 }
+tr.rank-top-1{ background:var(--gold); }
+tr.rank-top-2{ background:var(--silver); }
+tr.rank-top-3{ background:var(--bronze); }
+tr.rank-rise{
+  animation:rowRise .9s ease;
+}
+tr.rank-fall{
+  animation:rowFall .9s ease;
+}
+@keyframes popUp{
+  0%{ transform:translateY(6px) scale(.8); opacity:.2; }
+  70%{ transform:translateY(-2px) scale(1.15); opacity:1; }
+  100%{ transform:translateY(0) scale(1); opacity:1; }
+}
+@keyframes popDown{
+  0%{ transform:translateY(-6px) scale(.8); opacity:.2; }
+  70%{ transform:translateY(2px) scale(1.15); opacity:1; }
+  100%{ transform:translateY(0) scale(1); opacity:1; }
+}
+@keyframes rowRise{
+  0%{ background:var(--riseFlash); }
+  100%{ background:transparent; }
+}
+@keyframes rowFall{
+  0%{ background:var(--fallFlash); }
+  100%{ background:transparent; }
+}
 @media (max-width:900px){
-  .stats{
-    grid-template-columns:1fr;
-  }
-  .lastCatchMain{
-    font-size:20px;
-  }
-  .wrap{
-    padding:8px;
-  }
+  .stats{ grid-template-columns:1fr; }
+  .lastCatchMain{ font-size:20px; }
+  .wrap{ padding:8px; }
 }
 @media print{
   .actions, .infoLine, .updated { display:none !important; }
@@ -380,13 +415,9 @@ async function loadState(manual = false) {
   }
 
   try {
-    const res = await fetch("/api/state", {
-      cache: "no-store"
-    });
+    const res = await fetch("/api/state", { cache: "no-store" });
 
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
-    }
+    if (!res.ok) throw new Error("HTTP " + res.status);
 
     const data = await res.json();
     renderLive(data);
@@ -449,7 +480,6 @@ function renderTop3(rows) {
   const empty = document.getElementById("top3Empty");
 
   body.innerHTML = "";
-
   const visibleRows = rows.slice(0, 3);
 
   if (!visibleRows.length) {
@@ -495,13 +525,18 @@ function renderLeaderboard(rows) {
     const previousRank = previousRankMap[team.id];
     newRankMap[team.id] = currentRank;
 
-    let moveHtml = `<span class="moveArrow moveSame">•</span>`;
+    let moveHtml = `<span class="moveWrap"><span class="moveArrow moveSame">•</span></span>`;
+    let moveClass = "";
 
     if (typeof previousRank === "number") {
       if (currentRank < previousRank) {
-        moveHtml = `<span class="moveArrow moveUp">▲</span>`;
+        const diff = previousRank - currentRank;
+        moveHtml = `<span class="moveWrap"><span class="moveArrow moveUp">▲</span><span class="moveDelta moveUp">+${diff}</span></span>`;
+        moveClass = "rank-rise";
       } else if (currentRank > previousRank) {
-        moveHtml = `<span class="moveArrow moveDown">▼</span>`;
+        const diff = currentRank - previousRank;
+        moveHtml = `<span class="moveWrap"><span class="moveArrow moveDown">▼</span><span class="moveDelta moveDown">-${diff}</span></span>`;
+        moveClass = "rank-fall";
       }
     }
 
@@ -509,7 +544,13 @@ function renderLeaderboard(rows) {
       ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
+    const topRankClass =
+      currentRank === 1 ? "rank-top-1" :
+      currentRank === 2 ? "rank-top-2" :
+      currentRank === 3 ? "rank-top-3" : "";
+
     const tr = document.createElement("tr");
+    tr.className = `${topRankClass} ${moveClass}`.trim();
     tr.innerHTML = `
       <td>
         <div class="rankCell">
@@ -573,10 +614,7 @@ function connectSocket() {
 
 function startFallbackRefresh() {
   if (fallbackTimer) return;
-
-  fallbackTimer = setInterval(() => {
-    loadState(false);
-  }, FALLBACK_MS);
+  fallbackTimer = setInterval(() => loadState(false), FALLBACK_MS);
 }
 
 function stopFallbackRefresh() {
