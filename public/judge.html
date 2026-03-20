@@ -395,12 +395,21 @@ async function saveCatch() {
     });
 
     const contentType = res.headers.get("content-type") || "";
+
     if (!contentType.includes("application/json")) {
       setStatus("Server nevrátil platnú odpoveď", true, "error");
       return;
     }
 
     const out = await res.json();
+
+    if (res.status === 401 || out.code === "AUTH_REQUIRED") {
+      setStatus("Relácia vypršala, prihlasujem znova...", true, "warn");
+      setTimeout(() => {
+        window.location.href = "/login.html";
+      }, 1000);
+      return;
+    }
 
     if (out.ok) {
       setStatus("ULOŽENÉ ✔", false, "success");

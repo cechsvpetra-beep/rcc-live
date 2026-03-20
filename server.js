@@ -118,17 +118,35 @@ function deletePhysicalFileFromPublic(publicPath) {
 }
 
 function requireLogin(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect("/login.html");
+  if (req.session.user) {
+    return next();
   }
-  next();
+
+  if (req.path.startsWith("/api/")) {
+    return res.status(401).json({
+      ok: false,
+      error: "Neprihlásený používateľ",
+      code: "AUTH_REQUIRED"
+    });
+  }
+
+  return res.redirect("/login.html");
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.redirect("/login.html");
+  if (req.session.user && req.session.user.role === "admin") {
+    return next();
   }
-  next();
+
+  if (req.path.startsWith("/api/")) {
+    return res.status(401).json({
+      ok: false,
+      error: "Admin prístup vyžadovaný",
+      code: "ADMIN_REQUIRED"
+    });
+  }
+
+  return res.redirect("/login.html");
 }
 
 app.post("/api/login", (req, res) => {

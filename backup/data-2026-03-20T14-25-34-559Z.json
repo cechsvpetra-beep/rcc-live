@@ -443,7 +443,15 @@
       "photo": null
     }
   ],
-  "catches": [],
+  "catches": [
+    {
+      "id": 1774016734558,
+      "teamId": 1,
+      "weight": 5.5,
+      "time": "2026-03-20T14:25:34.558Z",
+      "photo": null
+    }
+  ],
   "meta": {
     "nextTeamId": 51
   }
