@@ -181,16 +181,13 @@ button:hover{
   font-size:12px;
   line-height:1.45;
 }
-.hidden{
-  display:none !important;
-}
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-  <button class="secondaryBtn" onclick="forceSync()">Synchronizovať</button>
+  <button class="secondaryBtn" onclick="reloadData()">Obnoviť</button>
   <button class="secondaryBtn" onclick="logout()">Odhlásiť</button>
 </div>
 
@@ -206,8 +203,8 @@ button:hover{
     </div>
 
     <div class="infoRow">
-      <div class="infoLabel">Offline fronta</div>
-      <div class="infoValue" id="pendingCount">0 čaká</div>
+      <div class="infoLabel">Dostupné tímy</div>
+      <div class="infoValue" id="teamCount">0</div>
     </div>
   </div>
 
@@ -218,7 +215,7 @@ button:hover{
   <select id="team"></select>
 
   <label>Váha (kg)</label>
-  <input type="number" id="weight" step="0.01" min="0">
+  <input type="number" id="weight" step="0.01" min="0" inputmode="decimal">
 
   <label>Fotka</label>
   <input type="file" id="photo" accept="image/*" onchange="previewPhoto()">
@@ -226,7 +223,7 @@ button:hover{
   <div class="previewWrap">
     <div class="previewBox" id="photoPreview">bez foto</div>
     <div class="smallText">
-      Fotka sa uloží aj offline a po návrate internetu sa automaticky odošle.
+      Zápis sa odošle priamo na server. Po úspechu sa formulár vyčistí.
     </div>
   </div>
 
@@ -238,125 +235,81 @@ button:hover{
   <div id="status"></div>
 
   <div class="note">
-    Ak vypadne internet, úlovok sa uloží lokálne do fronty. Po návrate internetu sa automaticky odošle na server.
+    Ak sa zápis nepodarí, stránka zobrazí presnú chybu servera. Váhu môžeš zadať aj s čiarkou, napríklad 12,45.
   </div>
 </div>
 
 <script>
-const STORAGE_QUEUE_KEY = "rcc_offline_catch_queue";
-const STORAGE_STATE_KEY = "rcc_cached_state";
-const STORAGE_USER_KEY = "rcc_cached_user";
-
 let state = null;
-let currentUser = null;
 
-/* =========================
-   LOGIN / AUTH
-========================= */
 async function checkLogin() {
   try {
-    const res = await fetch("/api/me", { cache: "no-store" });
+    const res = await fetch("/api/me", {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+
+    if (!res.ok) {
+      window.location.href = "/login.html";
+      return false;
+    }
+
     const user = await res.json();
 
-    if (user) {
-      currentUser = user;
-      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
-      return true;
+    if (!user) {
+      window.location.href = "/login.html";
+      return false;
     }
 
-    const cachedUser = getCachedUser();
-    if (!navigator.onLine && cachedUser) {
-      currentUser = cachedUser;
-      setStatus("Offline režim – používam posledné prihlásenie", false, "warn");
-      return true;
-    }
-
-    window.location.href = "/login.html";
-    return false;
+    return true;
   } catch (e) {
-    const cachedUser = getCachedUser();
-    if (!navigator.onLine && cachedUser) {
-      currentUser = cachedUser;
-      setStatus("Offline režim – používam posledné prihlásenie", false, "warn");
-      return true;
-    }
-
     window.location.href = "/login.html";
     return false;
   }
 }
 
-function getCachedUser() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-
-/* =========================
-   LOAD STATE
-========================= */
 async function load() {
   updateConnectionUI();
 
   try {
-    const res = await fetch("/api/state", { cache: "no-store" });
-    const json = await res.json();
+    const res = await fetch("/api/state", {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
 
-    state = json;
-    cacheState(json);
+    if (!res.ok) {
+      throw new Error("Načítanie /api/state zlyhalo");
+    }
+
+    state = await res.json();
 
     renderSectors();
     renderTeams();
-    updatePendingCount();
-
-    if (navigator.onLine) {
-      setStatus("Dáta načítané", false, "success");
-    }
+    updateTeamCount();
+    setStatus("Dáta načítané", false, "success");
   } catch (e) {
-    const cached = getCachedState();
-
-    if (cached) {
-      state = cached;
-      renderSectors();
-      renderTeams();
-      updatePendingCount();
-      setStatus("Offline režim – používam posledné uložené dáta", false, "warn");
-    } else {
-      setStatus("Chyba načítania – chýbajú aj offline dáta", true, "error");
-    }
+    console.error(e);
+    setStatus("Chyba načítania dát", true, "error");
   }
 }
 
-function cacheState(data) {
-  localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(data));
-}
-
-function getCachedState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_STATE_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-
-/* =========================
-   RENDER
-========================= */
 function renderSectors() {
-  const el = document.getElementById("sector");
-  if (!el || !state?.lb) return;
+  const sectorEl = document.getElementById("sector");
+  if (!sectorEl || !state?.lb) return;
 
-  el.innerHTML = "";
+  sectorEl.innerHTML = "";
 
-  const sectors = [...new Set(state.lb.map(t => t.sector))];
+  const sectors = [...new Set(
+    state.lb
+      .filter(t => t && t.sector)
+      .map(t => t.sector)
+  )].sort((a, b) => String(a).localeCompare(String(b)));
 
   sectors.forEach(s => {
-    el.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+    sectorEl.innerHTML += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
   });
 
-  el.onchange = renderTeams;
+  sectorEl.onchange = renderTeams;
 }
 
 function renderTeams() {
@@ -368,6 +321,7 @@ function renderTeams() {
 
   state.lb
     .filter(t => t.sector === sector)
+    .sort((a, b) => Number(a.id) - Number(b.id))
     .forEach(t => {
       el.innerHTML += `
         <option value="${t.id}">
@@ -377,9 +331,12 @@ function renderTeams() {
     });
 }
 
-/* =========================
-   PHOTO PREVIEW
-========================= */
+function updateTeamCount() {
+  const el = document.getElementById("teamCount");
+  if (!el || !state?.lb) return;
+  el.textContent = String(state.lb.length || 0);
+}
+
 function previewPhoto() {
   const input = document.getElementById("photo");
   const preview = document.getElementById("photoPreview");
@@ -399,152 +356,76 @@ function previewPhoto() {
   reader.readAsDataURL(file);
 }
 
-/* =========================
-   SAVE CATCH
-========================= */
-async function saveCatch() {
-  const teamId = document.getElementById("team").value;
-  const weight = document.getElementById("weight").value;
-  const file = document.getElementById("photo").files[0];
+function normalizeWeight(val) {
+  const parsed = Number(String(val ?? "").trim().replace(",", "."));
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.round(parsed * 100) / 100;
+}
 
-  if (!teamId || !weight) {
-    setStatus("Vyplň tím a váhu", true, "error");
+async function saveCatch() {
+  const teamId = Number(document.getElementById("team").value || 0);
+  const weight = normalizeWeight(document.getElementById("weight").value);
+
+  if (!teamId) {
+    setStatus("Vyber tím", true, "error");
     return;
   }
 
-  const payload = {
-    id: Date.now(),
-    teamId: Number(teamId),
-    weight: Number(weight),
-    time: new Date().toISOString(),
-    photoDataUrl: file ? await fileToDataUrl(file) : null,
-    photoName: file ? file.name : null
-  };
-
-  if (navigator.onLine) {
-    const ok = await sendCatchToServer(payload);
-
-    if (ok) {
-      setStatus("ULOŽENÉ ✔", false, "success");
-      clearForm();
-      await load();
-      return;
-    }
+  if (!weight || weight <= 0) {
+    setStatus("Zadaj platnú váhu", true, "error");
+    return;
   }
 
-  enqueueOfflineCatch(payload);
-  setStatus("Uložené offline – čaká na synchronizáciu", false, "warn");
-  clearForm();
-  updatePendingCount();
-}
+  const form = new FormData();
+  form.append("teamId", String(teamId));
+  form.append("weight", String(weight));
 
-async function sendCatchToServer(item) {
+  const file = document.getElementById("photo").files[0];
+  if (file) {
+    form.append("photo", file);
+  }
+
   try {
-    const form = new FormData();
-    form.append("teamId", item.teamId);
-    form.append("weight", item.weight);
-
-    if (item.photoDataUrl) {
-      const blob = dataURLToBlob(item.photoDataUrl);
-      const fileName = item.photoName || `photo_${Date.now()}.jpg`;
-      form.append("photo", blob, fileName);
-    }
+    setStatus("Ukladám úlovok...", false, "info");
 
     const res = await fetch("/api/catch", {
       method: "POST",
-      body: form
+      body: form,
+      credentials: "same-origin"
     });
 
     const contentType = res.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-      return false;
+      setStatus("Server nevrátil platnú odpoveď", true, "error");
+      return;
     }
 
     const out = await res.json();
-    return Boolean(out.ok);
-  } catch (e) {
-    return false;
-  }
-}
 
-/* =========================
-   OFFLINE QUEUE
-========================= */
-function getOfflineQueue() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_QUEUE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveOfflineQueue(queue) {
-  localStorage.setItem(STORAGE_QUEUE_KEY, JSON.stringify(queue));
-}
-
-function enqueueOfflineCatch(item) {
-  const queue = getOfflineQueue();
-  queue.push(item);
-  saveOfflineQueue(queue);
-}
-
-function updatePendingCount() {
-  const count = getOfflineQueue().length;
-  const el = document.getElementById("pendingCount");
-  if (el) {
-    el.textContent = `${count} čaká`;
-  }
-}
-
-async function syncOfflineQueue() {
-  if (!navigator.onLine) return;
-
-  const queue = getOfflineQueue();
-  if (!queue.length) {
-    updatePendingCount();
-    return;
-  }
-
-  setStatus(`Synchronizujem ${queue.length} offline úlovkov...`, false, "info");
-
-  const remaining = [];
-
-  for (const item of queue) {
-    const ok = await sendCatchToServer(item);
-    if (!ok) {
-      remaining.push(item);
+    if (out.ok) {
+      setStatus("ULOŽENÉ ✔", false, "success");
+      clearForm();
+      await load();
+    } else {
+      setStatus(out.error || "Chyba pri ukladaní", true, "error");
     }
-  }
-
-  saveOfflineQueue(remaining);
-  updatePendingCount();
-
-  if (remaining.length === 0) {
-    setStatus("Offline fronta úspešne synchronizovaná", false, "success");
-    await load();
-  } else {
-    setStatus(`Niektoré úlovky sa nepodarilo odoslať (${remaining.length})`, false, "warn");
+  } catch (e) {
+    console.error(e);
+    setStatus("Server je nedostupný alebo spojenie zlyhalo", true, "error");
   }
 }
 
-async function forceSync() {
-  await syncOfflineQueue();
-}
-
-/* =========================
-   HELPERS
-========================= */
 function clearForm() {
   document.getElementById("weight").value = "";
   document.getElementById("photo").value = "";
   document.getElementById("photoPreview").innerHTML = "bez foto";
 }
 
-function setStatus(text, error = false, cls = "") {
+function setStatus(msg, err = false, cls = "") {
   const el = document.getElementById("status");
   if (!el) return;
-  el.innerText = text;
-  el.className = cls || (error ? "error" : "success");
+  el.innerText = msg;
+  el.className = cls || (err ? "error" : "success");
 }
 
 function updateConnectionUI() {
@@ -556,31 +437,20 @@ function updateConnectionUI() {
   } else {
     el.innerHTML = `<span class="onlineDot dotOffline"></span>Offline`;
   }
-
-  updatePendingCount();
 }
 
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+async function reloadData() {
+  await load();
 }
 
-function dataURLToBlob(dataURL) {
-  const parts = dataURL.split(",");
-  const mime = parts[0].match(/:(.*?);/)[1];
-  const binary = atob(parts[1]);
-  const len = binary.length;
-  const bytes = new Uint8Array(len);
-
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return new Blob([bytes], { type: mime });
+async function logout() {
+  try {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "same-origin"
+    });
+  } catch (e) {}
+  window.location.href = "/login.html";
 }
 
 function escapeHtml(text) {
@@ -591,36 +461,20 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-async function logout() {
-  try {
-    await fetch("/api/logout", { method: "POST" });
-  } catch (e) {}
-  localStorage.removeItem(STORAGE_USER_KEY);
-  window.location.href = "/login.html";
-}
-
-/* =========================
-   EVENTS
-========================= */
-window.addEventListener("online", async () => {
+window.addEventListener("online", () => {
   updateConnectionUI();
-  await syncOfflineQueue();
+  setStatus("Pripojenie obnovené", false, "success");
 });
 
 window.addEventListener("offline", () => {
   updateConnectionUI();
-  setStatus("Internet vypadol – úlovky sa budú ukladať offline", false, "warn");
+  setStatus("Internet nie je dostupný", true, "warn");
 });
 
-/* =========================
-   INIT
-========================= */
 (async function init() {
   const ok = await checkLogin();
   if (!ok) return;
-
   await load();
-  await syncOfflineQueue();
 })();
 </script>
 

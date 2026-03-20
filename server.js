@@ -14,7 +14,6 @@ const BACKUP_DIR = path.join(__dirname, "backup");
 
 const VALID_SECTORS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const DEFAULT_TEAM_COUNT = 50;
-const BACKUP_INTERVAL_MS = 60 * 1000;
 const MAX_BACKUPS = 50;
 
 if (!fs.existsSync(PUBLIC_DIR)) {
@@ -85,9 +84,15 @@ function defaultData() {
   };
 }
 
+function writeJsonAtomic(filePath, data) {
+  const tempPath = `${filePath}.tmp`;
+  fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
+  fs.renameSync(tempPath, filePath);
+}
+
 function ensureDataFile() {
   if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData(), null, 2), "utf8");
+    writeJsonAtomic(DATA_FILE, defaultData());
   }
 }
 
@@ -208,55 +213,20 @@ function loadData() {
 
     return { sectors, teams, catches, meta };
   } catch (e) {
+    console.error("Chyba pri loadData, obnovujem defaultData:", e);
     const data = defaultData();
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8");
+    writeJsonAtomic(DATA_FILE, data);
     return data;
   }
 }
 
-function saveData(data) {
-  const safeTeams = Array.isArray(data?.teams)
-    ? data.teams
-        .map(t => normalizeTeam(t, t))
-        .filter(t => Number(t.id) > 0)
-        .sort((a, b) => Number(a.id) - Number(b.id))
-    : [];
-
-  const safeCatches = Array.isArray(data?.catches)
-    ? data.catches.map(normalizeCatch).filter(Boolean)
-    : [];
-
-  const maxTeamId = safeTeams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
-
-  const safeData = {
-    sectors: normalizeSectors(data?.sectors, defaultSectors()),
-    teams: safeTeams,
-    catches: safeCatches,
-    meta: {
-      nextTeamId: Math.max(
-        Number(data?.meta?.nextTeamId || 0),
-        maxTeamId + 1,
-        DEFAULT_TEAM_COUNT + 1
-      )
-    }
-  };
-
-  fs.writeFileSync(DATA_FILE, JSON.stringify(safeData, null, 2), "utf8");
-}
-
-function createBackup() {
+function cleanupBackups() {
   try {
-    if (!fs.existsSync(DATA_FILE)) return;
-
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-");
-    const backupName = `data-${timestamp}.json`;
-    const backupPath = path.join(BACKUP_DIR, backupName);
-
-    fs.copyFileSync(DATA_FILE, backupPath);
-
     const files = fs.readdirSync(BACKUP_DIR)
-      .filter(name => name.startsWith("data-") && name.endsWith(".json"))
+      .filter(name =>
+        (name.startsWith("data-") || name.startsWith("pre-restore-")) &&
+        name.endsWith(".json")
+      )
       .sort();
 
     if (files.length > MAX_BACKUPS) {
@@ -269,11 +239,67 @@ function createBackup() {
         }
       }
     }
+  } catch (e) {
+    console.error("Cleanup backupov zlyhal:", e);
+  }
+}
+
+function createBackupFromData(data, prefix = "data") {
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) {
+      fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    }
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, "-");
+    const backupName = `${prefix}-${timestamp}.json`;
+    const backupPath = path.join(BACKUP_DIR, backupName);
+
+    writeJsonAtomic(backupPath, data);
+    cleanupBackups();
 
     console.log("Backup uložený:", backupName);
   } catch (e) {
     console.error("Backup chyba:", e);
   }
+}
+
+function saveData(data) {
+  const current = loadData();
+
+  if ((current.catches?.length || 0) > 0 && (data?.catches?.length || 0) === 0) {
+    data.catches = current.catches;
+  }
+
+  const safeTeams = Array.isArray(data?.teams)
+    ? data.teams
+        .map(t => normalizeTeam(t, t))
+        .filter(t => Number(t.id) > 0)
+        .sort((a, b) => Number(a.id) - Number(b.id))
+    : current.teams;
+
+  const safeCatches = Array.isArray(data?.catches)
+    ? data.catches.map(normalizeCatch).filter(Boolean)
+    : current.catches;
+
+  const maxTeamId = safeTeams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
+
+  const safeData = {
+    sectors: normalizeSectors(data?.sectors, current.sectors || defaultSectors()),
+    teams: safeTeams,
+    catches: safeCatches,
+    meta: {
+      nextTeamId: Math.max(
+        Number(data?.meta?.nextTeamId || 0),
+        maxTeamId + 1,
+        DEFAULT_TEAM_COUNT + 1
+      )
+    }
+  };
+
+  writeJsonAtomic(DATA_FILE, safeData);
+  createBackupFromData(safeData, "data");
+  return safeData;
 }
 
 function getTeamById(data, id) {
@@ -422,9 +448,20 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
     };
 
     data.catches.push(newCatch);
-    saveData(data);
+    const saved = saveData(data);
 
-    res.json({ ok: true });
+    console.log("Úlovok uložený:", {
+      catchId: newCatch.id,
+      teamId,
+      weight,
+      totalCatches: saved.catches.length
+    });
+
+    res.json({
+      ok: true,
+      catchId: newCatch.id,
+      totalCatches: saved.catches.length
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: "Ukladanie úlovku zlyhalo" });
@@ -511,22 +548,33 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       return res.status(400).json({ ok: false, error: "Neplatná štruktúra dát" });
     }
 
+    if (!Array.isArray(parsed.teams) || !Array.isArray(parsed.catches)) {
+      return res.status(400).json({ ok: false, error: "Záloha nemá platnú RCC štruktúru" });
+    }
+
     const safeData = {
       sectors: normalizeSectors(parsed.sectors, defaultSectors()),
-      teams: Array.isArray(parsed.teams)
-        ? parsed.teams
-            .map(t => normalizeTeam(t, t))
-            .filter(t => Number(t.id) > 0)
-            .sort((a, b) => Number(a.id) - Number(b.id))
-        : buildDefaultTeams(),
-      catches: Array.isArray(parsed.catches)
-        ? parsed.catches.map(normalizeCatch).filter(Boolean)
-        : [],
+      teams: parsed.teams
+        .map(t => normalizeTeam(t, t))
+        .filter(t => Number(t.id) > 0)
+        .sort((a, b) => Number(a.id) - Number(b.id)),
+      catches: parsed.catches
+        .map(normalizeCatch)
+        .filter(Boolean),
       meta: parsed.meta || {}
     };
 
     if (!safeData.teams.length) {
-      safeData.teams = buildDefaultTeams();
+      return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
+    }
+
+    const current = loadData();
+
+    if ((current.catches?.length || 0) > 0 && (safeData.catches?.length || 0) === 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "Záloha neobsahuje úlovky – obnova zablokovaná (ochrana dát)"
+      });
     }
 
     const maxTeamId = safeData.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
@@ -536,17 +584,9 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       DEFAULT_TEAM_COUNT + 1
     );
 
-    if (!fs.existsSync(BACKUP_DIR)) {
-      fs.mkdirSync(BACKUP_DIR, { recursive: true });
-    }
-
-    if (fs.existsSync(DATA_FILE)) {
-      const emergencyName = `pre-restore-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-      const emergencyPath = path.join(BACKUP_DIR, emergencyName);
-      fs.copyFileSync(DATA_FILE, emergencyPath);
-    }
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(safeData, null, 2), "utf8");
+    createBackupFromData(current, "pre-restore");
+    writeJsonAtomic(DATA_FILE, safeData);
+    createBackupFromData(safeData, "data");
 
     return res.json({
       ok: true,
@@ -561,8 +601,35 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
 app.get("/api/admin/download-data", requireAdmin, (req, res) => {
   try {
     ensureDataFile();
+
+    const raw = fs.readFileSync(DATA_FILE, "utf8");
+    const parsed = JSON.parse(raw || "{}");
+    const normalized = {
+      sectors: normalizeSectors(parsed.sectors, defaultSectors()),
+      teams: Array.isArray(parsed.teams)
+        ? parsed.teams
+            .map(t => normalizeTeam(t, t))
+            .filter(t => Number(t.id) > 0)
+            .sort((a, b) => Number(a.id) - Number(b.id))
+        : buildDefaultTeams(),
+      catches: Array.isArray(parsed.catches)
+        ? parsed.catches.map(normalizeCatch).filter(Boolean)
+        : [],
+      meta: parsed.meta || {}
+    };
+
+    const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
+    normalized.meta.nextTeamId = Math.max(
+      Number(normalized.meta.nextTeamId || 0),
+      maxTeamId + 1,
+      DEFAULT_TEAM_COUNT + 1
+    );
+
     const filename = `rcc-data-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-    res.download(DATA_FILE, filename);
+
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    return res.send(JSON.stringify(normalized, null, 2));
   } catch (e) {
     console.error("Download data chyba:", e);
     res.status(500).json({ ok: false, error: "Stiahnutie dát zlyhalo" });
@@ -784,6 +851,4 @@ app.get("/health", (req, res) => {
 
 app.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
-  createBackup();
-  setInterval(createBackup, BACKUP_INTERVAL_MS);
 });

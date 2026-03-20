@@ -107,6 +107,7 @@ button.danger:hover{
   margin:0 0 16px 0;
   font-weight:bold;
   color:#8dffb2;
+  min-height:18px;
 }
 .rowSector{
   display:grid;
@@ -249,6 +250,19 @@ label.inline{
   color:var(--muted);
   padding:14px 0;
 }
+.backupInfo{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid #2a3340;
+  border-radius:12px;
+  background:#111826;
+  color:#d7e5f6;
+  line-height:1.5;
+}
+.backupInfo.error{
+  border-color:#5b1f1f;
+  color:#ffb4b4;
+}
 @media (max-width:1200px){
   .rowTeam{
     grid-template-columns:60px 1fr 90px 90px 110px 1fr 120px;
@@ -282,12 +296,13 @@ label.inline{
     <img src="/logo.png" alt="RCC logo" class="logo">
     <div>
       <h1>Admin – RCC</h1>
-      <div class="sub">Sektory, tímy, stanovištia, aktivácia, fotky tímov, úprava úlovkov a obnova zo zálohy</div>
+      <div class="sub">Sektory, tímy, stanovištia, aktivácia, fotky tímov, úprava úlovkov, export a obnova</div>
     </div>
   </div>
 
   <div class="actions">
     <button class="secondary" onclick="window.location.href='/live.html'">LIVE</button>
+    <button class="secondary" onclick="window.location.href='/judge.html'">ROZHODCA</button>
     <button class="secondary" onclick="logout()">Odhlásiť</button>
   </div>
 </div>
@@ -311,13 +326,19 @@ label.inline{
 </div>
 
 <div class="section">
-  <h2>Obnova zo zálohy</h2>
-  <div class="sectionSub">Vyber JSON zálohu a obnov dáta aj z mobilu. Pred obnovou sa uloží núdzová kópia aktuálnych dát.</div>
+  <h2>Export a obnova</h2>
+  <div class="sectionSub">Stiahni si aktuálne dáta alebo obnov systém zo záložného JSON súboru.</div>
 
   <div class="footerActions">
-    <input id="restoreBackupFile" type="file" accept=".json,application/json">
+    <button class="secondary" onclick="downloadCurrentData()">Stiahnuť aktuálne dáta</button>
+  </div>
+
+  <div class="footerActions">
+    <input id="restoreBackupFile" type="file" accept=".json,application/json" onchange="previewBackupFile()">
     <button class="secondary" onclick="restoreBackup()">Obnoviť zo zálohy</button>
   </div>
+
+  <div id="backupPreview" class="backupInfo" style="display:none;"></div>
 </div>
 
 <div class="section">
@@ -342,13 +363,15 @@ label.inline{
 
 <script>
 let adminData = null;
-let stateData = null;
 let allCatches = [];
 const SECTOR_CODES = ["A","B","C","D","E","F","G","H"];
 
 async function loadAdmin() {
   try {
-    const meRes = await fetch("/api/me", { cache: "no-store" });
+    const meRes = await fetch("/api/me", {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
     const me = await meRes.json();
 
     if (!me || me.role !== "admin") {
@@ -356,16 +379,31 @@ async function loadAdmin() {
       return;
     }
 
-    const [adminRes, stateRes] = await Promise.all([
-      fetch("/api/admin/setup", { cache: "no-store" }),
-      fetch("/api/state", { cache: "no-store" })
+    const [adminRes, catchesRes] = await Promise.all([
+      fetch("/api/admin/setup", {
+        cache: "no-store",
+        credentials: "same-origin"
+      }),
+      fetch("/api/admin/catches", {
+        cache: "no-store",
+        credentials: "same-origin"
+      })
     ]);
 
-    adminData = await adminRes.json();
-    stateData = await stateRes.json();
+    if (!adminRes.ok) {
+      throw new Error("Načítanie admin setup zlyhalo");
+    }
 
+    const setup = await adminRes.json();
+    adminData = setup;
     normalizeData();
-    await loadCatches();
+
+    if (catchesRes.ok) {
+      const catchesOut = await catchesRes.json();
+      allCatches = Array.isArray(catchesOut.catches) ? catchesOut.catches : [];
+    } else {
+      allCatches = [];
+    }
 
     renderSectors();
     renderTeams();
@@ -376,17 +414,6 @@ async function loadAdmin() {
   } catch (e) {
     console.error(e);
     setStatus("Chyba načítania", true);
-  }
-}
-
-async function loadCatches() {
-  try {
-    const res = await fetch("/api/admin/catches", { cache: "no-store" });
-    const out = await res.json();
-    allCatches = Array.isArray(out.catches) ? out.catches : [];
-  } catch (e) {
-    console.error(e);
-    allCatches = [];
   }
 }
 
@@ -706,7 +733,8 @@ async function uploadTeamPhoto(teamId, input) {
 
     const res = await fetch(`/api/team-photo/${teamId}`, {
       method: "POST",
-      body: form
+      body: form,
+      credentials: "same-origin"
     });
 
     const out = await res.json();
@@ -748,7 +776,8 @@ async function saveAdmin() {
     const res = await fetch("/api/admin/setup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      credentials: "same-origin"
     });
 
     const out = await res.json();
@@ -767,6 +796,103 @@ async function saveAdmin() {
   } catch (e) {
     console.error(e);
     setStatus("Server neodpovedá", true);
+  }
+}
+
+async function loadCatches() {
+  try {
+    const res = await fetch("/api/admin/catches", {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+    const out = await res.json();
+    allCatches = Array.isArray(out.catches) ? out.catches : [];
+  } catch (e) {
+    console.error(e);
+    allCatches = [];
+  }
+}
+
+async function downloadCurrentData() {
+  try {
+    setStatus("Pripravujem stiahnutie dát...");
+
+    const res = await fetch("/api/admin/download-data", {
+      method: "GET",
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+
+    if (!res.ok) {
+      let errorText = "Stiahnutie dát zlyhalo";
+      try {
+        const out = await res.json();
+        errorText = out.error || errorText;
+      } catch {}
+      setStatus(errorText, true);
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rcc-data-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+    setStatus("Aktuálne dáta boli stiahnuté ✔");
+  } catch (e) {
+    console.error(e);
+    setStatus("Stiahnutie dát zlyhalo", true);
+  }
+}
+
+async function previewBackupFile() {
+  const input = document.getElementById("restoreBackupFile");
+  const box = document.getElementById("backupPreview");
+  const file = input?.files?.[0];
+
+  box.style.display = "none";
+  box.className = "backupInfo";
+  box.innerHTML = "";
+
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+
+    if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.teams) || !Array.isArray(parsed.catches)) {
+      box.style.display = "block";
+      box.className = "backupInfo error";
+      box.innerHTML = `Vybraný súbor nemá platnú RCC štruktúru.`;
+      return;
+    }
+
+    const teamsCount = parsed.teams.length;
+    const catchesCount = parsed.catches.length;
+    const activeCount = parsed.teams.filter(t => t && t.active).length;
+    const totalWeight = parsed.catches.reduce((sum, c) => sum + Number(c?.weight || 0), 0);
+
+    box.style.display = "block";
+    box.className = "backupInfo";
+    box.innerHTML = `
+      <b>Kontrola zálohy:</b><br>
+      Súbor: ${escapeHtml(file.name)}<br>
+      Tímy: ${escapeHtml(String(teamsCount))}<br>
+      Aktívne tímy: ${escapeHtml(String(activeCount))}<br>
+      Úlovky: ${escapeHtml(String(catchesCount))}<br>
+      Celková váha: ${escapeHtml(totalWeight.toFixed(2))} kg
+    `;
+  } catch (e) {
+    console.error(e);
+    box.style.display = "block";
+    box.className = "backupInfo error";
+    box.innerHTML = `Súbor sa nepodarilo načítať alebo nie je platný JSON.`;
   }
 }
 
@@ -790,7 +916,8 @@ async function restoreBackup() {
 
     const res = await fetch("/api/admin/restore-backup", {
       method: "POST",
-      body: form
+      body: form,
+      credentials: "same-origin"
     });
 
     const out = await res.json();
@@ -808,6 +935,11 @@ async function restoreBackup() {
 
     setStatus("Záloha bola úspešne obnovená ✔");
     input.value = "";
+
+    const box = document.getElementById("backupPreview");
+    box.style.display = "none";
+    box.className = "backupInfo";
+    box.innerHTML = "";
   } catch (e) {
     console.error(e);
     setStatus("Server neodpovedá pri obnove zo zálohy", true);
@@ -829,7 +961,8 @@ async function saveCatchEdit(catchId) {
     const res = await fetch(`/api/admin/catch-update/${catchId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ teamId, weight })
+      body: JSON.stringify({ teamId, weight }),
+      credentials: "same-origin"
     });
 
     const out = await res.json();
@@ -857,7 +990,8 @@ async function deleteCatch(catchId) {
     setStatus(`Mažem úlovok ${catchId}...`);
 
     const res = await fetch(`/api/admin/catch-delete/${catchId}`, {
-      method: "POST"
+      method: "POST",
+      credentials: "same-origin"
     });
 
     const out = await res.json();
@@ -878,14 +1012,20 @@ async function deleteCatch(catchId) {
 }
 
 async function reloadAdminSetupOnly() {
-  const res = await fetch("/api/admin/setup", { cache: "no-store" });
+  const res = await fetch("/api/admin/setup", {
+    cache: "no-store",
+    credentials: "same-origin"
+  });
   adminData = await res.json();
   normalizeData();
 }
 
 async function logout() {
   try {
-    await fetch("/api/logout", { method: "POST" });
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "same-origin"
+    });
   } catch (e) {}
   window.location.href = "/login.html";
 }
