@@ -14,9 +14,9 @@
   --muted:#99abc1;
   --green:#22c55e;
   --red:#ff6b6b;
-  --gold:rgba(255, 215, 0, .10);
-  --silver:rgba(192, 192, 192, .10);
-  --bronze:rgba(205, 127, 50, .12);
+  --gold:rgba(255,215,0,.10);
+  --silver:rgba(192,192,192,.10);
+  --bronze:rgba(205,127,50,.12);
   --riseFlash:rgba(34,197,94,.12);
   --fallFlash:rgba(255,107,107,.10);
 }
@@ -25,8 +25,7 @@ html,body{margin:0;padding:0}
 body{
   font-family:Arial,sans-serif;
   color:var(--text);
-  background:
-    radial-gradient(circle at top left, #0f2238 0%, #07111f 45%, #06101c 100%);
+  background:radial-gradient(circle at top left, #0f2238 0%, #07111f 45%, #06101c 100%);
   min-height:100vh;
 }
 .wrap{
@@ -280,39 +279,69 @@ tr.rank-fall{
 .teamRow:hover{
   background:rgba(255,255,255,.03) !important;
 }
-.expandHint{
+.teamHint{
   color:var(--muted);
   font-size:11px;
   margin-top:4px;
 }
-.chevron{
-  display:inline-block;
-  width:16px;
+.detailPage{
+  display:none;
+}
+.detailTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.detailTitle{
+  font-size:28px;
   font-weight:900;
-  color:#9fc0df;
+  margin:0;
 }
-.detailsRow td{
-  background:rgba(255,255,255,.02);
-  padding:0;
+.detailMeta{
+  color:var(--muted);
+  font-size:14px;
+  margin-top:6px;
 }
-.detailsWrap{
+.detailStats{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:10px;
+  margin-bottom:12px;
+}
+.detailCard{
+  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
+  border:1px solid var(--line);
+  border-radius:14px;
   padding:14px;
+}
+.detailLabel{
+  color:#b6c6d9;
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+.detailValue{
+  font-size:22px;
+  font-weight:900;
 }
 .catchGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-  gap:10px;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:12px;
 }
 .catchItem{
-  background:#0d1724;
-  border:1px solid #24364b;
-  border-radius:12px;
-  padding:10px;
+  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
 }
 .catchTop{
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   gap:10px;
   margin-bottom:8px;
 }
@@ -326,22 +355,24 @@ tr.rank-fall{
 .catchMeta{
   color:var(--muted);
   font-size:12px;
-  line-height:1.4;
+  line-height:1.45;
 }
 .catchPhoto{
-  margin-top:8px;
   width:100%;
-  max-width:180px;
-  height:120px;
+  height:180px;
   object-fit:cover;
-  border-radius:10px;
+  border-radius:12px;
   border:1px solid #24364b;
   background:#09111b;
+  margin-top:10px;
 }
 .noCatchPhoto{
-  margin-top:8px;
+  margin-top:10px;
   color:var(--muted);
   font-size:12px;
+}
+.hidden{
+  display:none !important;
 }
 @keyframes popUp{
   0%{ transform:translateY(6px) scale(.8); opacity:.2; }
@@ -363,13 +394,14 @@ tr.rank-fall{
 }
 @media (max-width:900px){
   .stats{ grid-template-columns:1fr; }
+  .detailStats{ grid-template-columns:1fr 1fr; }
   .lastCatchMain{ font-size:20px; }
   .wrap{ padding:8px; }
 }
 @media print{
   .actions, .infoLine, .updated { display:none !important; }
   body{ background:#fff; color:#000; }
-  .section, .stat, .lastCatch{ background:#fff; color:#000; border:1px solid #ccc; }
+  .section, .stat, .lastCatch, .detailCard, .catchItem{ background:#fff; color:#000; border:1px solid #ccc; }
   th, td{ color:#000; border-color:#ddd; }
 }
 </style>
@@ -387,83 +419,122 @@ tr.rank-fall{
     </div>
 
     <div class="actions">
+      <button id="backToLiveBtn" class="hidden" onclick="closeTeamDetail()">← Späť na LIVE tabuľku</button>
       <button onclick="exportPdf()">Export PDF</button>
       <button onclick="loadState(true)">Obnoviť</button>
     </div>
   </div>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="statLabel">Celková váha rýb</div>
-      <div class="statValue" id="totalWeight">0.00 kg</div>
+  <div id="livePage">
+    <div class="stats">
+      <div class="stat">
+        <div class="statLabel">Celková váha rýb</div>
+        <div class="statValue" id="totalWeight">0.00 kg</div>
+      </div>
+
+      <div class="stat">
+        <div class="statLabel">Počet ulovených rýb</div>
+        <div class="statValue" id="totalFish">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="statLabel">Najväčšia ryba</div>
+        <div class="statValue" id="topFishWeight">0.00 kg</div>
+        <div class="statSub" id="topFishTeam">–</div>
+      </div>
     </div>
 
-    <div class="stat">
-      <div class="statLabel">Počet ulovených rýb</div>
-      <div class="statValue" id="totalFish">0</div>
+    <div class="lastCatch">
+      <div class="lastCatchTitle">Posledný úlovok</div>
+      <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
+      <div class="lastCatchSub" id="lastCatchSub"></div>
     </div>
 
-    <div class="stat">
-      <div class="statLabel">Najväčšia ryba</div>
-      <div class="statValue" id="topFishWeight">0.00 kg</div>
-      <div class="statSub" id="topFishTeam">–</div>
+    <div class="infoLine" id="infoLine"></div>
+    <div class="updated" id="updatedAt"></div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>TOP 3 ryby tímov</h2>
+        <div class="sectionSub">Zobrazujú sa iba prvé 3 miesta</div>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Poradie</th>
+              <th>Tím</th>
+              <th>1. ryba</th>
+              <th>2. ryba</th>
+              <th>3. ryba</th>
+              <th>Súčet TOP 3</th>
+            </tr>
+          </thead>
+          <tbody id="top3Body"></tbody>
+        </table>
+      </div>
+      <div id="top3Empty" class="empty" style="display:none;">Zatiaľ nie sú dostupné dáta pre TOP 3.</div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Celkové poradie</h2>
+        <div class="sectionSub">Klikni na tím a otvorí sa detail jeho úlovkov.</div>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Poradie</th>
+              <th>Tím</th>
+              <th>Sektor</th>
+              <th>Stanovište</th>
+              <th>Foto</th>
+              <th>Celková váha</th>
+              <th>Úlovky</th>
+            </tr>
+          </thead>
+          <tbody id="lbBody"></tbody>
+        </table>
+      </div>
+      <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
     </div>
   </div>
 
-  <div class="lastCatch">
-    <div class="lastCatchTitle">Posledný úlovok</div>
-    <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
-    <div class="lastCatchSub" id="lastCatchSub"></div>
-  </div>
+  <div id="detailPage" class="detailPage">
+    <div class="detailTop">
+      <div>
+        <h2 class="detailTitle" id="detailTeamName">Tím</h2>
+        <div class="detailMeta" id="detailTeamMeta"></div>
+      </div>
+    </div>
 
-  <div class="infoLine" id="infoLine"></div>
-  <div class="updated" id="updatedAt"></div>
+    <div class="detailStats">
+      <div class="detailCard">
+        <div class="detailLabel">Celková váha</div>
+        <div class="detailValue" id="detailTotal">0.00 kg</div>
+      </div>
+      <div class="detailCard">
+        <div class="detailLabel">Počet úlovkov</div>
+        <div class="detailValue" id="detailCount">0</div>
+      </div>
+      <div class="detailCard">
+        <div class="detailLabel">Najväčšia ryba</div>
+        <div class="detailValue" id="detailBiggest">0.00 kg</div>
+      </div>
+      <div class="detailCard">
+        <div class="detailLabel">Súčet TOP 3</div>
+        <div class="detailValue" id="detailTop3Sum">0.00 kg</div>
+      </div>
+    </div>
 
-  <div class="section">
-    <div class="sectionHead">
-      <h2>TOP 3 ryby tímov</h2>
-      <div class="sectionSub">Zobrazujú sa iba prvé 3 miesta</div>
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Úlovky tímu</h2>
+        <div class="sectionSub">Zoradené podľa poradia úlovku</div>
+      </div>
+      <div id="detailCatchesWrap" style="padding:14px;"></div>
     </div>
-    <div class="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Poradie</th>
-            <th>Tím</th>
-            <th>1. ryba</th>
-            <th>2. ryba</th>
-            <th>3. ryba</th>
-            <th>Súčet TOP 3</th>
-          </tr>
-        </thead>
-        <tbody id="top3Body"></tbody>
-      </table>
-    </div>
-    <div id="top3Empty" class="empty" style="display:none;">Zatiaľ nie sú dostupné dáta pre TOP 3.</div>
-  </div>
-
-  <div class="section">
-    <div class="sectionHead">
-      <h2>Celkové poradie</h2>
-      <div class="sectionSub">Klikni na tím a zobrazia sa jeho úlovky. Šípka hore = zlepšenie, šípka dole = pokles.</div>
-    </div>
-    <div class="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Poradie</th>
-            <th>Tím</th>
-            <th>Sektor</th>
-            <th>Stanovište</th>
-            <th>Foto</th>
-            <th>Celková váha</th>
-            <th>Úlovky</th>
-          </tr>
-        </thead>
-        <tbody id="lbBody"></tbody>
-      </table>
-    </div>
-    <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
   </div>
 </div>
 
@@ -473,8 +544,9 @@ let socket = null;
 let socketConnected = false;
 let fallbackTimer = null;
 let previousRankMap = {};
-let expandedTeams = new Set();
 let currentTeamCatches = {};
+let lastRenderedLb = [];
+let selectedTeamId = null;
 const FALLBACK_MS = 30000;
 
 async function loadState(manual = false) {
@@ -487,7 +559,6 @@ async function loadState(manual = false) {
 
   try {
     const res = await fetch("/api/state", { cache: "no-store" });
-
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     const data = await res.json();
@@ -514,6 +585,8 @@ function renderLive(data) {
   const lastCatch = data?.lastCatch || null;
   const top3teams = Array.isArray(data?.top3teams) ? data.top3teams : [];
   const lb = Array.isArray(data?.lb) ? data.lb : [];
+
+  lastRenderedLb = lb;
   currentTeamCatches = data?.teamCatches || {};
 
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
@@ -545,6 +618,10 @@ function renderLive(data) {
 
   renderTop3(top3teams);
   renderLeaderboard(lb);
+
+  if (selectedTeamId !== null) {
+    renderTeamDetail(selectedTeamId);
+  }
 }
 
 function renderTop3(rows) {
@@ -621,12 +698,9 @@ function renderLeaderboard(rows) {
       currentRank === 2 ? "rank-top-2" :
       currentRank === 3 ? "rank-top-3" : "";
 
-    const isExpanded = expandedTeams.has(team.id);
-    const chevron = isExpanded ? "▾" : "▸";
-
     const tr = document.createElement("tr");
     tr.className = `teamRow ${topRankClass} ${moveClass}`.trim();
-    tr.onclick = () => toggleTeam(team.id, rows);
+    tr.onclick = () => openTeamDetail(team.id);
     tr.innerHTML = `
       <td>
         <div class="rankCell">
@@ -635,11 +709,8 @@ function renderLeaderboard(rows) {
         </div>
       </td>
       <td>
-        <div>
-          <span class="chevron">${chevron}</span>
-          <span class="teamName">${escapeHtml(team.name || "-")}</span>
-        </div>
-        <div class="expandHint">Klikni pre detail úlovkov</div>
+        <div class="teamName">${escapeHtml(team.name || "-")}</div>
+        <div class="teamHint">Klikni pre detail úlovkov</div>
       </td>
       <td>${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td>${escapeHtml(String(team.peg || "-"))}</td>
@@ -648,34 +719,56 @@ function renderLeaderboard(rows) {
       <td>${escapeHtml(String(team.count || 0))}</td>
     `;
     body.appendChild(tr);
-
-    if (isExpanded) {
-      const detailTr = document.createElement("tr");
-      detailTr.className = "detailsRow";
-      detailTr.innerHTML = `
-        <td colspan="7">
-          <div class="detailsWrap">
-            ${renderTeamCatchesHtml(team.id, team.name)}
-          </div>
-        </td>
-      `;
-      body.appendChild(detailTr);
-    }
   });
 
   previousRankMap = newRankMap;
 }
 
-function renderTeamCatchesHtml(teamId, teamName) {
+function openTeamDetail(teamId) {
+  selectedTeamId = Number(teamId);
+  document.getElementById("livePage").style.display = "none";
+  document.getElementById("detailPage").style.display = "block";
+  document.getElementById("backToLiveBtn").classList.remove("hidden");
+  renderTeamDetail(selectedTeamId);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function closeTeamDetail() {
+  selectedTeamId = null;
+  document.getElementById("detailPage").style.display = "none";
+  document.getElementById("livePage").style.display = "block";
+  document.getElementById("backToLiveBtn").classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderTeamDetail(teamId) {
+  const team = lastRenderedLb.find(t => Number(t.id) === Number(teamId));
+
+  if (!team) {
+    closeTeamDetail();
+    return;
+  }
+
+  document.getElementById("detailTeamName").textContent = team.name || `Tím ${teamId}`;
+  document.getElementById("detailTeamMeta").textContent =
+    `Sektor ${team.sectorCode || team.sector || "-"} • Stanovište ${team.peg || "-"} • Aktuálne poradie ${getCurrentRank(teamId)}.`;
+
+  document.getElementById("detailTotal").textContent = formatKg(Number(team.total || 0));
+  document.getElementById("detailCount").textContent = String(team.count || 0);
+  document.getElementById("detailBiggest").textContent = formatKg(Number(team.biggest || 0));
+  document.getElementById("detailTop3Sum").textContent = formatKg(Number(team.top3sum || 0));
+
   const catches = Array.isArray(currentTeamCatches?.[teamId]) ? currentTeamCatches[teamId] : [];
+  const wrap = document.getElementById("detailCatchesWrap");
 
   if (!catches.length) {
-    return `<div class="empty">Tím ${escapeHtml(teamName || "")} zatiaľ nemá žiadne úlovky.</div>`;
+    wrap.innerHTML = `<div class="empty">Tím zatiaľ nemá žiadne úlovky.</div>`;
+    return;
   }
 
   const sorted = [...catches].sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
 
-  return `
+  wrap.innerHTML = `
     <div class="catchGrid">
       ${sorted.map(c => `
         <div class="catchItem">
@@ -697,22 +790,10 @@ function renderTeamCatchesHtml(teamId, teamName) {
   `;
 }
 
-function toggleTeam(teamId) {
-  if (expandedTeams.has(teamId)) {
-    expandedTeams.delete(teamId);
-  } else {
-    expandedTeams.add(teamId);
-  }
-
-  const data = {
-    lb: lastRenderedLb,
-    teamCatches: currentTeamCatches
-  };
-
-  renderLeaderboard(lastRenderedLb);
+function getCurrentRank(teamId) {
+  const index = lastRenderedLb.findIndex(t => Number(t.id) === Number(teamId));
+  return index >= 0 ? index + 1 : "-";
 }
-
-let lastRenderedLb = [];
 
 function connectSocket() {
   const infoLine = document.getElementById("infoLine");
@@ -743,7 +824,6 @@ function connectSocket() {
     });
 
     socket.on("state:update", (data) => {
-      lastRenderedLb = Array.isArray(data?.lb) ? data.lb : [];
       renderLive(data);
       document.getElementById("updatedAt").textContent =
         "Posledná realtime aktualizácia: " + new Date().toLocaleString("sk-SK");
@@ -800,12 +880,6 @@ function escapeAttr(text) {
 function exportPdf() {
   window.print();
 }
-
-const originalRenderLive = renderLive;
-renderLive = function(data) {
-  lastRenderedLb = Array.isArray(data?.lb) ? data.lb : [];
-  originalRenderLive(data);
-};
 
 loadState();
 connectSocket();
