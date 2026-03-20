@@ -232,6 +232,25 @@ tbody tr:hover{
   color:var(--muted);
   font-size:12px;
 }
+.rankCell{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.moveArrow{
+  font-size:14px;
+  font-weight:900;
+  line-height:1;
+}
+.moveUp{
+  color:var(--green);
+}
+.moveDown{
+  color:var(--red);
+}
+.moveSame{
+  color:transparent;
+}
 @media (max-width:900px){
   .stats{
     grid-template-columns:1fr;
@@ -299,7 +318,7 @@ tbody tr:hover{
   <div class="section">
     <div class="sectionHead">
       <h2>TOP 3 ryby tímov</h2>
-      <div class="sectionSub">Vyhodnotenie tímu podľa súčtu 3 najväčších rýb</div>
+      <div class="sectionSub">Zobrazujú sa iba prvé 3 miesta</div>
     </div>
     <div class="tableWrap">
       <table>
@@ -322,7 +341,7 @@ tbody tr:hover{
   <div class="section">
     <div class="sectionHead">
       <h2>Celkové poradie</h2>
-      <div class="sectionSub">Live poradie aktívnych tímov podľa celkovej váhy úlovkov</div>
+      <div class="sectionSub">Šípka hore = zlepšenie, šípka dole = pokles</div>
     </div>
     <div class="tableWrap">
       <table>
@@ -349,6 +368,7 @@ tbody tr:hover{
 let socket = null;
 let socketConnected = false;
 let fallbackTimer = null;
+let previousRankMap = {};
 const FALLBACK_MS = 30000;
 
 async function loadState(manual = false) {
@@ -430,14 +450,16 @@ function renderTop3(rows) {
 
   body.innerHTML = "";
 
-  if (!rows.length) {
+  const visibleRows = rows.slice(0, 3);
+
+  if (!visibleRows.length) {
     empty.style.display = "block";
     return;
   }
 
   empty.style.display = "none";
 
-  rows.forEach((team, index) => {
+  visibleRows.forEach((team, index) => {
     const top3 = Array.isArray(team.top3) ? team.top3 : [0, 0, 0];
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -460,19 +482,41 @@ function renderLeaderboard(rows) {
 
   if (!rows.length) {
     empty.style.display = "block";
+    previousRankMap = {};
     return;
   }
 
   empty.style.display = "none";
 
+  const newRankMap = {};
+
   rows.forEach((team, index) => {
+    const currentRank = index + 1;
+    const previousRank = previousRankMap[team.id];
+    newRankMap[team.id] = currentRank;
+
+    let moveHtml = `<span class="moveArrow moveSame">•</span>`;
+
+    if (typeof previousRank === "number") {
+      if (currentRank < previousRank) {
+        moveHtml = `<span class="moveArrow moveUp">▲</span>`;
+      } else if (currentRank > previousRank) {
+        moveHtml = `<span class="moveArrow moveDown">▼</span>`;
+      }
+    }
+
     const photoHtml = team.photo
       ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="rank">${index + 1}.</span></td>
+      <td>
+        <div class="rankCell">
+          ${moveHtml}
+          <span class="rank">${currentRank}.</span>
+        </div>
+      </td>
       <td><span class="teamName">${escapeHtml(team.name || "-")}</span></td>
       <td>${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td>${escapeHtml(String(team.peg || "-"))}</td>
@@ -482,6 +526,8 @@ function renderLeaderboard(rows) {
     `;
     body.appendChild(tr);
   });
+
+  previousRankMap = newRankMap;
 }
 
 function connectSocket() {
