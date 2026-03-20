@@ -143,6 +143,11 @@ button:hover{
 }
 .infoLine.error{ color:var(--red); }
 .infoLine.ok{ color:#8dffb2; }
+.updated{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
 .section{
   background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
@@ -194,6 +199,12 @@ tbody tr:hover{
 .teamName{
   font-weight:800;
 }
+.teamLink{
+  cursor:pointer;
+}
+.teamLink:hover{
+  text-decoration:underline;
+}
 .badge{
   display:inline-block;
   padding:4px 8px;
@@ -226,11 +237,6 @@ tbody tr:hover{
   padding:18px 14px;
   color:var(--muted);
   font-size:14px;
-}
-.updated{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:12px;
 }
 .rankCell{
   display:flex;
@@ -267,23 +273,32 @@ tbody tr:hover{
 tr.rank-top-1{ background:var(--gold); }
 tr.rank-top-2{ background:var(--silver); }
 tr.rank-top-3{ background:var(--bronze); }
-tr.rank-rise{
-  animation:rowRise .9s ease;
+tr.rank-rise{ animation:rowRise .9s ease; }
+tr.rank-fall{ animation:rowFall .9s ease; }
+
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:12px 14px 0 14px;
 }
-tr.rank-fall{
-  animation:rowFall .9s ease;
-}
-.teamRow{
+.tabBtn{
+  border:none;
+  border-radius:999px;
+  padding:8px 14px;
+  background:#132235;
+  color:#dce8f5;
+  font-weight:800;
   cursor:pointer;
 }
-.teamRow:hover{
-  background:rgba(255,255,255,.03) !important;
+.tabBtn:hover{
+  background:#1d3048;
 }
-.teamHint{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:4px;
+.tabBtn.active{
+  background:var(--green);
+  color:#07111f;
 }
+
 .detailPage{
   display:none;
 }
@@ -374,6 +389,7 @@ tr.rank-fall{
 .hidden{
   display:none !important;
 }
+
 @keyframes popUp{
   0%{ transform:translateY(6px) scale(.8); opacity:.2; }
   70%{ transform:translateY(-2px) scale(1.15); opacity:1; }
@@ -392,6 +408,7 @@ tr.rank-fall{
   0%{ background:var(--fallFlash); }
   100%{ background:transparent; }
 }
+
 @media (max-width:900px){
   .stats{ grid-template-columns:1fr; }
   .detailStats{ grid-template-columns:1fr 1fr; }
@@ -456,7 +473,7 @@ tr.rank-fall{
     <div class="section">
       <div class="sectionHead">
         <h2>TOP 3 ryby tímov</h2>
-        <div class="sectionSub">Zobrazujú sa iba prvé 3 miesta</div>
+        <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
       </div>
       <div class="tableWrap">
         <table>
@@ -478,9 +495,12 @@ tr.rank-fall{
 
     <div class="section">
       <div class="sectionHead">
-        <h2>Celkové poradie</h2>
-        <div class="sectionSub">Klikni na tím a otvorí sa detail jeho úlovkov.</div>
+        <h2>Poradie tímov</h2>
+        <div class="sectionSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
       </div>
+
+      <div class="tabs" id="sectorTabs"></div>
+
       <div class="tableWrap">
         <table>
           <thead>
@@ -547,6 +567,7 @@ let previousRankMap = {};
 let currentTeamCatches = {};
 let lastRenderedLb = [];
 let selectedTeamId = null;
+let currentSectorTab = "ALL";
 const FALLBACK_MS = 30000;
 
 async function loadState(manual = false) {
@@ -617,7 +638,8 @@ function renderLive(data) {
   }
 
   renderTop3(top3teams);
-  renderLeaderboard(lb);
+  renderSectorTabs(lb);
+  renderLeaderboard(getFilteredRows(lb));
 
   if (selectedTeamId !== null) {
     renderTeamDetail(selectedTeamId);
@@ -643,7 +665,7 @@ function renderTop3(rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
-      <td><span class="teamName">${escapeHtml(team.name || "-")}</span></td>
+      <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
       <td>${formatKg(Number(top3[0] || 0))}</td>
       <td>${formatKg(Number(top3[1] || 0))}</td>
       <td>${formatKg(Number(top3[2] || 0))}</td>
@@ -651,6 +673,40 @@ function renderTop3(rows) {
     `;
     body.appendChild(tr);
   });
+}
+
+function renderSectorTabs(rows) {
+  const wrap = document.getElementById("sectorTabs");
+  if (!wrap) return;
+
+  const sectors = [...new Set(
+    rows
+      .map(t => String(t.sectorCode || t.sector || "").trim())
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  if (currentSectorTab !== "ALL" && !sectors.includes(currentSectorTab)) {
+    currentSectorTab = "ALL";
+  }
+
+  const tabs = ["ALL", ...sectors];
+
+  wrap.innerHTML = tabs.map(tab => {
+    const label = tab === "ALL" ? "CELKOVÉ" : tab;
+    const cls = currentSectorTab === tab ? "tabBtn active" : "tabBtn";
+    return `<button class="${cls}" onclick="setSectorTab('${escapeJs(tab)}')">${escapeHtml(label)}</button>`;
+  }).join("");
+}
+
+function setSectorTab(tab) {
+  currentSectorTab = tab;
+  renderSectorTabs(lastRenderedLb);
+  renderLeaderboard(getFilteredRows(lastRenderedLb));
+}
+
+function getFilteredRows(rows) {
+  if (currentSectorTab === "ALL") return rows;
+  return rows.filter(t => String(t.sectorCode || t.sector || "") === currentSectorTab);
 }
 
 function renderLeaderboard(rows) {
@@ -661,23 +717,29 @@ function renderLeaderboard(rows) {
 
   if (!rows.length) {
     empty.style.display = "block";
-    previousRankMap = {};
+    if (currentSectorTab === "ALL") {
+      previousRankMap = {};
+    }
     return;
   }
 
   empty.style.display = "none";
 
-  const newRankMap = {};
+  const isOverall = currentSectorTab === "ALL";
+  const newRankMap = isOverall ? {} : previousRankMap;
 
   rows.forEach((team, index) => {
     const currentRank = index + 1;
     const previousRank = previousRankMap[team.id];
-    newRankMap[team.id] = currentRank;
+
+    if (isOverall) {
+      newRankMap[team.id] = currentRank;
+    }
 
     let moveHtml = `<span class="moveWrap"><span class="moveArrow moveSame">•</span></span>`;
     let moveClass = "";
 
-    if (typeof previousRank === "number") {
+    if (isOverall && typeof previousRank === "number") {
       if (currentRank < previousRank) {
         const diff = previousRank - currentRank;
         moveHtml = `<span class="moveWrap"><span class="moveArrow moveUp">▲</span><span class="moveDelta moveUp">+${diff}</span></span>`;
@@ -693,10 +755,13 @@ function renderLeaderboard(rows) {
       ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
-    const topRankClass =
-      currentRank === 1 ? "rank-top-1" :
-      currentRank === 2 ? "rank-top-2" :
-      currentRank === 3 ? "rank-top-3" : "";
+    const topRankClass = isOverall
+      ? (
+          currentRank === 1 ? "rank-top-1" :
+          currentRank === 2 ? "rank-top-2" :
+          currentRank === 3 ? "rank-top-3" : ""
+        )
+      : "";
 
     const tr = document.createElement("tr");
     tr.className = `teamRow ${topRankClass} ${moveClass}`.trim();
@@ -721,7 +786,9 @@ function renderLeaderboard(rows) {
     body.appendChild(tr);
   });
 
-  previousRankMap = newRankMap;
+  if (isOverall) {
+    previousRankMap = newRankMap;
+  }
 }
 
 function openTeamDetail(teamId) {
@@ -751,7 +818,7 @@ function renderTeamDetail(teamId) {
 
   document.getElementById("detailTeamName").textContent = team.name || `Tím ${teamId}`;
   document.getElementById("detailTeamMeta").textContent =
-    `Sektor ${team.sectorCode || team.sector || "-"} • Stanovište ${team.peg || "-"} • Aktuálne poradie ${getCurrentRank(teamId)}.`;
+    `Sektor ${team.sectorCode || team.sector || "-"} • Stanovište ${team.peg || "-"} • Aktuálne celkové poradie ${getOverallRank(teamId)}.`;
 
   document.getElementById("detailTotal").textContent = formatKg(Number(team.total || 0));
   document.getElementById("detailCount").textContent = String(team.count || 0);
@@ -790,7 +857,7 @@ function renderTeamDetail(teamId) {
   `;
 }
 
-function getCurrentRank(teamId) {
+function getOverallRank(teamId) {
   const index = lastRenderedLb.findIndex(t => Number(t.id) === Number(teamId));
   return index >= 0 ? index + 1 : "-";
 }
@@ -875,6 +942,10 @@ function escapeHtml(text) {
 
 function escapeAttr(text) {
   return escapeHtml(text);
+}
+
+function escapeJs(text) {
+  return String(text ?? "").replaceAll("\\", "\\\\").replaceAll("'", "\\'");
 }
 
 function exportPdf() {
