@@ -6,971 +6,554 @@
 <title>RCC Live tabuľka</title>
 <style>
 :root{
-  --bg:#0b0f14;
-  --line:#243244;
+  --bg:#07111f;
+  --panel:#0d1828;
+  --panel2:#0a1422;
+  --line:#1f3146;
   --text:#eef4fb;
-  --muted:#9db0c5;
-  --green:#76ff9f;
-  --green2:#21d36d;
-  --gold:#f4c84d;
-  --silver:#d4dbe4;
-  --bronze:#d4955a;
-  --blue:#63b3ff;
+  --muted:#99abc1;
+  --green:#22c55e;
+  --red:#ff6b6b;
 }
 *{box-sizing:border-box}
+html,body{margin:0;padding:0}
 body{
-  margin:0;
   font-family:Arial,sans-serif;
-  background:radial-gradient(circle at top left,#112034 0%, #0b0f14 45%, #091019 100%);
   color:var(--text);
-  padding:16px;
+  background:
+    radial-gradient(circle at top left, #0f2238 0%, #07111f 45%, #06101c 100%);
+  min-height:100vh;
+}
+.wrap{
+  width:100%;
+  max-width:100%;
+  margin:0 auto;
+  padding:10px;
 }
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:12px;
-  margin-bottom:16px;
+  gap:14px;
+  padding:10px 0 14px 0;
   flex-wrap:wrap;
 }
 .brand{
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:12px;
 }
-.brandLogo{
-  width:68px;
-  height:68px;
+.logo{
+  width:48px;
+  height:48px;
   object-fit:contain;
-  border-radius:12px;
-  background:rgba(255,255,255,.04);
+  border-radius:10px;
   border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
 }
-.brandText h1{
+.titleBox h1{
   margin:0;
-  font-size:24px;
+  font-size:18px;
+  line-height:1.1;
 }
-.brandText .sub{
-  margin-top:4px;
+.titleBox .sub{
+  margin-top:3px;
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
 }
-.topActions{
+.actions{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
-.btn{
+button{
   border:none;
   border-radius:12px;
-  padding:10px 14px;
+  padding:12px 16px;
+  font-weight:700;
   cursor:pointer;
-  font-weight:bold;
-  color:#08110c;
-  background:linear-gradient(135deg,var(--green),var(--green2));
+  background:#16263a;
+  color:#fff;
 }
-.btn.secondary{
-  color:var(--text);
-  background:#243141;
+button:hover{
+  background:#21354f;
 }
-.hidden{display:none !important}
 .stats{
   display:grid;
-  grid-template-columns:repeat(3,minmax(200px,1fr));
-  gap:14px;
-  margin-bottom:14px;
+  grid-template-columns:repeat(3, 1fr);
+  gap:10px;
+  margin-bottom:10px;
 }
 .stat{
-  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
+  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:16px 18px;
+  border-radius:14px;
+  padding:14px;
+  min-height:72px;
 }
-.stat .label{
-  color:var(--muted);
-  font-size:13px;
-  font-weight:bold;
+.statLabel{
+  color:#b6c6d9;
+  font-size:12px;
+  font-weight:700;
   margin-bottom:8px;
 }
-.stat .value{
-  font-size:24px;
+.statValue{
+  font-size:22px;
   font-weight:900;
 }
-.stat .sub{
-  margin-top:6px;
-  color:var(--green);
-  font-size:14px;
-  font-weight:bold;
+.statSub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
 }
 .lastCatch{
-  margin-bottom:14px;
-  background:linear-gradient(90deg,rgba(33,211,109,.18),rgba(33,211,109,.05));
-  border:1px solid rgba(33,211,109,.24);
+  margin-bottom:10px;
+  background:linear-gradient(90deg, rgba(34,197,94,.18), rgba(11,58,42,.65));
+  border:1px solid rgba(34,197,94,.22);
   border-radius:14px;
-  padding:14px 16px;
+  padding:14px;
 }
 .lastCatchTitle{
-  color:var(--green);
-  font-size:12px;
+  font-size:11px;
   font-weight:900;
+  letter-spacing:1px;
+  color:#b5ffd0;
   text-transform:uppercase;
-  letter-spacing:.8px;
   margin-bottom:6px;
 }
-.lastCatchText{
-  font-size:17px;
-  font-weight:bold;
+.lastCatchMain{
+  font-size:24px;
+  font-weight:900;
+  line-height:1.15;
 }
-.status{
+.lastCatchSub{
+  margin-top:4px;
+  color:#d9f7e5;
+  font-size:14px;
+}
+.infoLine{
+  min-height:18px;
+  margin:8px 2px 14px 2px;
   color:var(--muted);
   font-size:13px;
-  margin:6px 0 12px 0;
 }
-.filters{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin:0 0 14px 0;
+.infoLine.error{
+  color:var(--red);
 }
-.filterBtn{
-  border:1px solid var(--line);
-  background:#101722;
-  color:var(--text);
-  border-radius:10px;
-  padding:10px 14px;
-  cursor:pointer;
-  font-weight:800;
+.infoLine.ok{
+  color:#8dffb2;
 }
-.filterBtn.active{
-  background:linear-gradient(135deg,var(--green),var(--green2));
-  color:#08110c;
-  border-color:transparent;
-}
-.sectionCard,.desktopTableWrap,.graphCard{
-  background:linear-gradient(180deg,#101721 0%, #0e141d 100%);
+.section{
+  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
   border-radius:16px;
-  overflow:auto;
-  margin-bottom:18px;
+  margin-bottom:12px;
+  overflow:hidden;
 }
-.sectionHeader{
-  padding:16px 18px;
-  border-bottom:1px solid #1e2a38;
-  background:#111923;
+.sectionHead{
+  padding:14px 14px 10px 14px;
+  border-bottom:1px solid rgba(255,255,255,.04);
 }
-.sectionHeader h2{
+.sectionHead h2{
   margin:0;
-  font-size:20px;
+  font-size:16px;
 }
-.sectionHeader .sub{
-  margin-top:5px;
+.sectionSub{
+  margin-top:4px;
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
+}
+.tableWrap{
+  width:100%;
+  overflow:auto;
 }
 table{
   width:100%;
   border-collapse:collapse;
+  min-width:900px;
 }
-th,td{
-  padding:15px 12px;
-  border-bottom:1px solid #1e2a38;
+th, td{
+  padding:12px 10px;
+  border-bottom:1px solid rgba(255,255,255,.05);
   text-align:left;
-  vertical-align:middle;
+  font-size:13px;
 }
 th{
-  background:#131c27;
-  color:#b8c7d7;
-  font-size:13px;
+  color:#b9cbe0;
+  font-size:12px;
   text-transform:uppercase;
-  letter-spacing:.5px;
+  background:rgba(255,255,255,.02);
 }
-tbody tr.top1{background:linear-gradient(90deg,rgba(244,200,77,.18),rgba(244,200,77,.04))}
-tbody tr.top2{background:linear-gradient(90deg,rgba(212,219,228,.16),rgba(212,219,228,.04))}
-tbody tr.top3{background:linear-gradient(90deg,rgba(212,149,90,.18),rgba(212,149,90,.04))}
-.rankCell{
-  width:120px;
+tbody tr:hover{
+  background:rgba(255,255,255,.02);
+}
+.rank{
   font-weight:900;
-  font-size:18px;
-}
-.medal{
-  display:inline-block;
-  min-width:34px;
+  color:#d7e6f5;
 }
 .teamName{
-  font-weight:900;
-  color:#fff;
-  cursor:pointer;
+  font-weight:800;
 }
-.teamName:hover{color:var(--green)}
-.smallMeta{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  background:#142437;
+  color:#d9e7f4;
 }
-.weight{
-  color:var(--green);
-  font-weight:900;
-  white-space:nowrap;
-}
-.detailBtn{
-  border:none;
-  border-radius:10px;
-  padding:10px 14px;
-  font-weight:900;
-  cursor:pointer;
-  color:#08110c;
-  background:linear-gradient(135deg,var(--green),var(--green2));
-}
-.teamThumb,.thumbPlaceholder{
-  width:54px;
-  height:54px;
+.teamPhoto{
+  width:42px;
+  height:42px;
   border-radius:50%;
-}
-.teamThumb{
   object-fit:cover;
-  border:2px solid #233140;
-  background:#101722;
+  border:1px solid #2c4058;
+  background:#0d1724;
 }
-.teamThumbLarge,.thumbPlaceholderLarge{
-  width:88px;
-  height:88px;
+.noPhoto{
+  width:42px;
+  height:42px;
   border-radius:50%;
-}
-.teamThumbLarge{
-  object-fit:cover;
-  border:3px solid #233140;
-  background:#101722;
-}
-.thumbPlaceholder,.thumbPlaceholderLarge{
-  border:2px dashed #314256;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:#8ea0b3;
-  font-size:11px;
-}
-.thumbPlaceholderLarge{
-  border-width:3px;
-  font-size:14px;
-}
-.top3Table tbody tr.place1{
-  background:linear-gradient(90deg, rgba(244,200,77,.30), rgba(90,66,0,.20));
-}
-.top3Table tbody tr.place2{
-  background:linear-gradient(90deg, rgba(212,219,228,.22), rgba(58,58,58,.18));
-}
-.top3Table tbody tr.place3{
-  background:linear-gradient(90deg, rgba(212,149,90,.24), rgba(90,42,0,.16));
-}
-.mobileCards{
-  display:none;
-  gap:12px;
-  flex-direction:column;
-  margin-bottom:18px;
-}
-.teamCard{
-  background:linear-gradient(180deg,#121923 0%, #0f151e 100%);
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:14px;
-}
-.teamCard.top1{border-color:rgba(244,200,77,.55)}
-.teamCard.top2{border-color:rgba(212,219,228,.55)}
-.teamCard.top3{border-color:rgba(212,149,90,.55)}
-.teamCardHead{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:10px;
-}
-.teamCardRank{
-  font-size:22px;
-  font-weight:900;
-  min-width:42px;
-}
-.teamCardName{
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
-}
-.teamCardMeta{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:6px;
-  line-height:1.45;
-}
-.teamCardWeight{
-  font-size:26px;
-  font-weight:900;
-  color:var(--green);
-  white-space:nowrap;
-}
-.teamCardBottom{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-.detailHero{
-  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:18px;
-  margin-bottom:14px;
-  display:flex;
-  gap:16px;
-  align-items:center;
-}
-.detailTitle{
-  margin:0 0 8px 0;
-  font-size:30px;
-}
-.detailMeta{
-  color:var(--muted);
-  font-size:15px;
-}
-.summary{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(180px,1fr));
-  gap:14px;
-  margin-bottom:16px;
-}
-.sumBox,.top3Box{
-  background:linear-gradient(180deg,#131c28 0%, #101722 100%);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:16px;
-}
-.sumBox .label,.top3Box .label{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:6px;
-  font-weight:bold;
-}
-.sumBox .value,.top3Box .value{
-  font-size:24px;
-  font-weight:900;
-}
-.top3Detail{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(140px,1fr));
-  gap:14px;
-  margin-bottom:16px;
-}
-.graphCard{
-  padding:16px;
-}
-.graphHeader{
-  font-size:18px;
-  font-weight:900;
-  margin-bottom:10px;
-}
-.graphSub{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:12px;
-}
-.chartWrap{
-  width:100%;
-  overflow:auto;
-}
-.chartSvg{
-  width:100%;
-  min-width:520px;
-  height:240px;
-  display:block;
-}
-.axisText{fill:#9db0c5;font-size:12px}
-.gridLine{stroke:#243244;stroke-width:1}
-.linePath{fill:none;stroke:var(--blue);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.point{fill:var(--green);stroke:#0b0f14;stroke-width:3}
-.pointLabel{fill:#eef4fb;font-size:12px;font-weight:bold}
-.bar{fill:rgba(99,179,255,.20)}
-.catchGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:14px;
-}
-.catchCard{
-  background:linear-gradient(180deg,#121923 0%, #0f151e 100%);
-  border:1px solid var(--line);
-  border-radius:16px;
-  overflow:hidden;
-}
-.catchImg{
-  width:100%;
-  height:210px;
-  object-fit:cover;
-  display:block;
-  background:#192432;
-}
-.catchInside{padding:16px}
-.catchWeight{
-  font-size:30px;
-  font-weight:900;
-  color:var(--green);
-  margin-bottom:8px;
-}
-.catchMeta{
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.5;
+  border:1px dashed #30455c;
+  color:#8ea3b8;
+  font-size:10px;
 }
 .empty{
+  padding:18px 14px;
   color:var(--muted);
-  font-size:18px;
-  padding:18px 0;
+  font-size:14px;
 }
-@media (max-width:980px){
-  .stats,.summary{grid-template-columns:1fr}
-  .top3Detail{grid-template-columns:1fr 1fr}
+.updated{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
 }
-@media (max-width:760px){
-  body{padding:12px}
-  .brandLogo{width:52px;height:52px}
-  .brandText h1{font-size:20px}
-  .desktopTableWrap{display:none}
-  .mobileCards{display:flex}
-  .detailTitle{font-size:24px}
-  .catchGrid{grid-template-columns:1fr}
-  .catchImg{height:220px}
-  .detailHero{flex-direction:column;align-items:flex-start}
-  .top3Detail{grid-template-columns:1fr}
-  .chartSvg{min-width:420px;height:220px}
+@media (max-width:900px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+  .lastCatchMain{
+    font-size:20px;
+  }
+  .wrap{
+    padding:8px;
+  }
+}
+@media print{
+  .actions, .infoLine, .updated { display:none !important; }
+  body{ background:#fff; color:#000; }
+  .section, .stat, .lastCatch{ background:#fff; color:#000; border:1px solid #ccc; }
+  th, td{ color:#000; border-color:#ddd; }
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <img src="/logo.png" alt="RCC logo" class="brandLogo">
-    <div class="brandText">
-      <h1>RCC Live tabuľka</h1>
-      <div class="sub">Ružín Carp Classic</div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <img src="/logo.png" alt="RCC logo" class="logo" onerror="this.style.display='none'">
+      <div class="titleBox">
+        <h1>RCC Live tabuľka</h1>
+        <div class="sub">Ružín Carp Classic</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button onclick="exportPdf()">Export PDF</button>
+      <button onclick="loadState(true)">Obnoviť</button>
     </div>
   </div>
 
-  <div class="topActions">
-    <button class="btn secondary hidden" id="backBtn" onclick="showMain()">← Späť</button>
-    <button class="btn secondary" onclick="window.print()">Export PDF</button>
-    <button class="btn secondary" onclick="window.location.reload()">Obnoviť</button>
-  </div>
-</div>
-
-<div id="mainView">
   <div class="stats">
     <div class="stat">
-      <div class="label">Celková váha rýb</div>
-      <div class="value" id="totalWeight">0.00 kg</div>
+      <div class="statLabel">Celková váha rýb</div>
+      <div class="statValue" id="totalWeight">0.00 kg</div>
     </div>
+
     <div class="stat">
-      <div class="label">Počet ulovených rýb</div>
-      <div class="value" id="totalFish">0</div>
+      <div class="statLabel">Počet ulovených rýb</div>
+      <div class="statValue" id="totalFish">0</div>
     </div>
+
     <div class="stat">
-      <div class="label">Najväčšia ryba</div>
-      <div class="value" id="topFishWeight">0.00 kg</div>
-      <div class="sub" id="topFishTeam">—</div>
+      <div class="statLabel">Najväčšia ryba</div>
+      <div class="statValue" id="topFishWeight">0.00 kg</div>
+      <div class="statSub" id="topFishTeam">–</div>
     </div>
   </div>
 
   <div class="lastCatch">
     <div class="lastCatchTitle">Posledný úlovok</div>
-    <div class="lastCatchText" id="lastCatchText">Zatiaľ bez úlovku</div>
+    <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
+    <div class="lastCatchSub" id="lastCatchSub"></div>
   </div>
 
-  <div class="status" id="statusText">Načítavam live dáta…</div>
+  <div class="infoLine" id="infoLine"></div>
+  <div class="updated" id="updatedAt"></div>
 
-  <div class="filters" id="filters"></div>
-
-  <div class="sectionCard">
-    <div class="sectionHeader">
+  <div class="section">
+    <div class="sectionHead">
       <h2>TOP 3 ryby tímov</h2>
-      <div class="sub">Vyhodnotenie tímu podľa súčtu 3 najväčších rýb</div>
+      <div class="sectionSub">Vyhodnotenie tímu podľa súčtu 3 najväčších rýb</div>
     </div>
-    <table class="top3Table">
-      <thead>
-        <tr>
-          <th>Poradie</th>
-          <th>Tím</th>
-          <th>1. ryba</th>
-          <th>2. ryba</th>
-          <th>3. ryba</th>
-          <th>Súčet TOP 3</th>
-        </tr>
-      </thead>
-      <tbody id="top3teamsBody"></tbody>
-    </table>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Poradie</th>
+            <th>Tím</th>
+            <th>1. ryba</th>
+            <th>2. ryba</th>
+            <th>3. ryba</th>
+            <th>Súčet TOP 3</th>
+          </tr>
+        </thead>
+        <tbody id="top3Body"></tbody>
+      </table>
+    </div>
+    <div id="top3Empty" class="empty" style="display:none;">Zatiaľ nie sú dostupné dáta pre TOP 3.</div>
   </div>
 
-  <div class="desktopTableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Celkové poradie</th>
-          <th>Tím</th>
-          <th>Sektor</th>
-          <th>Stanovište</th>
-          <th>Foto</th>
-          <th>Celková váha</th>
-          <th>Úlovky</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+  <div class="section">
+    <div class="sectionHead">
+      <h2>Celkové poradie</h2>
+      <div class="sectionSub">Live poradie aktívnych tímov podľa celkovej váhy úlovkov</div>
+    </div>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Poradie</th>
+            <th>Tím</th>
+            <th>Sektor</th>
+            <th>Stanovište</th>
+            <th>Foto</th>
+            <th>Celková váha</th>
+            <th>Úlovky</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+    <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
   </div>
-
-  <div class="mobileCards" id="mobileCards"></div>
 </div>
 
-<div id="detailView" class="hidden">
-  <div class="detailHero">
-    <div id="detailTeamPhoto"></div>
-    <div>
-      <h2 class="detailTitle" id="teamName">Tím</h2>
-      <div class="detailMeta" id="teamMeta">Sektor — | Stanovište —</div>
-    </div>
-  </div>
-
-  <div class="summary">
-    <div class="sumBox">
-      <div class="label">Celková váha</div>
-      <div class="value" id="detailTotal">0.00 kg</div>
-    </div>
-    <div class="sumBox">
-      <div class="label">Počet úlovkov</div>
-      <div class="value" id="detailCount">0</div>
-    </div>
-    <div class="sumBox">
-      <div class="label">Najväčšia ryba</div>
-      <div class="value" id="detailBiggest">0.00 kg</div>
-    </div>
-  </div>
-
-  <div class="top3Detail">
-    <div class="top3Box">
-      <div class="label">1. najväčšia</div>
-      <div class="value" id="detailTop1">0.00 kg</div>
-    </div>
-    <div class="top3Box">
-      <div class="label">2. najväčšia</div>
-      <div class="value" id="detailTop2">0.00 kg</div>
-    </div>
-    <div class="top3Box">
-      <div class="label">3. najväčšia</div>
-      <div class="value" id="detailTop3">0.00 kg</div>
-    </div>
-    <div class="top3Box">
-      <div class="label">Súčet TOP 3</div>
-      <div class="value" id="detailTop3Sum">0.00 kg</div>
-    </div>
-  </div>
-
-  <div class="graphCard">
-    <div class="graphHeader">LIVE graf vývoja váhy tímu</div>
-    <div class="graphSub">Priebežný rast celkovej váhy po každom zapísanom úlovku</div>
-    <div class="chartWrap">
-      <svg class="chartSvg" id="teamChart" viewBox="0 0 900 240" preserveAspectRatio="none"></svg>
-    </div>
-  </div>
-
-  <div class="catchGrid" id="catchGrid"></div>
-</div>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
-let state = null;
-let setupData = null;
-let currentSector = "all";
+let socket = null;
+let socketConnected = false;
+let fallbackTimer = null;
+const FALLBACK_MS = 30000;
 
-async function loadLive() {
+async function loadState(manual = false) {
+  const infoLine = document.getElementById("infoLine");
+
+  if (manual) {
+    infoLine.textContent = "Načítavam dáta...";
+    infoLine.className = "infoLine";
+  }
+
   try {
-    const [stateRes, setupRes] = await Promise.all([
-      fetch("/api/state", { cache: "no-store" }),
-      fetch("/api/admin/setup", { cache: "no-store" })
-    ]);
-
-    state = await stateRes.json();
-    setupData = await setupRes.json();
-
-    renderSectorFilters();
-    renderStats();
-    renderLastCatch();
-    renderTop3Teams();
-    renderTable();
-    renderMobileCards();
-    setStatus("Live dáta aktualizované");
-  } catch (err) {
-    console.error(err);
-    setStatus("Chyba načítania live dát");
-  }
-}
-
-function setStatus(text) {
-  const el = document.getElementById("statusText");
-  if (el) el.textContent = text;
-}
-
-function medalForPlace(index) {
-  if (index === 0) return "🥇";
-  if (index === 1) return "🥈";
-  if (index === 2) return "🥉";
-  return (index + 1);
-}
-
-function rowClass(index) {
-  if (index === 0) return "top1";
-  if (index === 1) return "top2";
-  if (index === 2) return "top3";
-  return "";
-}
-
-function top3RowClass(index) {
-  if (index === 0) return "place1";
-  if (index === 1) return "place2";
-  if (index === 2) return "place3";
-  return "";
-}
-
-function fmtTime(iso) {
-  if (!iso) return "";
-  try {
-    return new Date(iso).toLocaleString("sk-SK");
-  } catch {
-    return iso;
-  }
-}
-
-function visibleSectors() {
-  const sectors = setupData?.sectors || {};
-  return Object.values(sectors)
-    .filter(s => s && s.visible)
-    .sort((a, b) => String(a.code).localeCompare(String(b.code)));
-}
-
-function sectorDisplayName(code) {
-  const sector = setupData?.sectors?.[code];
-  return sector?.name || `Sektor ${code}`;
-}
-
-function renderSectorFilters() {
-  const wrap = document.getElementById("filters");
-  if (!wrap) return;
-
-  const sectors = visibleSectors();
-
-  wrap.innerHTML = `
-    <button class="filterBtn ${currentSector === "all" ? "active" : ""}" onclick="setSectorFilter('all')">
-      Všetko
-    </button>
-  `;
-
-  sectors.forEach(sector => {
-    wrap.innerHTML += `
-      <button class="filterBtn ${currentSector === sector.code ? "active" : ""}" onclick="setSectorFilter('${sector.code}')">
-        ${sector.code}
-      </button>
-    `;
-  });
-
-  if (currentSector !== "all" && !sectors.some(s => s.code === currentSector)) {
-    currentSector = "all";
-    renderSectorFilters();
-  }
-}
-
-function setSectorFilter(code) {
-  currentSector = code;
-  renderSectorFilters();
-  renderTop3Teams();
-  renderTable();
-  renderMobileCards();
-}
-
-function teamPhotoHtml(photo) {
-  if (photo) return `<img class="teamThumb" src="${photo}" alt="Foto tímu">`;
-  return `<div class="thumbPlaceholder">bez foto</div>`;
-}
-
-function teamPhotoLargeHtml(photo) {
-  if (photo) return `<img class="teamThumbLarge" src="${photo}" alt="Foto tímu">`;
-  return `<div class="thumbPlaceholderLarge">bez foto</div>`;
-}
-
-function showMain() {
-  document.getElementById("detailView").classList.add("hidden");
-  document.getElementById("mainView").classList.remove("hidden");
-  document.getElementById("backBtn").classList.add("hidden");
-}
-
-function filteredLeaderboard() {
-  if (!state || !state.lb) return [];
-
-  const visibleCodes = visibleSectors().map(s => s.code);
-  let data = state.lb.filter(t => visibleCodes.includes(t.sectorCode || t.sector));
-
-  if (currentSector === "all") return data;
-  return data.filter(t => (t.sectorCode || t.sector) === currentSector);
-}
-
-function renderStats() {
-  if (!state) return;
-
-  document.getElementById("totalWeight").innerText =
-    Number(state.totalWeight || 0).toFixed(2) + " kg";
-
-  document.getElementById("totalFish").innerText =
-    state.totalFish || 0;
-
-  if (state.topFish) {
-    document.getElementById("topFishWeight").innerText =
-      Number(state.topFish.weight || 0).toFixed(2) + " kg";
-    document.getElementById("topFishTeam").innerText =
-      state.topFish.team || "—";
-  } else {
-    document.getElementById("topFishWeight").innerText = "0.00 kg";
-    document.getElementById("topFishTeam").innerText = "—";
-  }
-}
-
-function renderLastCatch() {
-  const box = document.getElementById("lastCatchText");
-  if (!box || !state) return;
-
-  let last = null;
-  let lastTeam = null;
-
-  Object.keys(state.teamCatches || {}).forEach(teamId => {
-    const arr = state.teamCatches[teamId] || [];
-    arr.forEach(c => {
-      if (!last || new Date(c.time) > new Date(last.time)) {
-        last = c;
-        const team = state.lb.find(t => Number(t.id) === Number(teamId));
-        lastTeam = team ? team.name : ("Tím " + teamId);
-      }
+    const res = await fetch("/api/state", {
+      cache: "no-store"
     });
-  });
 
-  if (!last) {
-    box.textContent = "Zatiaľ bez úlovku";
-    return;
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
+    const data = await res.json();
+    renderLive(data);
+
+    document.getElementById("updatedAt").textContent =
+      "Posledná aktualizácia: " + new Date().toLocaleString("sk-SK");
+
+    if (manual && !socketConnected) {
+      infoLine.textContent = "Dáta obnovené cez HTTP";
+      infoLine.className = "infoLine ok";
+    }
+  } catch (e) {
+    console.error("Live load error:", e);
+    infoLine.textContent = "Chyba načítania live dát";
+    infoLine.className = "infoLine error";
   }
-
-  box.textContent = `${lastTeam} • ${Number(last.weight).toFixed(2)} kg • ${fmtTime(last.time)}`;
 }
 
-function renderTop3Teams() {
-  const body = document.getElementById("top3teamsBody");
-  if (!body || !state) return;
+function renderLive(data) {
+  const totalWeight = Number(data?.totalWeight || 0);
+  const totalFish = Number(data?.totalFish || 0);
+  const topFish = data?.topFish || null;
+  const lastCatch = data?.lastCatch || null;
+  const top3teams = Array.isArray(data?.top3teams) ? data.top3teams : [];
+  const lb = Array.isArray(data?.lb) ? data.lb : [];
+
+  document.getElementById("totalWeight").textContent = formatKg(totalWeight);
+  document.getElementById("totalFish").textContent = String(totalFish);
+
+  document.getElementById("topFishWeight").textContent = topFish
+    ? formatKg(Number(topFish.weight || 0))
+    : "0.00 kg";
+
+  document.getElementById("topFishTeam").textContent = topFish
+    ? safeText(topFish.teamName || topFish.team || "–")
+    : "–";
+
+  const lastCatchMain = document.getElementById("lastCatchMain");
+  const lastCatchSub = document.getElementById("lastCatchSub");
+
+  if (lastCatch) {
+    const teamName = safeText(lastCatch.teamName || lastCatch.team || ("Tím " + (lastCatch.teamId || "")));
+    const sector = safeText(lastCatch.sector || "-");
+    const peg = safeText(lastCatch.peg || "-");
+    const time = formatDateTime(lastCatch.time);
+
+    lastCatchMain.textContent = `${teamName} • ${formatKg(Number(lastCatch.weight || 0))}`;
+    lastCatchSub.textContent = `Sektor ${sector} • Stanovište ${peg} • ${time}`;
+  } else {
+    lastCatchMain.textContent = "Zatiaľ bez úlovku";
+    lastCatchSub.textContent = "";
+  }
+
+  renderTop3(top3teams);
+  renderLeaderboard(lb);
+}
+
+function renderTop3(rows) {
+  const body = document.getElementById("top3Body");
+  const empty = document.getElementById("top3Empty");
 
   body.innerHTML = "";
 
-  const visibleCodes = visibleSectors().map(s => s.code);
-  let data = (state.top3teams || []).filter(t => visibleCodes.includes(t.sectorCode || t.sector));
-
-  if (currentSector !== "all") {
-    data = data.filter(t => (t.sectorCode || t.sector) === currentSector);
+  if (!rows.length) {
+    empty.style.display = "block";
+    return;
   }
 
-  const top3 = data.slice(0, 3);
+  empty.style.display = "none";
 
-  top3.forEach((t, i) => {
-    body.innerHTML += `
-      <tr class="${top3RowClass(i)}">
-        <td class="rankCell"><span class="medal">${medalForPlace(i)}</span></td>
-        <td>
-          <div class="teamName" onclick="showTeam(${t.id})">${escapeHtml(t.name)}</div>
-          <div class="smallMeta">${escapeHtml(sectorDisplayName(t.sectorCode || t.sector))} • Stanovište ${escapeHtml(String(t.peg))}</div>
-        </td>
-        <td class="weight">${Number(t.top3?.[0] || 0).toFixed(2)} kg</td>
-        <td class="weight">${Number(t.top3?.[1] || 0).toFixed(2)} kg</td>
-        <td class="weight">${Number(t.top3?.[2] || 0).toFixed(2)} kg</td>
-        <td class="weight">${Number(t.top3sum || 0).toFixed(2)} kg</td>
-      </tr>
+  rows.forEach((team, index) => {
+    const top3 = Array.isArray(team.top3) ? team.top3 : [0, 0, 0];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="rank">${index + 1}.</span></td>
+      <td><span class="teamName">${escapeHtml(team.name || "-")}</span></td>
+      <td>${formatKg(Number(top3[0] || 0))}</td>
+      <td>${formatKg(Number(top3[1] || 0))}</td>
+      <td>${formatKg(Number(top3[2] || 0))}</td>
+      <td><span class="badge">${formatKg(Number(team.top3sum || 0))}</span></td>
     `;
+    body.appendChild(tr);
   });
-
-  if (!top3.length) {
-    body.innerHTML = `<tr><td colspan="6" class="empty">Zatiaľ nie sú dáta pre TOP 3 ryby tímov.</td></tr>`;
-  }
 }
 
-function renderTable() {
-  const body = document.getElementById("tableBody");
-  if (!body) return;
+function renderLeaderboard(rows) {
+  const body = document.getElementById("lbBody");
+  const empty = document.getElementById("lbEmpty");
 
   body.innerHTML = "";
 
-  const data = filteredLeaderboard();
-
-  data.forEach((t, i) => {
-    body.innerHTML += `
-      <tr class="${rowClass(i)}">
-        <td class="rankCell"><span class="medal">${medalForPlace(i)}</span></td>
-        <td>
-          <div class="teamName" onclick="showTeam(${t.id})">${escapeHtml(t.name)}</div>
-          <div class="smallMeta">${t.count} úlovkov • najväčšia ${Number(t.biggest).toFixed(2)} kg</div>
-        </td>
-        <td>${escapeHtml(sectorDisplayName(t.sectorCode || t.sector))}</td>
-        <td>${escapeHtml(String(t.peg))}</td>
-        <td>${teamPhotoHtml(t.photo)}</td>
-        <td class="weight">${Number(t.total).toFixed(2)} kg</td>
-        <td><button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button></td>
-      </tr>
-    `;
-  });
-
-  if (!data.length) {
-    body.innerHTML = `<tr><td colspan="7" class="empty">V tomto výbere zatiaľ nie sú žiadne tímy.</td></tr>`;
-  }
-}
-
-function renderMobileCards() {
-  const wrap = document.getElementById("mobileCards");
-  if (!wrap) return;
-
-  wrap.innerHTML = "";
-
-  const data = filteredLeaderboard();
-
-  data.forEach((t, i) => {
-    wrap.innerHTML += `
-      <div class="teamCard ${rowClass(i)}">
-        <div class="teamCardHead">
-          <div class="teamCardRank">${medalForPlace(i)}</div>
-          <div>${teamPhotoHtml(t.photo)}</div>
-          <div style="flex:1;">
-            <div class="teamCardName" onclick="showTeam(${t.id})">${escapeHtml(t.name)}</div>
-            <div class="teamCardMeta">
-              ${escapeHtml(sectorDisplayName(t.sectorCode || t.sector))} • Stanovište ${escapeHtml(String(t.peg))}<br>
-              ${t.count} úlovkov • najväčšia ${Number(t.biggest).toFixed(2)} kg
-            </div>
-          </div>
-          <div class="teamCardWeight">${Number(t.total).toFixed(2)} kg</div>
-        </div>
-        <div class="teamCardBottom">
-          <div style="color:var(--muted);font-size:13px;">Celkové poradie ${i + 1}</div>
-          <button class="detailBtn" onclick="showTeam(${t.id})">ÚLOVKY</button>
-        </div>
-      </div>
-    `;
-  });
-
-  if (!data.length) {
-    wrap.innerHTML = `<div class="empty">V tomto výbere zatiaľ nie sú žiadne tímy.</div>`;
-  }
-}
-
-function renderTeamChart(catches) {
-  const svg = document.getElementById("teamChart");
-  if (!svg) return;
-
-  const width = 900;
-  const height = 240;
-  const left = 55;
-  const right = 20;
-  const top = 15;
-  const bottom = 36;
-  const innerW = width - left - right;
-  const innerH = height - top - bottom;
-  const sorted = [...catches].sort((a, b) => new Date(a.time) - new Date(b.time));
-
-  svg.innerHTML = "";
-
-  if (!sorted.length) {
-    svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" class="axisText">Tím zatiaľ nemá žiadny vývoj váhy</text>`;
+  if (!rows.length) {
+    empty.style.display = "block";
     return;
   }
 
-  let running = 0;
-  const points = sorted.map((c, i) => {
-    running += Number(c.weight || 0);
-    return { xIndex: i + 1, total: running };
-  });
+  empty.style.display = "none";
 
-  const maxY = Math.max(...points.map(p => p.total), 1);
-  const ySteps = 4;
+  rows.forEach((team, index) => {
+    const photoHtml = team.photo
+      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
+      : `<div class="noPhoto">bez<br>foto</div>`;
 
-  for (let i = 0; i <= ySteps; i++) {
-    const y = top + (innerH / ySteps) * i;
-    const val = ((maxY / ySteps) * (ySteps - i)).toFixed(2);
-    svg.innerHTML += `<line x1="${left}" y1="${y}" x2="${width-right}" y2="${y}" class="gridLine"></line>`;
-    svg.innerHTML += `<text x="${left-10}" y="${y+4}" text-anchor="end" class="axisText">${val}</text>`;
-  }
-
-  let path = "";
-
-  points.forEach((p, i) => {
-    const x = left + ((points.length === 1 ? innerW / 2 : (innerW / (points.length - 1)) * i));
-    const y = top + innerH - ((p.total / maxY) * innerH);
-
-    p.x = x;
-    p.y = y;
-
-    path += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-
-    svg.innerHTML += `<rect x="${x-14}" y="${y}" width="28" height="${top+innerH-y}" class="bar"></rect>`;
-  });
-
-  svg.innerHTML += `<path d="${path}" class="linePath"></path>`;
-
-  points.forEach((p, i) => {
-    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="6" class="point"></circle>`;
-    svg.innerHTML += `<text x="${p.x}" y="${p.y - 12}" text-anchor="middle" class="pointLabel">${p.total.toFixed(2)}</text>`;
-    svg.innerHTML += `<text x="${p.x}" y="${height - 12}" text-anchor="middle" class="axisText">#${i + 1}</text>`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="rank">${index + 1}.</span></td>
+      <td><span class="teamName">${escapeHtml(team.name || "-")}</span></td>
+      <td>${escapeHtml(team.sectorCode || team.sector || "-")}</td>
+      <td>${escapeHtml(String(team.peg || "-"))}</td>
+      <td>${photoHtml}</td>
+      <td><span class="badge">${formatKg(Number(team.total || 0))}</span></td>
+      <td>${escapeHtml(String(team.count || 0))}</td>
+    `;
+    body.appendChild(tr);
   });
 }
 
-function showTeam(id) {
-  if (!state) return;
+function connectSocket() {
+  const infoLine = document.getElementById("infoLine");
 
-  const team = state.lb.find(t => Number(t.id) === Number(id));
-  if (!team) return;
+  try {
+    socket = io();
 
-  const catches = state.teamCatches[id] || [];
-  const top3 = team.top3 || [];
+    socket.on("connect", () => {
+      socketConnected = true;
+      infoLine.textContent = "Realtime LIVE pripojené";
+      infoLine.className = "infoLine ok";
+      stopFallbackRefresh();
+    });
 
-  document.getElementById("teamName").innerText = team.name;
-  document.getElementById("teamMeta").innerText = `${sectorDisplayName(team.sectorCode || team.sector)} | Stanovište ${team.peg}`;
-  document.getElementById("detailTotal").innerText = Number(team.total).toFixed(2) + " kg";
-  document.getElementById("detailCount").innerText = team.count;
-  document.getElementById("detailBiggest").innerText = Number(team.biggest).toFixed(2) + " kg";
-  document.getElementById("detailTeamPhoto").innerHTML = teamPhotoLargeHtml(team.photo);
-  document.getElementById("detailTop1").innerText = `${Number(top3[0] || 0).toFixed(2)} kg`;
-  document.getElementById("detailTop2").innerText = `${Number(top3[1] || 0).toFixed(2)} kg`;
-  document.getElementById("detailTop3").innerText = `${Number(top3[2] || 0).toFixed(2)} kg`;
-  document.getElementById("detailTop3Sum").innerText = `${Number(team.top3sum || 0).toFixed(2)} kg`;
+    socket.on("disconnect", () => {
+      socketConnected = false;
+      infoLine.textContent = "Realtime odpojené, beží fallback režim";
+      infoLine.className = "infoLine error";
+      startFallbackRefresh();
+    });
 
-  document.getElementById("mainView").classList.add("hidden");
-  document.getElementById("detailView").classList.remove("hidden");
-  document.getElementById("backBtn").classList.remove("hidden");
+    socket.on("connect_error", (err) => {
+      socketConnected = false;
+      console.error("Socket connect_error:", err);
+      infoLine.textContent = "WebSocket sa nepripojil, beží fallback režim";
+      infoLine.className = "infoLine error";
+      startFallbackRefresh();
+    });
 
-  renderTeamChart(catches);
-
-  const grid = document.getElementById("catchGrid");
-  grid.innerHTML = "";
-
-  if (!catches.length) {
-    grid.innerHTML = `<div class="empty">Tím zatiaľ nemá žiadne úlovky.</div>`;
-    return;
+    socket.on("state:update", (data) => {
+      renderLive(data);
+      document.getElementById("updatedAt").textContent =
+        "Posledná realtime aktualizácia: " + new Date().toLocaleString("sk-SK");
+    });
+  } catch (e) {
+    console.error("Socket init chyba:", e);
+    infoLine.textContent = "Realtime sa nespustil, beží fallback režim";
+    infoLine.className = "infoLine error";
+    startFallbackRefresh();
   }
+}
 
-  const sorted = [...catches].sort((a, b) => Number(b.weight) - Number(a.weight));
+function startFallbackRefresh() {
+  if (fallbackTimer) return;
 
-  sorted.forEach((c, index) => {
-    grid.innerHTML += `
-      <div class="catchCard">
-        ${c.photo ? `<img class="catchImg" src="${c.photo}" alt="Úlovok">` : ""}
-        <div class="catchInside">
-          <div class="catchWeight">${Number(c.weight).toFixed(2)} kg</div>
-          <div class="catchMeta">Úlovok #${c.number ?? (index + 1)}<br>${fmtTime(c.time)}</div>
-        </div>
-      </div>
-    `;
-  });
+  fallbackTimer = setInterval(() => {
+    loadState(false);
+  }, FALLBACK_MS);
+}
+
+function stopFallbackRefresh() {
+  if (!fallbackTimer) return;
+  clearInterval(fallbackTimer);
+  fallbackTimer = null;
+}
+
+function formatKg(value) {
+  return Number(value || 0).toFixed(2) + " kg";
+}
+
+function formatDateTime(value) {
+  try {
+    if (!value) return "";
+    return new Date(value).toLocaleString("sk-SK");
+  } catch {
+    return value || "";
+  }
+}
+
+function safeText(v) {
+  return String(v ?? "");
 }
 
 function escapeHtml(text) {
@@ -978,11 +561,21 @@ function escapeHtml(text) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-loadLive();
-setInterval(loadLive, 4000);
+function escapeAttr(text) {
+  return escapeHtml(text);
+}
+
+function exportPdf() {
+  window.print();
+}
+
+loadState();
+connectSocket();
+startFallbackRefresh();
 </script>
 </body>
 </html>

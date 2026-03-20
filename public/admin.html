@@ -612,8 +612,10 @@ function renderCatches() {
     return;
   }
 
+  const allTeams = Array.isArray(adminData?.teams) ? adminData.teams : [];
+  const activeTeams = allTeams.filter(t => t.active);
+
   data.forEach(c => {
-    const activeTeams = adminData.teams.filter(t => t.active);
     const selectedExists = activeTeams.some(t => Number(t.id) === Number(c.teamId));
     const teamOptions = [
       ...activeTeams.map(t => ({
@@ -623,7 +625,7 @@ function renderCatches() {
     ];
 
     if (!selectedExists) {
-      const currentTeam = adminData.teams.find(t => Number(t.id) === Number(c.teamId));
+      const currentTeam = allTeams.find(t => Number(t.id) === Number(c.teamId));
       if (currentTeam) {
         teamOptions.unshift({
           id: Number(currentTeam.id),

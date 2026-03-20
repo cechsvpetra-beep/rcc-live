@@ -1,20 +1,43 @@
+const http = require("http");
+const fileStore = require("./storage/fileStore");
+const backupService = require("./services/backupService");
+const stateService = require("./services/stateService");
+const catchService = require("./services/catchService");
 const express = require("express");
 const session = require("express-session");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { Server } = require("socket.io");
+
+const {
+  DEFAULT_TEAM_COUNT,
+  defaultSectors,
+  buildDefaultTeams,
+  writeJsonAtomic,
+  ensureDataFile,
+  normalizeSectors,
+  normalizeTeam,
+  normalizeCatch,
+  loadData,
+  saveData
+} = fileStore;
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    credentials: true
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_FILE = path.join(__dirname, "data.json");
 const UPLOADS_DIR = path.join(PUBLIC_DIR, "uploads");
 const BACKUP_DIR = path.join(__dirname, "backup");
-
-const VALID_SECTORS = ["A", "B", "C", "D", "E", "F", "G", "H"];
-const DEFAULT_TEAM_COUNT = 50;
-const MAX_BACKUPS = 50;
 
 if (!fs.existsSync(PUBLIC_DIR)) {
   fs.mkdirSync(PUBLIC_DIR, { recursive: true });
@@ -49,265 +72,35 @@ app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static(PUBLIC_DIR));
 
-function defaultSectors() {
-  return {
-    A: { code: "A", name: "Sektor A", visible: true },
-    B: { code: "B", name: "Sektor B", visible: true },
-    C: { code: "C", name: "Sektor C", visible: true },
-    D: { code: "D", name: "Sektor D", visible: true },
-    E: { code: "E", name: "Sektor E", visible: false },
-    F: { code: "F", name: "Sektor F", visible: false },
-    G: { code: "G", name: "Sektor G", visible: false },
-    H: { code: "H", name: "Sektor H", visible: false }
-  };
-}
-
-function buildDefaultTeams() {
-  return Array.from({ length: DEFAULT_TEAM_COUNT }, (_, i) => ({
-    id: i + 1,
-    name: `Tím ${i + 1}`,
-    sector: VALID_SECTORS[Math.floor(i / 7)] || "A",
-    peg: String(i + 1),
-    active: i < 20,
-    photo: null
-  }));
-}
-
-function defaultData() {
-  return {
-    sectors: defaultSectors(),
-    teams: buildDefaultTeams(),
-    catches: [],
-    meta: {
-      nextTeamId: DEFAULT_TEAM_COUNT + 1
-    }
-  };
-}
-
-function writeJsonAtomic(filePath, data) {
-  const tempPath = `${filePath}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
-  fs.renameSync(tempPath, filePath);
-}
-
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_FILE)) {
-    writeJsonAtomic(DATA_FILE, defaultData());
+function buildAndBroadcastLiveState() {
+  try {
+    const data = loadData();
+    const publicState = stateService.buildPublicState(data);
+    io.emit("state:update", publicState);
+    console.log("WebSocket broadcast: state:update");
+  } catch (e) {
+    console.error("WebSocket broadcast chyba:", e);
   }
 }
 
-function normalizeSectorCode(value, fallback = "A") {
-  const code = String(value || "").toUpperCase();
-  return VALID_SECTORS.includes(code) ? code : fallback;
-}
-
-function normalizeSectors(input, fallback) {
-  const base = defaultSectors();
-  const current = fallback && typeof fallback === "object" ? fallback : {};
-  const out = {};
-
-  for (const code of VALID_SECTORS) {
-    const fromInput = input && typeof input[code] === "object" ? input[code] : null;
-    const fromCurrent = current && typeof current[code] === "object" ? current[code] : null;
-    const source = fromInput || fromCurrent || base[code];
-
-    out[code] = {
-      code,
-      name: typeof source.name === "string" && source.name.trim() !== ""
-        ? String(source.name)
-        : base[code].name,
-      visible: source.visible !== undefined
-        ? Boolean(source.visible)
-        : Boolean(base[code].visible)
-    };
-  }
-
-  return out;
-}
-
-function normalizeTeam(raw, fallback = {}) {
-  const id = Number(raw?.id ?? fallback?.id ?? 0);
-
-  return {
-    id,
-    name: typeof raw?.name === "string" && raw.name.trim() !== ""
-      ? String(raw.name)
-      : (typeof fallback?.name === "string" && fallback.name.trim() !== "" ? String(fallback.name) : `Tím ${id}`),
-    sector: normalizeSectorCode(raw?.sector, normalizeSectorCode(fallback?.sector, "A")),
-    peg: raw?.peg !== undefined && raw?.peg !== null
-      ? String(raw.peg)
-      : String(fallback?.peg ?? id),
-    active: raw?.active !== undefined
-      ? Boolean(raw.active)
-      : Boolean(fallback?.active),
-    photo: raw?.photo !== undefined
-      ? (raw.photo || null)
-      : (fallback?.photo || null)
-  };
-}
-
-function normalizeCatch(raw) {
-  const id = Number(raw?.id || 0);
-  const teamId = Number(raw?.teamId || 0);
-  const weight = Number(raw?.weight || 0);
-
-  if (!id || !teamId || !weight) {
-    return null;
-  }
-
-  return {
-    id,
-    teamId,
-    weight,
-    time: raw?.time || new Date().toISOString(),
-    photo: raw?.photo || null
-  };
-}
-
-function loadData() {
-  ensureDataFile();
+io.on("connection", (socket) => {
+  console.log("WebSocket client connected:", socket.id);
 
   try {
-    const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const parsed = JSON.parse(raw || "{}");
-    const base = defaultData();
-
-    const sectors = normalizeSectors(parsed.sectors, base.sectors);
-
-    const incomingTeams = Array.isArray(parsed.teams) && parsed.teams.length
-      ? parsed.teams
-      : base.teams;
-
-    const teams = [];
-    const usedIds = new Set();
-
-    for (const item of incomingTeams) {
-      const id = Number(item?.id || 0);
-      if (!id || usedIds.has(id)) continue;
-
-      usedIds.add(id);
-      teams.push(normalizeTeam(item, { id }));
-    }
-
-    if (!teams.length) {
-      for (const t of base.teams) {
-        teams.push({ ...t });
-      }
-    }
-
-    teams.sort((a, b) => Number(a.id) - Number(b.id));
-
-    const catches = Array.isArray(parsed.catches)
-      ? parsed.catches.map(normalizeCatch).filter(Boolean)
-      : [];
-
-    const maxTeamId = teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
-
-    const meta = {
-      nextTeamId: Math.max(
-        Number(parsed?.meta?.nextTeamId || 0),
-        maxTeamId + 1,
-        DEFAULT_TEAM_COUNT + 1
-      )
-    };
-
-    return { sectors, teams, catches, meta };
+    const data = loadData();
+    const publicState = stateService.buildPublicState(data);
+    socket.emit("state:update", publicState);
   } catch (e) {
-    console.error("Chyba pri loadData, obnovujem defaultData:", e);
-    const data = defaultData();
-    writeJsonAtomic(DATA_FILE, data);
-    return data;
-  }
-}
-
-function cleanupBackups() {
-  try {
-    const files = fs.readdirSync(BACKUP_DIR)
-      .filter(name =>
-        (name.startsWith("data-") || name.startsWith("pre-restore-")) &&
-        name.endsWith(".json")
-      )
-      .sort();
-
-    if (files.length > MAX_BACKUPS) {
-      const toDelete = files.slice(0, files.length - MAX_BACKUPS);
-      for (const file of toDelete) {
-        try {
-          fs.unlinkSync(path.join(BACKUP_DIR, file));
-        } catch (e) {
-          console.error("Mazanie starej zálohy zlyhalo:", e);
-        }
-      }
-    }
-  } catch (e) {
-    console.error("Cleanup backupov zlyhal:", e);
-  }
-}
-
-function createBackupFromData(data, prefix = "data") {
-  try {
-    if (!fs.existsSync(BACKUP_DIR)) {
-      fs.mkdirSync(BACKUP_DIR, { recursive: true });
-    }
-
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-");
-    const backupName = `${prefix}-${timestamp}.json`;
-    const backupPath = path.join(BACKUP_DIR, backupName);
-
-    writeJsonAtomic(backupPath, data);
-    cleanupBackups();
-
-    console.log("Backup uložený:", backupName);
-  } catch (e) {
-    console.error("Backup chyba:", e);
-  }
-}
-
-function saveData(data) {
-  const current = loadData();
-
-  if ((current.catches?.length || 0) > 0 && (data?.catches?.length || 0) === 0) {
-    data.catches = current.catches;
+    console.error("Initial socket state chyba:", e);
   }
 
-  const safeTeams = Array.isArray(data?.teams)
-    ? data.teams
-        .map(t => normalizeTeam(t, t))
-        .filter(t => Number(t.id) > 0)
-        .sort((a, b) => Number(a.id) - Number(b.id))
-    : current.teams;
-
-  const safeCatches = Array.isArray(data?.catches)
-    ? data.catches.map(normalizeCatch).filter(Boolean)
-    : current.catches;
-
-  const maxTeamId = safeTeams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
-
-  const safeData = {
-    sectors: normalizeSectors(data?.sectors, current.sectors || defaultSectors()),
-    teams: safeTeams,
-    catches: safeCatches,
-    meta: {
-      nextTeamId: Math.max(
-        Number(data?.meta?.nextTeamId || 0),
-        maxTeamId + 1,
-        DEFAULT_TEAM_COUNT + 1
-      )
-    }
-  };
-
-  writeJsonAtomic(DATA_FILE, safeData);
-  createBackupFromData(safeData, "data");
-  return safeData;
-}
+  socket.on("disconnect", () => {
+    console.log("WebSocket client disconnected:", socket.id);
+  });
+});
 
 function getTeamById(data, id) {
   return (data.teams || []).find(t => Number(t.id) === Number(id));
-}
-
-function getCatchById(data, id) {
-  return (data.catches || []).find(c => Number(c.id) === Number(id));
 }
 
 function deletePhysicalFileFromPublic(publicPath) {
@@ -407,7 +200,13 @@ app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res)
     const newPhoto = "/uploads/" + req.file.filename;
 
     team.photo = newPhoto;
-    saveData(data);
+
+    saveData(data, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
+    });
 
     if (oldPhoto && oldPhoto !== newPhoto) {
       deletePhysicalFileFromPublic(oldPhoto);
@@ -430,25 +229,24 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
     const teamId = Number(req.body.teamId || 0);
     const weight = Number(req.body.weight || 0);
 
-    if (!teamId || !weight) {
-      return res.json({ ok: false, error: "Chýba tím alebo váha" });
-    }
-
-    const team = getTeamById(data, teamId);
-    if (!team) {
-      return res.json({ ok: false, error: "Tím neexistuje" });
-    }
-
-    const newCatch = {
-      id: Date.now(),
+    const result = catchService.addCatch(data, {
       teamId,
       weight,
-      time: new Date().toISOString(),
       photo: req.file ? "/uploads/" + req.file.filename : null
-    };
+    });
 
-    data.catches.push(newCatch);
-    const saved = saveData(data);
+    if (result.error) {
+      return res.json({ ok: false, error: result.error });
+    }
+
+    const newCatch = result.newCatch;
+
+    const saved = saveData(data, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
+    });
 
     console.log("Úlovok uložený:", {
       catchId: newCatch.id,
@@ -520,6 +318,11 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       teams,
       catches: current.catches || [],
       meta: current.meta || {}
+    }, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
     });
 
     res.json({ ok: true });
@@ -584,9 +387,10 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       DEFAULT_TEAM_COUNT + 1
     );
 
-    createBackupFromData(current, "pre-restore");
+    backupService.createBackupFromData(current, "pre-restore");
     writeJsonAtomic(DATA_FILE, safeData);
-    createBackupFromData(safeData, "data");
+    backupService.createBackupFromData(safeData, "data");
+    buildAndBroadcastLiveState();
 
     return res.json({
       ok: true,
@@ -636,10 +440,6 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
   }
 });
 
-/* =========================
-   ADMIN CATCHES
-========================= */
-
 app.get("/api/admin/catches", requireAdmin, (req, res) => {
   try {
     const data = loadData();
@@ -674,26 +474,21 @@ app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
     const teamId = Number(req.body.teamId || 0);
     const weight = Number(req.body.weight || 0);
 
-    if (!catchId || !teamId || !weight) {
-      return res.json({ ok: false, error: "Chýba ID úlovku, tím alebo váha" });
-    }
-
     const data = loadData();
-    const catchItem = getCatchById(data, catchId);
 
-    if (!catchItem) {
-      return res.json({ ok: false, error: "Úlovok neexistuje" });
+    const result = catchService.updateCatch(data, catchId, { teamId, weight });
+
+    if (result.error) {
+      return res.json({ ok: false, error: result.error });
     }
 
-    const team = getTeamById(data, teamId);
-    if (!team) {
-      return res.json({ ok: false, error: "Tím neexistuje" });
-    }
+    saveData(data, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
+    });
 
-    catchItem.teamId = teamId;
-    catchItem.weight = weight;
-
-    saveData(data);
     res.json({ ok: true });
   } catch (e) {
     console.error(e);
@@ -706,19 +501,24 @@ app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
     const catchId = Number(req.params.id);
     const data = loadData();
 
-    const index = data.catches.findIndex(c => Number(c.id) === catchId);
-    if (index === -1) {
-      return res.json({ ok: false, error: "Úlovok neexistuje" });
+    const result = catchService.deleteCatch(data, catchId);
+
+    if (result.error) {
+      return res.json({ ok: false, error: result.error });
     }
 
-    const catchItem = data.catches[index];
+    const catchItem = result.deleted;
 
     if (catchItem.photo) {
       deletePhysicalFileFromPublic(catchItem.photo);
     }
 
-    data.catches.splice(index, 1);
-    saveData(data);
+    saveData(data, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
+    });
 
     res.json({ ok: true });
   } catch (e) {
@@ -726,10 +526,6 @@ app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
     res.status(500).json({ ok: false, error: "Mazanie úlovku zlyhalo" });
   }
 });
-
-/* =========================
-   PUBLIC API
-========================= */
 
 app.get("/api/sectors", (req, res) => {
   const data = loadData();
@@ -743,91 +539,8 @@ app.get("/api/sectors", (req, res) => {
 app.get("/api/state", (req, res) => {
   try {
     const data = loadData();
-
-    const teams = Array.isArray(data.teams) ? data.teams : [];
-    const catches = Array.isArray(data.catches) ? data.catches : [];
-
-    const lb = teams
-      .filter(team => team.active)
-      .map(team => {
-        const teamCatches = catches.filter(c => Number(c.teamId) === Number(team.id));
-
-        const total = teamCatches.reduce((sum, c) => sum + Number(c.weight || 0), 0);
-
-        const biggest = teamCatches.length
-          ? Math.max(...teamCatches.map(c => Number(c.weight || 0)))
-          : 0;
-
-        const sortedTop = [...teamCatches]
-          .sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0))
-          .slice(0, 3)
-          .map(c => Number(c.weight || 0));
-
-        while (sortedTop.length < 3) sortedTop.push(0);
-
-        const top3sum = sortedTop.reduce((a, b) => a + b, 0);
-
-        return {
-          id: team.id,
-          name: team.name,
-          sector: team.sector,
-          sectorCode: team.sector,
-          peg: team.peg,
-          photo: team.photo || null,
-          total,
-          count: teamCatches.length,
-          biggest,
-          top3: sortedTop,
-          top3sum
-        };
-      });
-
-    lb.sort((a, b) => {
-      if (b.total !== a.total) return b.total - a.total;
-      if (b.biggest !== a.biggest) return b.biggest - a.biggest;
-      return a.id - b.id;
-    });
-
-    const top3teams = [...lb].sort((a, b) => {
-      if (b.top3sum !== a.top3sum) return b.top3sum - a.top3sum;
-      if (b.biggest !== a.biggest) return b.biggest - a.biggest;
-      return a.id - b.id;
-    });
-
-    const topFishCatch = catches.length
-      ? catches.reduce((max, c) => Number(c.weight || 0) > Number(max.weight || 0) ? c : max)
-      : null;
-
-    const topFish = topFishCatch
-      ? {
-          weight: Number(topFishCatch.weight || 0),
-          team: teams.find(t => Number(t.id) === Number(topFishCatch.teamId))?.name || ""
-        }
-      : null;
-
-    const teamCatches = Object.fromEntries(
-      teams.map(team => [
-        team.id,
-        catches
-          .filter(c => Number(c.teamId) === Number(team.id))
-          .map((c, index) => ({
-            id: c.id,
-            number: index + 1,
-            weight: Number(c.weight || 0),
-            time: c.time,
-            photo: c.photo || null
-          }))
-      ])
-    );
-
-    res.json({
-      lb,
-      totalWeight: lb.reduce((sum, t) => sum + Number(t.total || 0), 0),
-      totalFish: catches.length,
-      topFish,
-      teamCatches,
-      top3teams
-    });
+    const publicState = stateService.buildPublicState(data);
+    res.json(publicState);
   } catch (e) {
     console.error("API /api/state chyba:", e);
     res.status(500).json({
@@ -835,6 +548,7 @@ app.get("/api/state", (req, res) => {
       totalWeight: 0,
       totalFish: 0,
       topFish: null,
+      lastCatch: null,
       teamCatches: {},
       top3teams: []
     });
@@ -849,6 +563,6 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
 });
