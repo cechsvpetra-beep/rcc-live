@@ -274,6 +274,75 @@ tr.rank-rise{
 tr.rank-fall{
   animation:rowFall .9s ease;
 }
+.teamRow{
+  cursor:pointer;
+}
+.teamRow:hover{
+  background:rgba(255,255,255,.03) !important;
+}
+.expandHint{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+.chevron{
+  display:inline-block;
+  width:16px;
+  font-weight:900;
+  color:#9fc0df;
+}
+.detailsRow td{
+  background:rgba(255,255,255,.02);
+  padding:0;
+}
+.detailsWrap{
+  padding:14px;
+}
+.catchGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:10px;
+}
+.catchItem{
+  background:#0d1724;
+  border:1px solid #24364b;
+  border-radius:12px;
+  padding:10px;
+}
+.catchTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.catchNumber{
+  font-weight:900;
+}
+.catchWeight{
+  font-weight:900;
+  color:#dff7e7;
+}
+.catchMeta{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.4;
+}
+.catchPhoto{
+  margin-top:8px;
+  width:100%;
+  max-width:180px;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid #24364b;
+  background:#09111b;
+}
+.noCatchPhoto{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:12px;
+}
 @keyframes popUp{
   0%{ transform:translateY(6px) scale(.8); opacity:.2; }
   70%{ transform:translateY(-2px) scale(1.15); opacity:1; }
@@ -376,7 +445,7 @@ tr.rank-fall{
   <div class="section">
     <div class="sectionHead">
       <h2>Celkové poradie</h2>
-      <div class="sectionSub">Šípka hore = zlepšenie, šípka dole = pokles</div>
+      <div class="sectionSub">Klikni na tím a zobrazia sa jeho úlovky. Šípka hore = zlepšenie, šípka dole = pokles.</div>
     </div>
     <div class="tableWrap">
       <table>
@@ -404,6 +473,8 @@ let socket = null;
 let socketConnected = false;
 let fallbackTimer = null;
 let previousRankMap = {};
+let expandedTeams = new Set();
+let currentTeamCatches = {};
 const FALLBACK_MS = 30000;
 
 async function loadState(manual = false) {
@@ -443,6 +514,7 @@ function renderLive(data) {
   const lastCatch = data?.lastCatch || null;
   const top3teams = Array.isArray(data?.top3teams) ? data.top3teams : [];
   const lb = Array.isArray(data?.lb) ? data.lb : [];
+  currentTeamCatches = data?.teamCatches || {};
 
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
   document.getElementById("totalFish").textContent = String(totalFish);
@@ -549,8 +621,12 @@ function renderLeaderboard(rows) {
       currentRank === 2 ? "rank-top-2" :
       currentRank === 3 ? "rank-top-3" : "";
 
+    const isExpanded = expandedTeams.has(team.id);
+    const chevron = isExpanded ? "▾" : "▸";
+
     const tr = document.createElement("tr");
-    tr.className = `${topRankClass} ${moveClass}`.trim();
+    tr.className = `teamRow ${topRankClass} ${moveClass}`.trim();
+    tr.onclick = () => toggleTeam(team.id, rows);
     tr.innerHTML = `
       <td>
         <div class="rankCell">
@@ -558,7 +634,13 @@ function renderLeaderboard(rows) {
           <span class="rank">${currentRank}.</span>
         </div>
       </td>
-      <td><span class="teamName">${escapeHtml(team.name || "-")}</span></td>
+      <td>
+        <div>
+          <span class="chevron">${chevron}</span>
+          <span class="teamName">${escapeHtml(team.name || "-")}</span>
+        </div>
+        <div class="expandHint">Klikni pre detail úlovkov</div>
+      </td>
       <td>${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td>${escapeHtml(String(team.peg || "-"))}</td>
       <td>${photoHtml}</td>
@@ -566,10 +648,71 @@ function renderLeaderboard(rows) {
       <td>${escapeHtml(String(team.count || 0))}</td>
     `;
     body.appendChild(tr);
+
+    if (isExpanded) {
+      const detailTr = document.createElement("tr");
+      detailTr.className = "detailsRow";
+      detailTr.innerHTML = `
+        <td colspan="7">
+          <div class="detailsWrap">
+            ${renderTeamCatchesHtml(team.id, team.name)}
+          </div>
+        </td>
+      `;
+      body.appendChild(detailTr);
+    }
   });
 
   previousRankMap = newRankMap;
 }
+
+function renderTeamCatchesHtml(teamId, teamName) {
+  const catches = Array.isArray(currentTeamCatches?.[teamId]) ? currentTeamCatches[teamId] : [];
+
+  if (!catches.length) {
+    return `<div class="empty">Tím ${escapeHtml(teamName || "")} zatiaľ nemá žiadne úlovky.</div>`;
+  }
+
+  const sorted = [...catches].sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
+
+  return `
+    <div class="catchGrid">
+      ${sorted.map(c => `
+        <div class="catchItem">
+          <div class="catchTop">
+            <div class="catchNumber">Úlovok #${escapeHtml(String(c.number || 0))}</div>
+            <div class="catchWeight">${formatKg(Number(c.weight || 0))}</div>
+          </div>
+          <div class="catchMeta">
+            Čas: ${escapeHtml(formatDateTime(c.time))}
+          </div>
+          ${
+            c.photo
+              ? `<img src="${escapeAttr(c.photo)}" alt="Úlovok" class="catchPhoto">`
+              : `<div class="noCatchPhoto">bez fotky</div>`
+          }
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function toggleTeam(teamId) {
+  if (expandedTeams.has(teamId)) {
+    expandedTeams.delete(teamId);
+  } else {
+    expandedTeams.add(teamId);
+  }
+
+  const data = {
+    lb: lastRenderedLb,
+    teamCatches: currentTeamCatches
+  };
+
+  renderLeaderboard(lastRenderedLb);
+}
+
+let lastRenderedLb = [];
 
 function connectSocket() {
   const infoLine = document.getElementById("infoLine");
@@ -600,6 +743,7 @@ function connectSocket() {
     });
 
     socket.on("state:update", (data) => {
+      lastRenderedLb = Array.isArray(data?.lb) ? data.lb : [];
       renderLive(data);
       document.getElementById("updatedAt").textContent =
         "Posledná realtime aktualizácia: " + new Date().toLocaleString("sk-SK");
@@ -656,6 +800,12 @@ function escapeAttr(text) {
 function exportPdf() {
   window.print();
 }
+
+const originalRenderLive = renderLive;
+renderLive = function(data) {
+  lastRenderedLb = Array.isArray(data?.lb) ? data.lb : [];
+  originalRenderLive(data);
+};
 
 loadState();
 connectSocket();
