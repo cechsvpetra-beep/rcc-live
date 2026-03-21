@@ -27,6 +27,13 @@ const {
 } = fileStore;
 
 const app = express();
+
+/*
+  Dôležité pre Render / reverse proxy / HTTPS.
+  Bez tohto môže mať secure cookie problém.
+*/
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -50,13 +57,27 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 ensureDataFile();
 
+/*
+  Session konfigurácia:
+  - 24 hodín platnosť
+  - rolling: true = pri aktivite sa session obnovuje
+  - secure cookie len v produkcii
+  - name = vlastný názov cookie
+*/
+const isProduction = process.env.NODE_ENV === "production";
+const SESSION_SECRET = process.env.SESSION_SECRET || "rcc_secret_123";
+
 app.use(session({
-  secret: "rcc_secret_123",
+  name: "rcc.sid",
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   cookie: {
     httpOnly: true,
-    sameSite: "lax"
+    sameSite: "lax",
+    secure: isProduction,
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -149,6 +170,11 @@ function requireAdmin(req, res, next) {
   return res.redirect("/login.html");
 }
 
+/*
+  Bezpečnejší login:
+  - po úspešnom prihlásení sa vygeneruje nová session
+  - zníži sa riziko problémov so starou session
+*/
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   const user = USERS.find(u => u.username === username && u.password === password);
@@ -157,20 +183,56 @@ app.post("/api/login", (req, res) => {
     return res.json({ ok: false });
   }
 
-  req.session.user = {
-    username: user.username,
-    role: user.role
-  };
+  req.session.regenerate((err) => {
+    if (err) {
+      console.error("Session regenerate chyba:", err);
+      return res.status(500).json({ ok: false, error: "Login zlyhal" });
+    }
 
-  res.json({ ok: true, role: user.role });
+    req.session.user = {
+      username: user.username,
+      role: user.role
+    };
+
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.error("Session save chyba:", saveErr);
+        return res.status(500).json({ ok: false, error: "Login zlyhal" });
+      }
+
+      return res.json({ ok: true, role: user.role });
+    });
+  });
 });
 
 app.get("/api/me", (req, res) => {
   res.json(req.session.user || null);
 });
 
+/*
+  Nový jednoduchý endpoint:
+  front-end si vie overiť, či session stále žije
+*/
+app.get("/api/session-status", (req, res) => {
+  if (!req.session.user) {
+    return res.json({
+      ok: true,
+      loggedIn: false,
+      user: null
+    });
+  }
+
+  return res.json({
+    ok: true,
+    loggedIn: true,
+    user: req.session.user,
+    expiresAt: req.session.cookie?.expires || null
+  });
+});
+
 app.post("/api/logout", (req, res) => {
   req.session.destroy(() => {
+    res.clearCookie("rcc.sid");
     res.json({ ok: true });
   });
 });
@@ -592,6 +654,7 @@ app.get("/health", (req, res) => {
 
 server.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
+  console.log("NODE_ENV =", process.env.NODE_ENV || "undefined");
   console.log("DATA_ROOT =", DATA_ROOT);
   console.log("DATA_FILE =", DATA_FILE);
   console.log("UPLOADS_DIR =", UPLOADS_DIR);

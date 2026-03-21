@@ -181,6 +181,53 @@ button:hover{
   font-size:12px;
   line-height:1.45;
 }
+.queueBox{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid #223143;
+  border-radius:10px;
+  background:#0f1725;
+}
+.queueTitle{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  margin-bottom:6px;
+}
+.queueValue{
+  font-size:18px;
+  font-weight:900;
+}
+.queueList{
+  margin-top:10px;
+  display:grid;
+  gap:8px;
+}
+.queueItem{
+  border:1px solid #223143;
+  border-radius:10px;
+  padding:8px 10px;
+  background:#111a29;
+  font-size:13px;
+}
+.queueItemHead{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
+.queueBadge{
+  font-size:11px;
+  font-weight:700;
+  color:#fff;
+  background:#7c5c10;
+  padding:2px 6px;
+  border-radius:999px;
+}
+.hidden{
+  display:none;
+}
 </style>
 </head>
 
@@ -223,7 +270,7 @@ button:hover{
   <div class="previewWrap">
     <div class="previewBox" id="photoPreview">bez foto</div>
     <div class="smallText">
-      Zápis sa odošle priamo na server. Po úspechu sa formulár vyčistí.
+      Keď nie je internet, úlovok sa uloží do čakajúcej fronty v mobile. V tomto kroku sa ešte neposiela automaticky na server.
     </div>
   </div>
 
@@ -234,17 +281,180 @@ button:hover{
 
   <div id="status"></div>
 
+  <div class="queueBox">
+    <div class="queueTitle">Čakajúce offline úlovky</div>
+    <div class="queueValue" id="pendingCount">0</div>
+    <div class="queueList hidden" id="pendingList"></div>
+  </div>
+
   <div class="note">
-    Ak sa zápis nepodarí, stránka zobrazí presnú chybu servera. Váhu môžeš zadať aj s čiarkou, napríklad 12,45.
+    Offline režim teraz ukladá čakajúce úlovky len s údajmi tím + váha. Fotka sa do offline fronty v tomto kroku ešte neukladá.
   </div>
 </div>
 
 <script>
 let state = null;
 
-async function checkLogin() {
+const CACHE_KEYS = {
+  offlineAllowed: "rcc_judge_offline_allowed",
+  cachedState: "rcc_judge_cached_state",
+  cachedAt: "rcc_judge_cached_at",
+  cachedUser: "rcc_judge_cached_user",
+  pendingCatches: "rcc_judge_pending_catches_v1"
+};
+
+async function registerJudgeServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
   try {
-    const res = await fetch("/api/me", {
+    await navigator.serviceWorker.register("/sw-judge.js?v=2");
+    console.log("Judge service worker registrovaný");
+  } catch (e) {
+    console.error("Service worker registrácia zlyhala:", e);
+  }
+}
+
+function storeOfflineAccess(user) {
+  try {
+    localStorage.setItem(CACHE_KEYS.offlineAllowed, "1");
+    localStorage.setItem(CACHE_KEYS.cachedUser, JSON.stringify(user || null));
+  } catch (e) {
+    console.error("Uloženie offline prístupu zlyhalo:", e);
+  }
+}
+
+function hasOfflineAccess() {
+  try {
+    return localStorage.getItem(CACHE_KEYS.offlineAllowed) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function saveCachedState(data) {
+  try {
+    localStorage.setItem(CACHE_KEYS.cachedState, JSON.stringify(data));
+    localStorage.setItem(CACHE_KEYS.cachedAt, new Date().toISOString());
+  } catch (e) {
+    console.error("Uloženie cache state zlyhalo:", e);
+  }
+}
+
+function getCachedState() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEYS.cachedState);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getCachedAtText() {
+  try {
+    return localStorage.getItem(CACHE_KEYS.cachedAt) || "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function getPendingCatches() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEYS.pendingCatches);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function savePendingCatches(list) {
+  try {
+    localStorage.setItem(CACHE_KEYS.pendingCatches, JSON.stringify(list || []));
+  } catch (e) {
+    console.error("Uloženie pending fronty zlyhalo:", e);
+  }
+}
+
+function createPendingCatch(data) {
+  return {
+    localId: "pending_" + Date.now() + "_" + Math.random().toString(16).slice(2, 8),
+    createdAt: new Date().toISOString(),
+    teamId: Number(data.teamId || 0),
+    teamLabel: String(data.teamLabel || ""),
+    weight: Number(data.weight || 0),
+    hasPhoto: !!data.hasPhoto,
+    status: "pending"
+  };
+}
+
+function addPendingCatch(item) {
+  const list = getPendingCatches();
+  list.push(item);
+  savePendingCatches(list);
+  renderPendingList();
+}
+
+function renderPendingList() {
+  const list = getPendingCatches();
+  const countEl = document.getElementById("pendingCount");
+  const listEl = document.getElementById("pendingList");
+
+  if (countEl) {
+    countEl.textContent = String(list.length);
+  }
+
+  if (!listEl) return;
+
+  if (!list.length) {
+    listEl.innerHTML = "";
+    listEl.classList.add("hidden");
+    return;
+  }
+
+  listEl.classList.remove("hidden");
+  listEl.innerHTML = list
+    .slice()
+    .reverse()
+    .map(item => `
+      <div class="queueItem">
+        <div class="queueItemHead">
+          <strong>${escapeHtml(item.teamLabel || ("Tím " + item.teamId))}</strong>
+          <span class="queueBadge">ČAKÁ</span>
+        </div>
+        <div>Váha: ${escapeHtml(String(item.weight))} kg</div>
+        <div>Čas: ${escapeHtml(formatDate(item.createdAt))}</div>
+        <div>Fotka: ${item.hasPhoto ? "áno (zat. sa neuloží offline)" : "nie"}</div>
+      </div>
+    `)
+    .join("");
+}
+
+function formatDate(value) {
+  try {
+    return new Date(value).toLocaleString("sk-SK");
+  } catch (e) {
+    return String(value || "");
+  }
+}
+
+async function checkLogin() {
+  if (!navigator.onLine) {
+    if (hasOfflineAccess()) {
+      setStatus("Offline režim: používam posledné uložené dáta", false, "warn");
+      return true;
+    }
+
+    setStatus("Offline prístup ešte nie je pripravený. Najprv otvor judge online.", true, "error");
+    setTimeout(() => {
+      window.location.href = "/login.html";
+    }, 1200);
+    return false;
+  }
+
+  try {
+    const res = await fetch("/api/session-status", {
       cache: "no-store",
       credentials: "same-origin"
     });
@@ -254,15 +464,23 @@ async function checkLogin() {
       return false;
     }
 
-    const user = await res.json();
+    const out = await res.json();
 
-    if (!user) {
+    if (!out || !out.loggedIn || !out.user) {
       window.location.href = "/login.html";
       return false;
     }
 
+    storeOfflineAccess(out.user);
     return true;
   } catch (e) {
+    console.error("Kontrola loginu zlyhala:", e);
+
+    if (hasOfflineAccess()) {
+      setStatus("Server nie je dostupný, používam offline režim", false, "warn");
+      return true;
+    }
+
     window.location.href = "/login.html";
     return false;
   }
@@ -270,6 +488,30 @@ async function checkLogin() {
 
 async function load() {
   updateConnectionUI();
+
+  if (!navigator.onLine) {
+    const cached = getCachedState();
+
+    if (cached) {
+      state = cached;
+      renderSectors();
+      renderTeams();
+      updateTeamCount();
+      const cachedAt = getCachedAtText();
+      setStatus(
+        cachedAt
+          ? `Offline režim – použité posledné dáta (${cachedAt})`
+          : "Offline režim – použité posledné dáta",
+        false,
+        "warn"
+      );
+    } else {
+      setStatus("Offline režim – zatiaľ nie sú uložené žiadne dáta", true, "error");
+    }
+
+    renderPendingList();
+    return;
+  }
 
   try {
     const res = await fetch("/api/state", {
@@ -282,6 +524,7 @@ async function load() {
     }
 
     state = await res.json();
+    saveCachedState(state);
 
     renderSectors();
     renderTeams();
@@ -289,8 +532,22 @@ async function load() {
     setStatus("Dáta načítané", false, "success");
   } catch (e) {
     console.error(e);
+
+    const cached = getCachedState();
+    if (cached) {
+      state = cached;
+      renderSectors();
+      renderTeams();
+      updateTeamCount();
+      setStatus("Server nedostupný – použité posledné uložené dáta", true, "warn");
+      renderPendingList();
+      return;
+    }
+
     setStatus("Chyba načítania dát", true, "error");
   }
+
+  renderPendingList();
 }
 
 function renderSectors() {
@@ -362,9 +619,17 @@ function normalizeWeight(val) {
   return Math.round(parsed * 100) / 100;
 }
 
+function getSelectedTeamLabel() {
+  const teamEl = document.getElementById("team");
+  if (!teamEl) return "";
+  const option = teamEl.options[teamEl.selectedIndex];
+  return option ? option.textContent.trim() : "";
+}
+
 async function saveCatch() {
   const teamId = Number(document.getElementById("team").value || 0);
   const weight = normalizeWeight(document.getElementById("weight").value);
+  const file = document.getElementById("photo").files[0];
 
   if (!teamId) {
     setStatus("Vyber tím", true, "error");
@@ -376,11 +641,31 @@ async function saveCatch() {
     return;
   }
 
+  if (!navigator.onLine) {
+    const pendingItem = createPendingCatch({
+      teamId,
+      teamLabel: getSelectedTeamLabel(),
+      weight,
+      hasPhoto: !!file
+    });
+
+    addPendingCatch(pendingItem);
+
+    clearForm();
+
+    if (file) {
+      setStatus("Offline uložené do fronty. Poznámka: fotka sa v tomto kroku ešte neukladá offline.", false, "warn");
+    } else {
+      setStatus("Offline uložené do čakajúcej fronty ✔", false, "success");
+    }
+
+    return;
+  }
+
   const form = new FormData();
   form.append("teamId", String(teamId));
   form.append("weight", String(weight));
 
-  const file = document.getElementById("photo").files[0];
   if (file) {
     form.append("photo", file);
   }
@@ -454,11 +739,15 @@ async function reloadData() {
 
 async function logout() {
   try {
+    localStorage.removeItem(CACHE_KEYS.offlineAllowed);
+    localStorage.removeItem(CACHE_KEYS.cachedUser);
+
     await fetch("/api/logout", {
       method: "POST",
       credentials: "same-origin"
     });
   } catch (e) {}
+
   window.location.href = "/login.html";
 }
 
@@ -470,9 +759,10 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-window.addEventListener("online", () => {
+window.addEventListener("online", async () => {
   updateConnectionUI();
   setStatus("Pripojenie obnovené", false, "success");
+  await load();
 });
 
 window.addEventListener("offline", () => {
@@ -481,8 +771,12 @@ window.addEventListener("offline", () => {
 });
 
 (async function init() {
+  await registerJudgeServiceWorker();
+  renderPendingList();
+
   const ok = await checkLogin();
   if (!ok) return;
+
   await load();
 })();
 </script>
