@@ -27,11 +27,6 @@ const {
 } = fileStore;
 
 const app = express();
-
-/*
-  Dôležité pre Render / reverse proxy / HTTPS.
-  Bez tohto môže mať secure cookie problém.
-*/
 app.set("trust proxy", 1);
 
 const server = http.createServer(app);
@@ -57,13 +52,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 ensureDataFile();
 
-/*
-  Session konfigurácia:
-  - 24 hodín platnosť
-  - rolling: true = pri aktivite sa session obnovuje
-  - secure cookie len v produkcii
-  - name = vlastný názov cookie
-*/
 const isProduction = process.env.NODE_ENV === "production";
 const SESSION_SECRET = process.env.SESSION_SECRET || "rcc_secret_123";
 
@@ -170,11 +158,43 @@ function requireAdmin(req, res, next) {
   return res.redirect("/login.html");
 }
 
-/*
-  Bezpečnejší login:
-  - po úspešnom prihlásení sa vygeneruje nová session
-  - zníži sa riziko problémov so starou session
-*/
+function ensureMeta(data) {
+  if (!data.meta || typeof data.meta !== "object") {
+    data.meta = {};
+  }
+
+  if (!Array.isArray(data.meta.processedSubmissionIds)) {
+    data.meta.processedSubmissionIds = [];
+  }
+
+  return data.meta;
+}
+
+function cleanupProcessedSubmissionIds(data, maxItems = 5000) {
+  const meta = ensureMeta(data);
+
+  if (meta.processedSubmissionIds.length > maxItems) {
+    meta.processedSubmissionIds = meta.processedSubmissionIds.slice(-maxItems);
+  }
+}
+
+function hasProcessedSubmissionId(data, clientSubmissionId) {
+  if (!clientSubmissionId) return false;
+  const meta = ensureMeta(data);
+  return meta.processedSubmissionIds.includes(clientSubmissionId);
+}
+
+function markProcessedSubmissionId(data, clientSubmissionId) {
+  if (!clientSubmissionId) return;
+
+  const meta = ensureMeta(data);
+
+  if (!meta.processedSubmissionIds.includes(clientSubmissionId)) {
+    meta.processedSubmissionIds.push(clientSubmissionId);
+    cleanupProcessedSubmissionIds(data);
+  }
+}
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   const user = USERS.find(u => u.username === username && u.password === password);
@@ -209,10 +229,6 @@ app.get("/api/me", (req, res) => {
   res.json(req.session.user || null);
 });
 
-/*
-  Nový jednoduchý endpoint:
-  front-end si vie overiť, či session stále žije
-*/
 app.get("/api/session-status", (req, res) => {
   if (!req.session.user) {
     return res.json({
@@ -308,6 +324,16 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
 
     const teamId = Number(req.body.teamId || 0);
     const weight = Number(req.body.weight || 0);
+    const clientSubmissionId = String(req.body.clientSubmissionId || "").trim();
+
+    if (clientSubmissionId && hasProcessedSubmissionId(data, clientSubmissionId)) {
+      return res.json({
+        ok: true,
+        duplicate: true,
+        message: "Úlovok už bol spracovaný",
+        clientSubmissionId
+      });
+    }
 
     const result = catchService.addCatch(data, {
       teamId,
@@ -321,6 +347,10 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
 
     const newCatch = result.newCatch;
 
+    if (clientSubmissionId) {
+      markProcessedSubmissionId(data, clientSubmissionId);
+    }
+
     const saved = saveData(data, {
       onAfterSave: (savedData) => {
         backupService.createBackupFromData(savedData, "data");
@@ -332,13 +362,15 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
       catchId: newCatch.id,
       teamId,
       weight,
-      totalCatches: saved.catches.length
+      totalCatches: saved.catches.length,
+      clientSubmissionId: clientSubmissionId || null
     });
 
     return res.json({
       ok: true,
       catchId: newCatch.id,
-      totalCatches: saved.catches.length
+      totalCatches: saved.catches.length,
+      clientSubmissionId: clientSubmissionId || null
     });
   } catch (e) {
     console.error("API /api/catch chyba:", e);
@@ -450,6 +482,8 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       meta: parsed.meta || {}
     };
 
+    ensureMeta(safeData);
+
     if (!safeData.teams.length) {
       return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
     }
@@ -469,6 +503,8 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       maxTeamId + 1,
       DEFAULT_TEAM_COUNT + 1
     );
+
+    cleanupProcessedSubmissionIds(safeData);
 
     backupService.createBackupFromData(current, "pre-restore");
     writeJsonAtomic(DATA_FILE, safeData);
@@ -505,12 +541,16 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
       meta: parsed.meta || {}
     };
 
+    ensureMeta(normalized);
+
     const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
     normalized.meta.nextTeamId = Math.max(
       Number(normalized.meta.nextTeamId || 0),
       maxTeamId + 1,
       DEFAULT_TEAM_COUNT + 1
     );
+
+    cleanupProcessedSubmissionIds(normalized);
 
     const filename = `rcc-data-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
 

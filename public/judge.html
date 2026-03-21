@@ -286,7 +286,7 @@ button:disabled{
   <div class="previewWrap">
     <div class="previewBox" id="photoPreview">bez foto</div>
     <div class="smallText">
-      Keď nie je internet, úlovok sa uloží do čakajúcej fronty v mobile. Synchronizácia sa teraz spúšťa ručne tlačidlom nižšie.
+      Keď nie je internet, úlovok sa uloží do čakajúcej fronty v mobile. Po návrate internetu sa systém pokúsi synchronizovať automaticky.
     </div>
   </div>
 
@@ -309,7 +309,7 @@ button:disabled{
   </div>
 
   <div class="note">
-    Offline režim teraz ukladá čakajúce úlovky len s údajmi tím + váha. Fotka sa do offline fronty v tomto kroku ešte neukladá. Sync posiela úlovky jeden po druhom.
+    Offline režim teraz ukladá čakajúce úlovky len s údajmi tím + váha. Fotka sa do offline fronty v tomto kroku ešte neukladá. Sync posiela úlovky jeden po druhom a používa ochranu proti duplicitám.
   </div>
 </div>
 
@@ -322,7 +322,7 @@ const CACHE_KEYS = {
   cachedState: "rcc_judge_cached_state",
   cachedAt: "rcc_judge_cached_at",
   cachedUser: "rcc_judge_cached_user",
-  pendingCatches: "rcc_judge_pending_catches_v1"
+  pendingCatches: "rcc_judge_pending_catches_v2"
 };
 
 async function registerJudgeServiceWorker() {
@@ -334,6 +334,10 @@ async function registerJudgeServiceWorker() {
   } catch (e) {
     console.error("Service worker registrácia zlyhala:", e);
   }
+}
+
+function generateClientSubmissionId() {
+  return "sub_" + Date.now() + "_" + Math.random().toString(16).slice(2, 10);
 }
 
 function storeOfflineAccess(user) {
@@ -380,6 +384,29 @@ function getCachedAtText() {
   }
 }
 
+function migrateOldPendingCatchesIfNeeded() {
+  try {
+    const oldRaw = localStorage.getItem("rcc_judge_pending_catches_v1");
+    const newRaw = localStorage.getItem(CACHE_KEYS.pendingCatches);
+
+    if (!oldRaw || newRaw) return;
+
+    const oldList = JSON.parse(oldRaw);
+    if (!Array.isArray(oldList)) return;
+
+    const migrated = oldList.map(item => ({
+      ...item,
+      clientSubmissionId: item.clientSubmissionId || generateClientSubmissionId(),
+      status: item.status || "pending",
+      error: item.error || ""
+    }));
+
+    localStorage.setItem(CACHE_KEYS.pendingCatches, JSON.stringify(migrated));
+  } catch (e) {
+    console.error("Migrácia starej fronty zlyhala:", e);
+  }
+}
+
 function getPendingCatches() {
   try {
     const raw = localStorage.getItem(CACHE_KEYS.pendingCatches);
@@ -402,6 +429,7 @@ function savePendingCatches(list) {
 function createPendingCatch(data) {
   return {
     localId: "pending_" + Date.now() + "_" + Math.random().toString(16).slice(2, 8),
+    clientSubmissionId: generateClientSubmissionId(),
     createdAt: new Date().toISOString(),
     teamId: Number(data.teamId || 0),
     teamLabel: String(data.teamLabel || ""),
@@ -458,11 +486,7 @@ function renderPendingList() {
 
   if (syncBtn) {
     syncBtn.disabled = isSyncing || !navigator.onLine || list.length === 0;
-    if (isSyncing) {
-      syncBtn.textContent = "Synchronizujem...";
-    } else {
-      syncBtn.textContent = "Synchronizovať teraz";
-    }
+    syncBtn.textContent = isSyncing ? "Synchronizujem..." : "Synchronizovať teraz";
   }
 
   if (!listEl) return;
@@ -486,6 +510,7 @@ function renderPendingList() {
         <div>Váha: ${escapeHtml(String(item.weight))} kg</div>
         <div>Čas: ${escapeHtml(formatDate(item.createdAt))}</div>
         <div>Fotka: ${item.hasPhoto ? "áno (zat. sa neuloží offline)" : "nie"}</div>
+        <div>ID: ${escapeHtml(item.clientSubmissionId || "-")}</div>
         ${item.error ? `<div style="margin-top:4px;color:#ff6b6b;">${escapeHtml(item.error)}</div>` : ""}
       </div>
     `)
@@ -711,7 +736,6 @@ async function saveCatch() {
     });
 
     addPendingCatch(pendingItem);
-
     clearForm();
 
     if (file) {
@@ -726,6 +750,7 @@ async function saveCatch() {
   const form = new FormData();
   form.append("teamId", String(teamId));
   form.append("weight", String(weight));
+  form.append("clientSubmissionId", generateClientSubmissionId());
 
   if (file) {
     form.append("photo", file);
@@ -758,7 +783,7 @@ async function saveCatch() {
     }
 
     if (out.ok) {
-      setStatus("ULOŽENÉ ✔", false, "success");
+      setStatus(out.duplicate ? "Už bolo spracované ✔" : "ULOŽENÉ ✔", false, "success");
       clearForm();
       await load();
     } else {
@@ -782,7 +807,6 @@ async function syncPendingCatches() {
   }
 
   if (!list.length) {
-    setStatus("Nie sú žiadne čakajúce úlovky", false, "info");
     renderPendingList();
     return;
   }
@@ -802,6 +826,7 @@ async function syncPendingCatches() {
       const form = new FormData();
       form.append("teamId", String(item.teamId));
       form.append("weight", String(item.weight));
+      form.append("clientSubmissionId", String(item.clientSubmissionId || generateClientSubmissionId()));
 
       try {
         const res = await fetch("/api/catch", {
@@ -862,6 +887,15 @@ async function syncPendingCatches() {
   }
 }
 
+async function tryAutoSync() {
+  if (!navigator.onLine) return;
+  if (isSyncing) return;
+  if (getPendingCatches().length === 0) return;
+
+  setStatus("Internet obnovený, skúšam automatický sync...", false, "info");
+  await syncPendingCatches();
+}
+
 function clearForm() {
   document.getElementById("weight").value = "";
   document.getElementById("photo").value = "";
@@ -888,6 +922,7 @@ function updateConnectionUI() {
 
 async function reloadData() {
   await load();
+  await tryAutoSync();
 }
 
 async function logout() {
@@ -917,6 +952,7 @@ window.addEventListener("online", async () => {
   renderPendingList();
   setStatus("Pripojenie obnovené", false, "success");
   await load();
+  await tryAutoSync();
 });
 
 window.addEventListener("offline", () => {
@@ -927,12 +963,14 @@ window.addEventListener("offline", () => {
 
 (async function init() {
   await registerJudgeServiceWorker();
+  migrateOldPendingCatchesIfNeeded();
   renderPendingList();
 
   const ok = await checkLogin();
   if (!ok) return;
 
   await load();
+  await tryAutoSync();
 })();
 </script>
 
