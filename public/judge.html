@@ -88,6 +88,10 @@ button{
 button:hover{
   background:var(--greenDark);
 }
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
 .secondaryBtn{
   background:#243141;
   color:white;
@@ -225,8 +229,20 @@ button:hover{
   padding:2px 6px;
   border-radius:999px;
 }
+.queueBadgeSyncing{
+  background:#245ea8;
+}
+.queueBadgeError{
+  background:#9b1c1c;
+}
 .hidden{
   display:none;
+}
+.syncRow{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
 }
 </style>
 </head>
@@ -270,12 +286,12 @@ button:hover{
   <div class="previewWrap">
     <div class="previewBox" id="photoPreview">bez foto</div>
     <div class="smallText">
-      Keď nie je internet, úlovok sa uloží do čakajúcej fronty v mobile. V tomto kroku sa ešte neposiela automaticky na server.
+      Keď nie je internet, úlovok sa uloží do čakajúcej fronty v mobile. Synchronizácia sa teraz spúšťa ručne tlačidlom nižšie.
     </div>
   </div>
 
   <div class="actionRow">
-    <button onclick="saveCatch()">Uložiť úlovok</button>
+    <button onclick="saveCatch()" id="saveBtn">Uložiť úlovok</button>
     <button class="secondaryBtn" onclick="clearForm()">Vyčistiť</button>
   </div>
 
@@ -284,16 +300,22 @@ button:hover{
   <div class="queueBox">
     <div class="queueTitle">Čakajúce offline úlovky</div>
     <div class="queueValue" id="pendingCount">0</div>
+
+    <div class="syncRow">
+      <button class="secondaryBtn" id="syncBtn" onclick="syncPendingCatches()">Synchronizovať teraz</button>
+    </div>
+
     <div class="queueList hidden" id="pendingList"></div>
   </div>
 
   <div class="note">
-    Offline režim teraz ukladá čakajúce úlovky len s údajmi tím + váha. Fotka sa do offline fronty v tomto kroku ešte neukladá.
+    Offline režim teraz ukladá čakajúce úlovky len s údajmi tím + váha. Fotka sa do offline fronty v tomto kroku ešte neukladá. Sync posiela úlovky jeden po druhom.
   </div>
 </div>
 
 <script>
 let state = null;
+let isSyncing = false;
 
 const CACHE_KEYS = {
   offlineAllowed: "rcc_judge_offline_allowed",
@@ -385,7 +407,8 @@ function createPendingCatch(data) {
     teamLabel: String(data.teamLabel || ""),
     weight: Number(data.weight || 0),
     hasPhoto: !!data.hasPhoto,
-    status: "pending"
+    status: "pending",
+    error: ""
   };
 }
 
@@ -396,13 +419,50 @@ function addPendingCatch(item) {
   renderPendingList();
 }
 
+function updatePendingCatch(localId, patch) {
+  const list = getPendingCatches().map(item => {
+    if (item.localId === localId) {
+      return { ...item, ...patch };
+    }
+    return item;
+  });
+  savePendingCatches(list);
+  renderPendingList();
+}
+
+function removePendingCatch(localId) {
+  const list = getPendingCatches().filter(item => item.localId !== localId);
+  savePendingCatches(list);
+  renderPendingList();
+}
+
+function getBadgeHtml(status) {
+  if (status === "syncing") {
+    return `<span class="queueBadge queueBadgeSyncing">SYNC</span>`;
+  }
+  if (status === "error") {
+    return `<span class="queueBadge queueBadgeError">CHYBA</span>`;
+  }
+  return `<span class="queueBadge">ČAKÁ</span>`;
+}
+
 function renderPendingList() {
   const list = getPendingCatches();
   const countEl = document.getElementById("pendingCount");
   const listEl = document.getElementById("pendingList");
+  const syncBtn = document.getElementById("syncBtn");
 
   if (countEl) {
     countEl.textContent = String(list.length);
+  }
+
+  if (syncBtn) {
+    syncBtn.disabled = isSyncing || !navigator.onLine || list.length === 0;
+    if (isSyncing) {
+      syncBtn.textContent = "Synchronizujem...";
+    } else {
+      syncBtn.textContent = "Synchronizovať teraz";
+    }
   }
 
   if (!listEl) return;
@@ -421,11 +481,12 @@ function renderPendingList() {
       <div class="queueItem">
         <div class="queueItemHead">
           <strong>${escapeHtml(item.teamLabel || ("Tím " + item.teamId))}</strong>
-          <span class="queueBadge">ČAKÁ</span>
+          ${getBadgeHtml(item.status)}
         </div>
         <div>Váha: ${escapeHtml(String(item.weight))} kg</div>
         <div>Čas: ${escapeHtml(formatDate(item.createdAt))}</div>
         <div>Fotka: ${item.hasPhoto ? "áno (zat. sa neuloží offline)" : "nie"}</div>
+        ${item.error ? `<div style="margin-top:4px;color:#ff6b6b;">${escapeHtml(item.error)}</div>` : ""}
       </div>
     `)
     .join("");
@@ -709,6 +770,98 @@ async function saveCatch() {
   }
 }
 
+async function syncPendingCatches() {
+  if (isSyncing) return;
+
+  const list = getPendingCatches();
+
+  if (!navigator.onLine) {
+    setStatus("Sync nie je možný bez internetu", true, "warn");
+    renderPendingList();
+    return;
+  }
+
+  if (!list.length) {
+    setStatus("Nie sú žiadne čakajúce úlovky", false, "info");
+    renderPendingList();
+    return;
+  }
+
+  isSyncing = true;
+  renderPendingList();
+
+  let successCount = 0;
+
+  try {
+    for (const item of getPendingCatches()) {
+      updatePendingCatch(item.localId, {
+        status: "syncing",
+        error: ""
+      });
+
+      const form = new FormData();
+      form.append("teamId", String(item.teamId));
+      form.append("weight", String(item.weight));
+
+      try {
+        const res = await fetch("/api/catch", {
+          method: "POST",
+          body: form,
+          credentials: "same-origin"
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          updatePendingCatch(item.localId, {
+            status: "error",
+            error: "Server nevrátil JSON odpoveď"
+          });
+          continue;
+        }
+
+        const out = await res.json();
+
+        if (res.status === 401 || out.code === "AUTH_REQUIRED") {
+          updatePendingCatch(item.localId, {
+            status: "error",
+            error: "Relácia vypršala. Prihlás sa znova."
+          });
+          setStatus("Relácia vypršala. Prihlás sa znova.", true, "warn");
+          break;
+        }
+
+        if (out.ok) {
+          removePendingCatch(item.localId);
+          successCount += 1;
+        } else {
+          updatePendingCatch(item.localId, {
+            status: "error",
+            error: out.error || "Chyba pri synchronizácii"
+          });
+        }
+      } catch (e) {
+        updatePendingCatch(item.localId, {
+          status: "error",
+          error: "Spojenie zlyhalo počas syncu"
+        });
+        break;
+      }
+    }
+
+    if (successCount > 0) {
+      setStatus(`Synchronizované: ${successCount}`, false, "success");
+      await load();
+    } else if (getPendingCatches().length > 0) {
+      setStatus("Niektoré úlovky ostali vo fronte", true, "warn");
+    } else {
+      setStatus("Synchronizácia dokončená", false, "success");
+    }
+  } finally {
+    isSyncing = false;
+    renderPendingList();
+  }
+}
+
 function clearForm() {
   document.getElementById("weight").value = "";
   document.getElementById("photo").value = "";
@@ -761,12 +914,14 @@ function escapeHtml(text) {
 
 window.addEventListener("online", async () => {
   updateConnectionUI();
+  renderPendingList();
   setStatus("Pripojenie obnovené", false, "success");
   await load();
 });
 
 window.addEventListener("offline", () => {
   updateConnectionUI();
+  renderPendingList();
   setStatus("Internet nie je dostupný", true, "warn");
 });
 
