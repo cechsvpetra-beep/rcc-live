@@ -1,10 +1,17 @@
 const fs = require("fs");
 const path = require("path");
 
-const DATA_FILE = path.join(__dirname, "..", "data.json");
+const DATA_ROOT = process.env.DATA_ROOT || path.join(__dirname, "..");
+const DATA_FILE = path.join(DATA_ROOT, "data.json");
 
 const VALID_SECTORS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const DEFAULT_TEAM_COUNT = 50;
+
+function ensureDir(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
 
 function defaultSectors() {
   return {
@@ -42,12 +49,15 @@ function defaultData() {
 }
 
 function writeJsonAtomic(filePath, data) {
+  ensureDir(path.dirname(filePath));
   const tempPath = `${filePath}.tmp`;
   fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
   fs.renameSync(tempPath, filePath);
 }
 
 function ensureDataFile() {
+  ensureDir(DATA_ROOT);
+
   if (!fs.existsSync(DATA_FILE)) {
     writeJsonAtomic(DATA_FILE, defaultData());
   }
@@ -220,6 +230,8 @@ function saveData(data, options = {}) {
 }
 
 module.exports = {
+  DATA_ROOT,
+  DATA_FILE,
   VALID_SECTORS,
   DEFAULT_TEAM_COUNT,
   defaultSectors,

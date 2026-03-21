@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const { DATA_ROOT, writeJsonAtomic } = require("../storage/fileStore");
 
-const BACKUP_DIR = path.join(__dirname, "..", "backup");
+const BACKUP_DIR = path.join(DATA_ROOT, "backup");
 const MAX_BACKUPS = 50;
 
 function ensureBackupDir() {
@@ -23,7 +24,6 @@ function cleanupBackups() {
 
     if (files.length > MAX_BACKUPS) {
       const toDelete = files.slice(0, files.length - MAX_BACKUPS);
-
       for (const file of toDelete) {
         try {
           fs.unlinkSync(path.join(BACKUP_DIR, file));
@@ -46,10 +46,7 @@ function createBackupFromData(data, prefix = "data") {
     const backupName = `${prefix}-${timestamp}.json`;
     const backupPath = path.join(BACKUP_DIR, backupName);
 
-    const tempPath = `${backupPath}.tmp`;
-    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
-    fs.renameSync(tempPath, backupPath);
-
+    writeJsonAtomic(backupPath, data);
     cleanupBackups();
 
     console.log("Backup uložený:", backupName);
@@ -59,6 +56,7 @@ function createBackupFromData(data, prefix = "data") {
 }
 
 module.exports = {
+  BACKUP_DIR,
   cleanupBackups,
   createBackupFromData
 };

@@ -1,8 +1,4 @@
 const http = require("http");
-const fileStore = require("./storage/fileStore");
-const backupService = require("./services/backupService");
-const stateService = require("./services/stateService");
-const catchService = require("./services/catchService");
 const express = require("express");
 const session = require("express-session");
 const multer = require("multer");
@@ -10,7 +6,14 @@ const path = require("path");
 const fs = require("fs");
 const { Server } = require("socket.io");
 
+const fileStore = require("./storage/fileStore");
+const backupService = require("./services/backupService");
+const stateService = require("./services/stateService");
+const catchService = require("./services/catchService");
+
 const {
+  DATA_ROOT,
+  DATA_FILE,
   DEFAULT_TEAM_COUNT,
   defaultSectors,
   buildDefaultTeams,
@@ -35,9 +38,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 10000;
 
 const PUBLIC_DIR = path.join(__dirname, "public");
-const DATA_FILE = path.join(__dirname, "data.json");
-const UPLOADS_DIR = path.join(PUBLIC_DIR, "uploads");
-const BACKUP_DIR = path.join(__dirname, "backup");
+const UPLOADS_DIR = path.join(DATA_ROOT, "uploads");
 
 if (!fs.existsSync(PUBLIC_DIR)) {
   fs.mkdirSync(PUBLIC_DIR, { recursive: true });
@@ -47,9 +48,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-if (!fs.existsSync(BACKUP_DIR)) {
-  fs.mkdirSync(BACKUP_DIR, { recursive: true });
-}
+ensureDataFile();
 
 app.use(session({
   secret: "rcc_secret_123",
@@ -71,6 +70,7 @@ const USERS = [
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static(PUBLIC_DIR));
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 function buildAndBroadcastLiveState() {
   try {
@@ -108,7 +108,7 @@ function deletePhysicalFileFromPublic(publicPath) {
     if (!publicPath || typeof publicPath !== "string") return;
     if (!publicPath.startsWith("/uploads/")) return;
 
-    const fullPath = path.join(PUBLIC_DIR, publicPath.replace(/^\//, ""));
+    const fullPath = path.join(UPLOADS_DIR, path.basename(publicPath));
     if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
     }
@@ -230,13 +230,13 @@ app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res)
       deletePhysicalFileFromPublic(oldPhoto);
     }
 
-    res.json({
+    return res.json({
       ok: true,
       path: team.photo
     });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, error: "Upload fotky zlyhal" });
+    return res.status(500).json({ ok: false, error: "Upload fotky zlyhal" });
   }
 });
 
@@ -273,14 +273,17 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
       totalCatches: saved.catches.length
     });
 
-    res.json({
+    return res.json({
       ok: true,
       catchId: newCatch.id,
       totalCatches: saved.catches.length
     });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ ok: false, error: "Ukladanie úlovku zlyhalo" });
+    console.error("API /api/catch chyba:", e);
+    return res.status(500).json({
+      ok: false,
+      error: "Ukladanie úlovku zlyhalo"
+    });
   }
 });
 
@@ -343,10 +346,10 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       }
     });
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, error: "Ukladanie admin dát zlyhalo" });
+    return res.status(500).json({ ok: false, error: "Ukladanie admin dát zlyhalo" });
   }
 });
 
@@ -454,7 +457,7 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
     return res.send(JSON.stringify(normalized, null, 2));
   } catch (e) {
     console.error("Download data chyba:", e);
-    res.status(500).json({ ok: false, error: "Stiahnutie dát zlyhalo" });
+    return res.status(500).json({ ok: false, error: "Stiahnutie dát zlyhalo" });
   }
 });
 
@@ -479,10 +482,10 @@ app.get("/api/admin/catches", requireAdmin, (req, res) => {
         };
       });
 
-    res.json({ ok: true, catches });
+    return res.json({ ok: true, catches });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, catches: [], error: "Načítanie úlovkov zlyhalo" });
+    return res.status(500).json({ ok: false, catches: [], error: "Načítanie úlovkov zlyhalo" });
   }
 });
 
@@ -507,10 +510,10 @@ app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
       }
     });
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, error: "Úprava úlovku zlyhala" });
+    return res.status(500).json({ ok: false, error: "Úprava úlovku zlyhala" });
   }
 });
 
@@ -538,10 +541,10 @@ app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
       }
     });
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, error: "Mazanie úlovku zlyhalo" });
+    return res.status(500).json({ ok: false, error: "Mazanie úlovku zlyhalo" });
   }
 });
 
@@ -558,10 +561,10 @@ app.get("/api/state", (req, res) => {
   try {
     const data = loadData();
     const publicState = stateService.buildPublicState(data);
-    res.json(publicState);
+    return res.json(publicState);
   } catch (e) {
     console.error("API /api/state chyba:", e);
-    res.status(500).json({
+    return res.status(500).json({
       lb: [],
       totalWeight: 0,
       totalFish: 0,
@@ -578,9 +581,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
+  return res.json({
+    ok: true,
+    time: new Date().toISOString(),
+    dataRoot: DATA_ROOT,
+    dataFile: DATA_FILE,
+    uploadsDir: UPLOADS_DIR
+  });
 });
 
 server.listen(PORT, () => {
   console.log("Server beží na porte", PORT);
+  console.log("DATA_ROOT =", DATA_ROOT);
+  console.log("DATA_FILE =", DATA_FILE);
+  console.log("UPLOADS_DIR =", UPLOADS_DIR);
 });
