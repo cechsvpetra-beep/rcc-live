@@ -22,6 +22,8 @@ const {
   normalizeSectors,
   normalizeTeam,
   normalizeCatch,
+  normalizeJudge,
+  normalizeJudges,
   loadData,
   saveData
 } = fileStore;
@@ -167,11 +169,13 @@ function ensureMeta(data) {
   }
 
   if (!Array.isArray(data.meta.judges)) {
-    data.meta.judges = [];
+    data.meta.judges = Array.isArray(data.judges) ? data.judges : [];
   }
 
   if (!Number.isFinite(Number(data.meta.nextJudgeId))) {
-    data.meta.nextJudgeId = 1;
+    const maxJudgeId = (Array.isArray(data.judges) ? data.judges : [])
+      .reduce((max, j) => Math.max(max, Number(j?.id) || 0), 0);
+    data.meta.nextJudgeId = maxJudgeId + 1;
   }
 
   return data.meta;
@@ -213,21 +217,6 @@ function normalizeCatchTime(value) {
   return `${match[1]}:${match[2]}`;
 }
 
-function normalizeJudge(rawJudge, fallback = {}) {
-  const id = Number(rawJudge?.id || fallback?.id || 0);
-  const username = String(rawJudge?.username || fallback?.username || "").trim();
-  const password = String(rawJudge?.password || fallback?.password || "").trim();
-
-  return {
-    id,
-    username,
-    password,
-    active: rawJudge?.active !== undefined
-      ? Boolean(rawJudge.active)
-      : Boolean(fallback?.active)
-  };
-}
-
 function getJudgesFromData(data) {
   const meta = ensureMeta(data);
 
@@ -235,9 +224,7 @@ function getJudgesFromData(data) {
     ? data.judges
     : (Array.isArray(meta.judges) ? meta.judges : []);
 
-  return rawJudges
-    .map(j => normalizeJudge(j, j))
-    .filter(j => Number(j.id) > 0 && j.username && j.password);
+  return normalizeJudges(rawJudges);
 }
 
 function findJudgeUser(username, password) {
@@ -259,43 +246,49 @@ function findJudgeUser(username, password) {
 }
 
 app.post("/api/login", (req, res) => {
-  const { username, password } = req.body || {};
+  try {
+    const username = String(req.body?.username || "").trim();
+    const password = String(req.body?.password || "");
 
-  let user = null;
+    let user = null;
 
-  if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
-    user = {
-      username: ADMIN_USER.username,
-      role: ADMIN_USER.role
-    };
-  } else {
-    user = findJudgeUser(String(username || ""), String(password || ""));
-  }
-
-  if (!user) {
-    return res.json({ ok: false });
-  }
-
-  req.session.regenerate((err) => {
-    if (err) {
-      console.error("Session regenerate chyba:", err);
-      return res.status(500).json({ ok: false, error: "Login zlyhal" });
+    if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+      user = {
+        username: ADMIN_USER.username,
+        role: ADMIN_USER.role
+      };
+    } else {
+      user = findJudgeUser(username, password);
     }
 
-    req.session.user = {
-      username: user.username,
-      role: user.role
-    };
+    if (!user) {
+      return res.json({ ok: false });
+    }
 
-    req.session.save((saveErr) => {
-      if (saveErr) {
-        console.error("Session save chyba:", saveErr);
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Session regenerate chyba:", err);
         return res.status(500).json({ ok: false, error: "Login zlyhal" });
       }
 
-      return res.json({ ok: true, role: user.role });
+      req.session.user = {
+        username: user.username,
+        role: user.role
+      };
+
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("Session save chyba:", saveErr);
+          return res.status(500).json({ ok: false, error: "Login zlyhal" });
+        }
+
+        return res.json({ ok: true, role: user.role });
+      });
     });
-  });
+  } catch (e) {
+    console.error("API /api/login chyba:", e);
+    return res.status(500).json({ ok: false, error: "Login zlyhal" });
+  }
 });
 
 app.get("/api/me", (req, res) => {
@@ -521,36 +514,28 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       ? incoming.judges
       : (Array.isArray(incoming?.meta?.judges) ? incoming.meta.judges : []);
 
-    const usedJudgeUsernames = new Set();
-    const judges = [];
+    const judges = normalizeJudges(
+      incomingJudges
+        .map(j => normalizeJudge(j, j))
+        .filter(j => String(j.username || "").toLowerCase() !== ADMIN_USER.username.toLowerCase())
+    );
 
-    for (const rawJudge of incomingJudges) {
-      const judge = normalizeJudge(rawJudge, rawJudge);
-
-      if (!Number(judge.id)) continue;
-      if (!judge.username) continue;
-      if (!judge.password) continue;
-
-      const usernameKey = judge.username.toLowerCase();
-
-      if (usernameKey === ADMIN_USER.username.toLowerCase()) {
-        continue;
-      }
-
-      if (usedJudgeUsernames.has(usernameKey)) {
+    const usernameSet = new Set();
+    for (const judge of judges) {
+      const key = judge.username.toLowerCase();
+      if (usernameSet.has(key)) {
         return res.status(400).json({
           ok: false,
           error: `Duplicitné meno rozhodcu: ${judge.username}`
         });
       }
-
-      usedJudgeUsernames.add(usernameKey);
-      judges.push(judge);
+      usernameSet.add(key);
     }
 
     const nextJudgeId = judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
 
-    saveData({
+    const dataToSave = {
+      ...current,
       sectors,
       teams,
       catches: current.catches || [],
@@ -560,7 +545,9 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
         judges,
         nextJudgeId
       }
-    }, {
+    };
+
+    saveData(dataToSave, {
       onAfterSave: (savedData) => {
         backupService.createBackupFromData(savedData, "data");
         buildAndBroadcastLiveState();
@@ -569,7 +556,7 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
 
     return res.json({ ok: true });
   } catch (e) {
-    console.error(e);
+    console.error("API /api/admin/setup chyba:", e);
     return res.status(500).json({ ok: false, error: "Ukladanie admin dát zlyhalo" });
   }
 });
@@ -655,16 +642,21 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
           ...c,
           catchTime: normalizeCatchTime(c.catchTime)
         })),
-      judges: Array.isArray(parsed.judges) ? parsed.judges : [],
+      judges: normalizeJudges(
+        Array.isArray(parsed.judges)
+          ? parsed.judges
+          : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : [])
+      ),
       meta: parsed.meta || {}
     };
 
     ensureMeta(safeData);
 
-    const restoredJudges = getJudgesFromData(safeData);
-    safeData.judges = restoredJudges;
-    safeData.meta.judges = restoredJudges;
-    safeData.meta.nextJudgeId = restoredJudges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+    safeData.meta.judges = safeData.judges;
+    safeData.meta.nextJudgeId = safeData.judges.reduce(
+      (max, j) => Math.max(max, Number(j.id) || 0),
+      0
+    ) + 1;
 
     if (!safeData.teams.length) {
       return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
@@ -726,14 +718,20 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
               catchTime: normalizeCatchTime(c.catchTime)
             }))
         : [],
-      judges: Array.isArray(parsed.judges) ? parsed.judges : [],
+      judges: normalizeJudges(
+        Array.isArray(parsed.judges)
+          ? parsed.judges
+          : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : [])
+      ),
       meta: parsed.meta || {}
     };
 
     ensureMeta(normalized);
-    normalized.judges = getJudgesFromData(normalized);
     normalized.meta.judges = normalized.judges;
-    normalized.meta.nextJudgeId = normalized.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+    normalized.meta.nextJudgeId = normalized.judges.reduce(
+      (max, j) => Math.max(max, Number(j.id) || 0),
+      0
+    ) + 1;
 
     const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
     normalized.meta.nextTeamId = Math.max(
