@@ -1,3 +1,11 @@
+function getDisplayTime(catchItem) {
+  const catchTime = String(catchItem?.catchTime || "").trim();
+  if (catchTime) {
+    return catchTime;
+  }
+  return catchItem?.time || "";
+}
+
 function buildPublicState(data) {
   const teams = Array.isArray(data?.teams) ? data.teams : [];
   const catches = Array.isArray(data?.catches) ? data.catches : [];
@@ -68,7 +76,9 @@ function buildPublicState(data) {
         teamName: topFishTeam?.name || "",
         sector: topFishTeam?.sector || "",
         peg: topFishTeam?.peg || "",
-        time: topFishCatch.time || "",
+        time: getDisplayTime(topFishCatch),
+        catchTime: topFishCatch.catchTime || "",
+        recordedTime: topFishCatch.time || "",
         photo: topFishCatch.photo || null
       }
     : null;
@@ -91,7 +101,9 @@ function buildPublicState(data) {
         teamName: lastCatchTeam?.name || "",
         sector: lastCatchTeam?.sector || "",
         peg: lastCatchTeam?.peg || "",
-        time: lastCatchRaw.time || "",
+        time: getDisplayTime(lastCatchRaw),
+        catchTime: lastCatchRaw.catchTime || "",
+        recordedTime: lastCatchRaw.time || "",
         photo: lastCatchRaw.photo || null
       }
     : null;
@@ -105,7 +117,9 @@ function buildPublicState(data) {
           id: c.id,
           number: index + 1,
           weight: Number(c.weight || 0),
-          time: c.time,
+          time: getDisplayTime(c),
+          catchTime: c.catchTime || "",
+          recordedTime: c.time || "",
           photo: c.photo || null
         }))
     ])
