@@ -131,6 +131,17 @@ button.danger:hover{
   background:#111826;
   align-items:center;
 }
+.rowJudge{
+  display:grid;
+  grid-template-columns:70px 1.2fr 1fr 130px 120px;
+  gap:10px;
+  margin-bottom:10px;
+  padding:10px;
+  border:1px solid #2a3340;
+  border-radius:10px;
+  background:#111826;
+  align-items:center;
+}
 input,select{
   width:100%;
   padding:8px 10px;
@@ -287,6 +298,16 @@ label.inline{
   gap:10px;
   align-items:center;
 }
+.infoBox{
+  margin-top:10px;
+  padding:12px;
+  border:1px solid #2a3340;
+  border-radius:12px;
+  background:#111826;
+  color:#d7e5f6;
+  font-size:13px;
+  line-height:1.5;
+}
 @media (max-width:1200px){
   .rowTeam{
     grid-template-columns:60px 1fr 90px 90px 110px 1fr 120px;
@@ -304,6 +325,7 @@ label.inline{
     grid-column:1 / -1;
   }
   .rowTeam,
+  .rowJudge,
   .catchCard,
   .catchTools,
   .footerActions,
@@ -321,7 +343,7 @@ label.inline{
     <img src="/logo.png" alt="RCC logo" class="logo">
     <div>
       <h1>Admin – RCC</h1>
-      <div class="sub">Sektory, tímy, stanovištia, aktivácia, fotky tímov, úprava úlovkov, export a obnova</div>
+      <div class="sub">Sektory, tímy, rozhodcovia, úlovky, export a obnova</div>
     </div>
   </div>
 
@@ -344,9 +366,26 @@ label.inline{
   <h2>Tímy</h2>
   <div class="sectionSub">Názvy tímov, stanovištia, aktivácia a fotky tímov.</div>
   <div id="teams"></div>
+</div>
+
+<div class="section">
+  <h2>Rozhodcovia</h2>
+  <div class="sectionSub">Tu pridávaš rozhodcov, nastavuješ im meno, heslo a aktívnosť.</div>
+
+  <div id="judges"></div>
 
   <div class="footerActions">
-    <button onclick="saveAdmin()">ULOŽIŤ</button>
+    <button class="secondary" onclick="addJudge()">+ Pridať rozhodcu</button>
+  </div>
+
+  <div class="infoBox">
+    Admin účet ostáva samostatný. Neaktívny rozhodca sa neprihlási. Zmazaný rozhodca sa už neprihlási vôbec.
+  </div>
+</div>
+
+<div class="section">
+  <div class="footerActions">
+    <button onclick="saveAdmin()">ULOŽIŤ VŠETKO</button>
   </div>
 </div>
 
@@ -388,7 +427,7 @@ label.inline{
   <div class="resetBox">
     <div class="resetTitle">Reset všetkých úlovkov</div>
     <div class="resetText">
-      Toto zmaže všetky úlovky po skončení pretekov. Tímy, sektory a fotky tímov ostanú zachované.
+      Toto zmaže všetky úlovky po skončení pretekov. Tímy, sektory, rozhodcovia a fotky tímov ostanú zachované.
       Pred resetom sa spraví bezpečnostná záloha. Pre potvrdenie napíš presne <b>RESET</b>.
     </div>
 
@@ -412,6 +451,20 @@ function normalizeCatchTime(value) {
   if (!match) return "";
 
   return `${match[1]}:${match[2]}`;
+}
+
+function ensureMeta() {
+  if (!adminData.meta || typeof adminData.meta !== "object") {
+    adminData.meta = {};
+  }
+
+  if (!Array.isArray(adminData.meta.judges)) {
+    adminData.meta.judges = [];
+  }
+
+  if (!Number.isFinite(Number(adminData.meta.nextJudgeId))) {
+    adminData.meta.nextJudgeId = 1;
+  }
 }
 
 async function loadAdmin() {
@@ -455,6 +508,7 @@ async function loadAdmin() {
 
     renderSectors();
     renderTeams();
+    renderJudges();
     renderCatchSectorFilter();
     renderCatches();
 
@@ -521,6 +575,30 @@ function normalizeData() {
     })
     .filter(Boolean)
     .sort((a, b) => a.id - b.id);
+
+  ensureMeta();
+
+  const judgeSeenIds = new Set();
+  adminData.meta.judges = adminData.meta.judges
+    .map((j) => {
+      const id = Number(j?.id || 0);
+      if (!id || judgeSeenIds.has(id)) return null;
+      judgeSeenIds.add(id);
+
+      return {
+        id,
+        username: typeof j?.username === "string" ? j.username.trim() : "",
+        password: typeof j?.password === "string" ? j.password.trim() : "",
+        active: Boolean(j?.active)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.id - b.id);
+
+  adminData.meta.nextJudgeId = Math.max(
+    Number(adminData.meta.nextJudgeId || 1),
+    adminData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1
+  );
 }
 
 function renderSectors() {
@@ -605,6 +683,53 @@ function renderTeams() {
         <div class="photoBox">
           ${renderPhotoThumb(t.photo)}
         </div>
+      </div>
+    `;
+  });
+}
+
+function renderJudges() {
+  const wrap = document.getElementById("judges");
+  if (!wrap) return;
+
+  ensureMeta();
+  wrap.innerHTML = "";
+
+  if (!adminData.meta.judges.length) {
+    wrap.innerHTML = `<div class="empty">Zatiaľ nie sú pridaní žiadni rozhodcovia.</div>`;
+    return;
+  }
+
+  adminData.meta.judges.forEach(j => {
+    wrap.innerHTML += `
+      <div class="rowJudge">
+        <div>#${j.id}</div>
+
+        <div class="inlineCol">
+          <div class="small">Meno / login</div>
+          <input
+            value="${escapeHtml(j.username)}"
+            onchange="changeJudgeUsername(${j.id},this.value)"
+            placeholder="napr. rozhodca1">
+        </div>
+
+        <div class="inlineCol">
+          <div class="small">Heslo</div>
+          <input
+            value="${escapeHtml(j.password)}"
+            onchange="changeJudgePassword(${j.id},this.value)"
+            placeholder="napr. 1234">
+        </div>
+
+        <label class="inline">
+          <input
+            type="checkbox"
+            ${j.active ? "checked" : ""}
+            onchange="changeJudgeActive(${j.id},this.checked)">
+          aktívny
+        </label>
+
+        <button class="danger" onclick="deleteJudge(${j.id})">Zmazať</button>
       </div>
     `;
   });
@@ -778,6 +903,54 @@ function changeTeamActive(id, value) {
   t.active = Boolean(value);
 }
 
+function getJudge(id) {
+  ensureMeta();
+  return adminData.meta.judges.find(j => Number(j.id) === Number(id));
+}
+
+function addJudge() {
+  ensureMeta();
+
+  const newId = Number(adminData.meta.nextJudgeId || 1);
+
+  adminData.meta.judges.push({
+    id: newId,
+    username: "",
+    password: "",
+    active: true
+  });
+
+  adminData.meta.nextJudgeId = newId + 1;
+  renderJudges();
+}
+
+function changeJudgeUsername(id, value) {
+  const j = getJudge(id);
+  if (!j) return;
+  j.username = value.trim();
+}
+
+function changeJudgePassword(id, value) {
+  const j = getJudge(id);
+  if (!j) return;
+  j.password = value.trim();
+}
+
+function changeJudgeActive(id, value) {
+  const j = getJudge(id);
+  if (!j) return;
+  j.active = Boolean(value);
+}
+
+function deleteJudge(id) {
+  const ok = confirm(`Naozaj chceš zmazať rozhodcu #${id}?`);
+  if (!ok) return;
+
+  ensureMeta();
+  adminData.meta.judges = adminData.meta.judges.filter(j => Number(j.id) !== Number(id));
+  renderJudges();
+}
+
 async function uploadTeamPhoto(teamId, input) {
   const file = input.files && input.files[0];
   if (!file) return;
@@ -814,9 +987,46 @@ async function uploadTeamPhoto(teamId, input) {
   }
 }
 
+function validateJudgesBeforeSave() {
+  ensureMeta();
+
+  const usernameSet = new Set();
+
+  for (const judge of adminData.meta.judges) {
+    const username = String(judge.username || "").trim();
+    const password = String(judge.password || "").trim();
+
+    if (!username) {
+      return "Každý rozhodca musí mať meno / login";
+    }
+
+    if (!password) {
+      return `Rozhodca ${username} nemá heslo`;
+    }
+
+    if (username.toLowerCase() === "admin") {
+      return 'Meno rozhodcu "admin" nie je povolené';
+    }
+
+    if (usernameSet.has(username.toLowerCase())) {
+      return `Duplicitné meno rozhodcu: ${username}`;
+    }
+
+    usernameSet.add(username.toLowerCase());
+  }
+
+  return "";
+}
+
 async function saveAdmin() {
   try {
     normalizeData();
+
+    const judgesError = validateJudgesBeforeSave();
+    if (judgesError) {
+      setStatus(judgesError, true);
+      return;
+    }
 
     const payload = {
       sectors: adminData.sectors,
@@ -827,7 +1037,15 @@ async function saveAdmin() {
         peg: t.peg,
         active: Boolean(t.active),
         photo: t.photo || null
-      }))
+      })),
+      meta: {
+        judges: adminData.meta.judges.map(j => ({
+          id: Number(j.id),
+          username: j.username,
+          password: j.password,
+          active: Boolean(j.active)
+        }))
+      }
     };
 
     const res = await fetch("/api/admin/setup", {
@@ -844,6 +1062,7 @@ async function saveAdmin() {
       await loadCatches();
       renderSectors();
       renderTeams();
+      renderJudges();
       renderCatchSectorFilter();
       renderCatches();
       setStatus("ULOŽENÉ ✔");
@@ -987,6 +1206,7 @@ async function restoreBackup() {
     await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
     renderSectors();
     renderTeams();
+    renderJudges();
     renderCatchSectorFilter();
     renderCatches();
 
@@ -1033,6 +1253,7 @@ async function saveCatchEdit(catchId) {
     if (out.ok) {
       await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
       renderTeams();
+      renderJudges();
       renderCatchSectorFilter();
       renderCatches();
       setStatus(`Úlovok ${catchId} upravený ✔`);
@@ -1062,6 +1283,7 @@ async function deleteCatch(catchId) {
     if (out.ok) {
       await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
       renderTeams();
+      renderJudges();
       renderCatchSectorFilter();
       renderCatches();
       setStatus(`Úlovok ${catchId} zmazaný ✔`);
@@ -1105,6 +1327,7 @@ async function resetAllCatches() {
 
     await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
     renderTeams();
+    renderJudges();
     renderCatchSectorFilter();
     renderCatches();
 

@@ -55,11 +55,18 @@ button{
 #error{
     color:#ff6b6b;
     margin-top:10px;
+    min-height:18px;
 }
 
 .logo{
     width:80px;
     margin-bottom:10px;
+}
+.hint{
+    color:#9db0c5;
+    font-size:13px;
+    margin-top:10px;
+    line-height:1.45;
 }
 </style>
 </head>
@@ -72,41 +79,52 @@ button{
 
 <h1>RCC Login</h1>
 
-<input id="username" placeholder="Meno">
-<input id="password" type="password" placeholder="Heslo">
+<input id="username" placeholder="Meno / login" autocomplete="username">
+<input id="password" type="password" placeholder="Heslo" autocomplete="current-password">
 
 <button onclick="login()">PRIHLÁSIŤ</button>
 
 <div id="error"></div>
+<div class="hint">Admin aj rozhodcovia sa prihlasujú cez tento formulár.</div>
 
 </div>
 
 <script>
 async function login(){
+    const errorEl = document.getElementById("error");
+    errorEl.innerText = "";
 
-    const username = document.getElementById("username").value
-    const password = document.getElementById("password").value
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-    const res = await fetch("/api/login",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({username,password})
-    })
-
-    const data = await res.json()
-
-    if(!data.ok){
-        document.getElementById("error").innerText = "Zlé meno alebo heslo"
-        return
+    if(!username || !password){
+        errorEl.innerText = "Zadaj meno aj heslo";
+        return;
     }
 
-    // presmerovanie podľa role
-    if(data.role === "admin"){
-        window.location.href = "/admin.html"
-    }else{
-        window.location.href = "/judge.html"
-    }
+    try{
+        const res = await fetch("/api/login",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({username,password}),
+            credentials:"same-origin"
+        });
 
+        const data = await res.json();
+
+        if(!data.ok){
+            errorEl.innerText = "Zlé meno alebo heslo, alebo účet nie je aktívny";
+            return;
+        }
+
+        if(data.role === "admin"){
+            window.location.href = "/admin.html";
+        }else{
+            window.location.href = "/judge.html";
+        }
+    }catch(e){
+        errorEl.innerText = "Server neodpovedá";
+    }
 }
 </script>
 

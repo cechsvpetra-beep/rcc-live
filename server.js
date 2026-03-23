@@ -69,12 +69,11 @@ app.use(session({
   }
 }));
 
-const USERS = [
-  { username: "admin", password: "admin123", role: "admin" },
-  { username: "judge1", password: "1234", role: "judge" },
-  { username: "judge2", password: "1234", role: "judge" },
-  { username: "judge3", password: "1234", role: "judge" }
-];
+const ADMIN_USER = {
+  username: "admin",
+  password: "admin123",
+  role: "admin"
+};
 
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
@@ -167,6 +166,14 @@ function ensureMeta(data) {
     data.meta.processedSubmissionIds = [];
   }
 
+  if (!Array.isArray(data.meta.judges)) {
+    data.meta.judges = [];
+  }
+
+  if (!Number.isFinite(Number(data.meta.nextJudgeId))) {
+    data.meta.nextJudgeId = 1;
+  }
+
   return data.meta;
 }
 
@@ -206,9 +213,60 @@ function normalizeCatchTime(value) {
   return `${match[1]}:${match[2]}`;
 }
 
+function normalizeJudge(rawJudge, fallback = {}) {
+  const id = Number(rawJudge?.id || fallback?.id || 0);
+  const username = String(rawJudge?.username || fallback?.username || "").trim();
+  const password = String(rawJudge?.password || fallback?.password || "").trim();
+
+  return {
+    id,
+    username,
+    password,
+    active: rawJudge?.active !== undefined
+      ? Boolean(rawJudge.active)
+      : Boolean(fallback?.active)
+  };
+}
+
+function getJudgesFromData(data) {
+  const meta = ensureMeta(data);
+
+  return (meta.judges || [])
+    .map(j => normalizeJudge(j, j))
+    .filter(j => Number(j.id) > 0 && j.username && j.password);
+}
+
+function findJudgeUser(username, password) {
+  const data = loadData();
+  const judges = getJudgesFromData(data);
+
+  const judge = judges.find(j =>
+    j.active &&
+    j.username === username &&
+    j.password === password
+  );
+
+  if (!judge) return null;
+
+  return {
+    username: judge.username,
+    role: "judge"
+  };
+}
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
-  const user = USERS.find(u => u.username === username && u.password === password);
+
+  let user = null;
+
+  if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+    user = {
+      username: ADMIN_USER.username,
+      role: ADMIN_USER.role
+    };
+  } else {
+    user = findJudgeUser(String(username || ""), String(password || ""));
+  }
 
   if (!user) {
     return res.json({ ok: false });
@@ -397,12 +455,23 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
 
 app.get("/api/admin/setup", requireAdmin, (req, res) => {
   const data = loadData();
-  res.json(data);
+  const meta = ensureMeta(data);
+
+  res.json({
+    sectors: data.sectors || {},
+    teams: data.teams || [],
+    catches: data.catches || [],
+    meta: {
+      ...meta,
+      judges: getJudgesFromData(data)
+    }
+  });
 });
 
 app.post("/api/admin/setup", requireAdmin, (req, res) => {
   try {
     const current = loadData();
+    const currentMeta = ensureMeta(current);
     const incoming = req.body || {};
 
     const sectors = normalizeSectors(incoming.sectors, current.sectors);
@@ -442,11 +511,45 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       .filter(t => Number(t.id) > 0)
       .sort((a, b) => Number(a.id) - Number(b.id));
 
+    const incomingJudges = Array.isArray(incoming?.meta?.judges) ? incoming.meta.judges : [];
+    const usedJudgeUsernames = new Set();
+    const judges = [];
+
+    for (const rawJudge of incomingJudges) {
+      const judge = normalizeJudge(rawJudge, rawJudge);
+
+      if (!Number(judge.id)) continue;
+      if (!judge.username) continue;
+      if (!judge.password) continue;
+
+      const usernameKey = judge.username.toLowerCase();
+
+      if (usernameKey === ADMIN_USER.username.toLowerCase()) {
+        continue;
+      }
+
+      if (usedJudgeUsernames.has(usernameKey)) {
+        return res.status(400).json({
+          ok: false,
+          error: `Duplicitné meno rozhodcu: ${judge.username}`
+        });
+      }
+
+      usedJudgeUsernames.add(usernameKey);
+      judges.push(judge);
+    }
+
+    const nextJudgeId = judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+
     saveData({
       sectors,
       teams,
       catches: current.catches || [],
-      meta: current.meta || {}
+      meta: {
+        ...currentMeta,
+        judges,
+        nextJudgeId
+      }
     }, {
       onAfterSave: (savedData) => {
         backupService.createBackupFromData(savedData, "data");
@@ -547,6 +650,9 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
 
     ensureMeta(safeData);
 
+    safeData.meta.judges = getJudgesFromData(safeData);
+    safeData.meta.nextJudgeId = safeData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+
     if (!safeData.teams.length) {
       return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
     }
@@ -611,6 +717,8 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
     };
 
     ensureMeta(normalized);
+    normalized.meta.judges = getJudgesFromData(normalized);
+    normalized.meta.nextJudgeId = normalized.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
 
     const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
     normalized.meta.nextTeamId = Math.max(
