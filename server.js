@@ -195,6 +195,17 @@ function markProcessedSubmissionId(data, clientSubmissionId) {
   }
 }
 
+function normalizeCatchTime(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) return null;
+
+  const match = raw.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  if (!match) return null;
+
+  return `${match[1]}:${match[2]}`;
+}
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body || {};
   const user = USERS.find(u => u.username === username && u.password === password);
@@ -325,6 +336,7 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
     const teamId = Number(req.body.teamId || 0);
     const weight = Number(req.body.weight || 0);
     const clientSubmissionId = String(req.body.clientSubmissionId || "").trim();
+    const catchTime = normalizeCatchTime(req.body.catchTime);
 
     if (clientSubmissionId && hasProcessedSubmissionId(data, clientSubmissionId)) {
       return res.json({
@@ -346,6 +358,7 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
     }
 
     const newCatch = result.newCatch;
+    newCatch.catchTime = catchTime;
 
     if (clientSubmissionId) {
       markProcessedSubmissionId(data, clientSubmissionId);
@@ -362,6 +375,7 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
       catchId: newCatch.id,
       teamId,
       weight,
+      catchTime,
       totalCatches: saved.catches.length,
       clientSubmissionId: clientSubmissionId || null
     });
@@ -523,7 +537,11 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
         .sort((a, b) => Number(a.id) - Number(b.id)),
       catches: parsed.catches
         .map(normalizeCatch)
-        .filter(Boolean),
+        .filter(Boolean)
+        .map(c => ({
+          ...c,
+          catchTime: normalizeCatchTime(c.catchTime)
+        })),
       meta: parsed.meta || {}
     };
 
@@ -581,7 +599,13 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
             .sort((a, b) => Number(a.id) - Number(b.id))
         : buildDefaultTeams(),
       catches: Array.isArray(parsed.catches)
-        ? parsed.catches.map(normalizeCatch).filter(Boolean)
+        ? parsed.catches
+            .map(normalizeCatch)
+            .filter(Boolean)
+            .map(c => ({
+              ...c,
+              catchTime: normalizeCatchTime(c.catchTime)
+            }))
         : [],
       meta: parsed.meta || {}
     };
@@ -625,6 +649,7 @@ app.get("/api/admin/catches", requireAdmin, (req, res) => {
           teamPeg: team?.peg || "-",
           weight: Number(c.weight || 0),
           time: c.time,
+          catchTime: normalizeCatchTime(c.catchTime),
           photo: c.photo || null
         };
       });
@@ -641,6 +666,7 @@ app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
     const catchId = Number(req.params.id);
     const teamId = Number(req.body.teamId || 0);
     const weight = Number(req.body.weight || 0);
+    const catchTime = normalizeCatchTime(req.body.catchTime);
 
     const data = loadData();
 
@@ -648,6 +674,11 @@ app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
 
     if (result.error) {
       return res.json({ ok: false, error: result.error });
+    }
+
+    const catchItem = (data.catches || []).find(c => Number(c.id) === catchId);
+    if (catchItem) {
+      catchItem.catchTime = catchTime;
     }
 
     saveData(data, {
