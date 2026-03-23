@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RCC Login</title>
+<title>Cech SV Petra</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b1220">
+<link rel="apple-touch-icon" href="/logo.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cech SV Petra">
 
 <style>
 body{
@@ -14,7 +21,8 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    min-height:100vh;
+    padding:16px;
 }
 
 .box{
@@ -23,6 +31,7 @@ body{
     padding:30px;
     border-radius:16px;
     width:320px;
+    max-width:100%;
     text-align:center;
 }
 
@@ -55,18 +64,20 @@ button{
 #error{
     color:#ff6b6b;
     margin-top:10px;
-    min-height:18px;
+    min-height:24px;
 }
 
 .logo{
     width:80px;
     margin-bottom:10px;
+    border-radius:14px;
 }
-.hint{
+
+.sub{
     color:#9db0c5;
-    font-size:13px;
-    margin-top:10px;
-    line-height:1.45;
+    margin-top:-10px;
+    margin-bottom:18px;
+    font-size:14px;
 }
 </style>
 </head>
@@ -75,55 +86,48 @@ button{
 
 <div class="box">
 
-<img src="/logo.png" class="logo">
+<img src="/logo.png" class="logo" alt="Logo">
 
-<h1>RCC Login</h1>
+<h1>Cech SV Petra</h1>
+<div class="sub">Prihlásenie pre admina aj rozhodcov</div>
 
-<input id="username" placeholder="Meno / login" autocomplete="username">
-<input id="password" type="password" placeholder="Heslo" autocomplete="current-password">
+<input id="username" placeholder="Meno">
+<input id="password" type="password" placeholder="Heslo">
 
 <button onclick="login()">PRIHLÁSIŤ</button>
 
 <div id="error"></div>
-<div class="hint">Admin aj rozhodcovia sa prihlasujú cez tento formulár.</div>
 
 </div>
 
 <script>
-async function login(){
-    const errorEl = document.getElementById("error");
-    errorEl.innerText = "";
-
+async function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
 
-    if(!username || !password){
-        errorEl.innerText = "Zadaj meno aj heslo";
-        return;
-    }
-
-    try{
-        const res = await fetch("/api/login",{
+    try {
+        const res = await fetch("/api/login", {
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({username,password}),
+            body:JSON.stringify({ username, password }),
             credentials:"same-origin"
         });
 
         const data = await res.json();
 
-        if(!data.ok){
-            errorEl.innerText = "Zlé meno alebo heslo, alebo účet nie je aktívny";
+        if (!data.ok) {
+            document.getElementById("error").innerText = "Zlé meno alebo heslo, alebo účet nie je aktívny";
             return;
         }
 
-        if(data.role === "admin"){
+        if (data.role === "admin") {
             window.location.href = "/admin.html";
-        }else{
+        } else {
             window.location.href = "/judge.html";
         }
-    }catch(e){
-        errorEl.innerText = "Server neodpovedá";
+    } catch (e) {
+        console.error(e);
+        document.getElementById("error").innerText = "Server neodpovedá";
     }
 }
 </script>
