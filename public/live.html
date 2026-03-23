@@ -127,6 +127,12 @@ button:hover{
   border-radius:14px;
   padding:14px;
 }
+.lastCatch.clickable{
+  cursor:pointer;
+}
+.lastCatch.clickable:hover{
+  border-color:rgba(255,255,255,.28);
+}
 .lastCatchTitle{
   font-size:11px;
   font-weight:900;
@@ -134,6 +140,35 @@ button:hover{
   color:#b5ffd0;
   text-transform:uppercase;
   margin-bottom:6px;
+}
+.lastCatchRow{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.lastCatchThumb{
+  width:88px;
+  height:88px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background:#09111b;
+  flex:0 0 auto;
+}
+.lastCatchNoThumb{
+  width:88px;
+  height:88px;
+  border-radius:12px;
+  border:1px dashed rgba(255,255,255,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#cce9d7;
+  font-size:12px;
+  flex:0 0 auto;
+}
+.lastCatchText{
+  min-width:0;
 }
 .lastCatchMain{
   font-size:24px;
@@ -144,6 +179,11 @@ button:hover{
   margin-top:4px;
   color:#d9f7e5;
   font-size:14px;
+}
+.lastCatchHint{
+  margin-top:6px;
+  color:#d4f0df;
+  font-size:12px;
 }
 
 .infoLine{
@@ -247,6 +287,33 @@ tbody tr:hover{
   border:1px dashed #30455c;
   color:#8ea3b8;
   font-size:10px;
+}
+.mobileTeamRow{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+.mobileTeamPhotoWrap{
+  display:none;
+}
+.mobileTeamPhoto{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid #2c4058;
+  background:#0d1724;
+}
+.mobileNoPhoto{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px dashed #30455c;
+  color:#8ea3b8;
+  font-size:9px;
 }
 .empty{
   padding:18px 14px;
@@ -398,6 +465,10 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   border:1px solid #24364b;
   background:#09111b;
   margin-top:10px;
+  cursor:pointer;
+}
+.catchPhoto:hover{
+  opacity:.92;
 }
 .noCatchPhoto{
   margin-top:10px;
@@ -496,6 +567,41 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   font-weight:900;
 }
 
+.imageModal{
+  width:min(1000px, 100%);
+  background:transparent;
+  border:none;
+  box-shadow:none;
+}
+.imageModalInner{
+  position:relative;
+}
+.imageModalImg{
+  width:100%;
+  max-height:85vh;
+  object-fit:contain;
+  border-radius:16px;
+  background:#09111b;
+}
+.imageModalClose{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-weight:800;
+}
+.imageModalCaption{
+  margin-top:10px;
+  color:#dfe8f3;
+  text-align:center;
+  font-size:14px;
+}
+
 .mobileSub{
   display:none;
   color:var(--muted);
@@ -538,6 +644,11 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   .detailStats{ grid-template-columns:1fr 1fr; }
   .bigFishGrid{ grid-template-columns:1fr; }
   .bigFishImage, .bigFishNoImage{ height:260px; }
+  .lastCatchRow{ align-items:flex-start; }
+  .lastCatchThumb, .lastCatchNoThumb{
+    width:72px;
+    height:72px;
+  }
 
   .tableWrap{ overflow:visible; }
   table{
@@ -592,6 +703,9 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   .mobileWeight,
   .mobileCount{
     display:inline;
+  }
+  .mobileTeamPhotoWrap{
+    display:block;
   }
 
   .teamName{
@@ -681,10 +795,16 @@ tr.rank-fall{ animation:rowFall .9s ease; }
       </div>
     </div>
 
-    <div class="lastCatch">
+    <div class="lastCatch" id="lastCatchBox">
       <div class="lastCatchTitle">Posledný úlovok</div>
-      <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
-      <div class="lastCatchSub" id="lastCatchSub"></div>
+      <div class="lastCatchRow">
+        <div id="lastCatchPhotoWrap"></div>
+        <div class="lastCatchText">
+          <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
+          <div class="lastCatchSub" id="lastCatchSub"></div>
+          <div class="lastCatchHint" id="lastCatchHint"></div>
+        </div>
+      </div>
     </div>
 
     <div class="infoLine" id="infoLine"></div>
@@ -810,6 +930,16 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   </div>
 </div>
 
+<div id="imageModal" class="modalOverlay" onclick="closeImageModal(event)">
+  <div class="imageModal" onclick="event.stopPropagation()">
+    <div class="imageModalInner">
+      <button class="imageModalClose" onclick="closeImageModal()">Zavrieť</button>
+      <img id="imageModalImg" class="imageModalImg" src="" alt="Zväčšený obrázok">
+      <div id="imageModalCaption" class="imageModalCaption"></div>
+    </div>
+  </div>
+</div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let socket = null;
@@ -821,6 +951,7 @@ let lastRenderedLb = [];
 let selectedTeamId = null;
 let currentSectorTab = "ALL";
 let currentTopFish = null;
+let currentLastCatch = null;
 const FALLBACK_MS = 30000;
 
 async function loadState(manual = false) {
@@ -863,6 +994,7 @@ function renderLive(data) {
   lastRenderedLb = lb;
   currentTeamCatches = data?.teamCatches || {};
   currentTopFish = topFish;
+  currentLastCatch = lastCatch;
 
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
   document.getElementById("totalFish").textContent = String(totalFish);
@@ -878,8 +1010,11 @@ function renderLive(data) {
   const topFishCard = document.getElementById("topFishCard");
   topFishCard.style.opacity = topFish ? "1" : ".7";
 
+  const lastCatchBox = document.getElementById("lastCatchBox");
   const lastCatchMain = document.getElementById("lastCatchMain");
   const lastCatchSub = document.getElementById("lastCatchSub");
+  const lastCatchHint = document.getElementById("lastCatchHint");
+  const lastCatchPhotoWrap = document.getElementById("lastCatchPhotoWrap");
 
   if (lastCatch) {
     const teamName = safeText(lastCatch.teamName || lastCatch.team || ("Tím " + (lastCatch.teamId || "")));
@@ -889,9 +1024,25 @@ function renderLive(data) {
 
     lastCatchMain.textContent = `${teamName} • ${formatKg(Number(lastCatch.weight || 0))}`;
     lastCatchSub.textContent = `Sektor ${sector} • Stanovište ${peg} • ${time}`;
+
+    if (lastCatch.photo) {
+      lastCatchPhotoWrap.innerHTML = `<img src="${escapeAttr(lastCatch.photo)}" class="lastCatchThumb" alt="Posledný úlovok">`;
+      lastCatchHint.textContent = "Klikni pre zväčšenie fotky";
+      lastCatchBox.classList.add("clickable");
+      lastCatchBox.onclick = () => openImageModal(lastCatch.photo, `${teamName} • ${formatKg(Number(lastCatch.weight || 0))} • ${time}`);
+    } else {
+      lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
+      lastCatchHint.textContent = "";
+      lastCatchBox.classList.remove("clickable");
+      lastCatchBox.onclick = null;
+    }
   } else {
     lastCatchMain.textContent = "Zatiaľ bez úlovku";
     lastCatchSub.textContent = "";
+    lastCatchHint.textContent = "";
+    lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
+    lastCatchBox.classList.remove("clickable");
+    lastCatchBox.onclick = null;
   }
 
   renderTop3(top3teams);
@@ -1012,6 +1163,10 @@ function renderLeaderboard(rows) {
       ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
+    const mobilePhotoHtml = team.photo
+      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="mobileTeamPhoto">`
+      : `<div class="mobileNoPhoto">bez<br>foto</div>`;
+
     const topRankClass = isOverall
       ? (
           currentRank === 1 ? "rank-top-1" :
@@ -1031,8 +1186,13 @@ function renderLeaderboard(rows) {
         </div>
       </td>
       <td class="col-team">
-        <div class="teamName">${escapeHtml(team.name || "-")}</div>
-        <div class="mobileSub">Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}</div>
+        <div class="mobileTeamRow">
+          <div class="mobileTeamPhotoWrap">${mobilePhotoHtml}</div>
+          <div>
+            <div class="teamName">${escapeHtml(team.name || "-")}</div>
+            <div class="mobileSub">Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}</div>
+          </div>
+        </div>
       </td>
       <td class="col-sector">${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td class="col-peg">${escapeHtml(String(team.peg || "-"))}</td>
@@ -1109,7 +1269,7 @@ function renderTeamDetail(teamId) {
           </div>
           ${
             c.photo
-              ? `<img src="${escapeAttr(c.photo)}" alt="Úlovok" class="catchPhoto">`
+              ? `<img src="${escapeAttr(c.photo)}" alt="Úlovok" class="catchPhoto" onclick="openImageModal('${escapeJs(c.photo)}','Úlovok #${escapeJs(String(c.number || 0))} • ${escapeJs(formatKg(Number(c.weight || 0)))} • ${escapeJs(formatDateTime(c.time))}')">`
               : `<div class="noCatchPhoto">bez fotky</div>`
           }
         </div>
@@ -1145,6 +1305,27 @@ function openTopFishModal() {
 function closeTopFishModal(event) {
   if (event && event.target && event.target.id !== "topFishModal") return;
   document.getElementById("topFishModal").style.display = "none";
+}
+
+function openImageModal(src, caption = "") {
+  const modal = document.getElementById("imageModal");
+  const img = document.getElementById("imageModalImg");
+  const cap = document.getElementById("imageModalCaption");
+
+  img.src = src || "";
+  cap.textContent = caption || "";
+  modal.style.display = "flex";
+}
+
+function closeImageModal(event) {
+  if (event && event.target && event.target.id !== "imageModal") return;
+  const modal = document.getElementById("imageModal");
+  const img = document.getElementById("imageModalImg");
+  const cap = document.getElementById("imageModalCaption");
+
+  modal.style.display = "none";
+  img.src = "";
+  cap.textContent = "";
 }
 
 function connectSocket() {
@@ -1247,6 +1428,7 @@ function exportPdf() {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeTopFishModal();
+    closeImageModal();
   }
 });
 
