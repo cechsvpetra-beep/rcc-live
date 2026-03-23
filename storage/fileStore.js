@@ -47,7 +47,9 @@ function defaultData() {
       nextTeamId: DEFAULT_TEAM_COUNT + 1,
       nextJudgeId: 1,
       judges: [],
-      processedSubmissionIds: []
+      processedSubmissionIds: [],
+      eventName: "RCC Live tabuľka",
+      eventSub: "Ružín Carp Classic"
     }
   };
 }
@@ -200,6 +202,16 @@ function normalizeProcessedSubmissionIds(input) {
   return out.slice(-5000);
 }
 
+function normalizeEventName(value, fallback = "RCC Live tabuľka") {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
+function normalizeEventSub(value, fallback = "Ružín Carp Classic") {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
 function loadData() {
   ensureDataFile();
 
@@ -258,7 +270,9 @@ function loadData() {
         1
       ),
       judges,
-      processedSubmissionIds: normalizeProcessedSubmissionIds(parsed?.meta?.processedSubmissionIds)
+      processedSubmissionIds: normalizeProcessedSubmissionIds(parsed?.meta?.processedSubmissionIds),
+      eventName: normalizeEventName(parsed?.meta?.eventName, base.meta.eventName),
+      eventSub: normalizeEventSub(parsed?.meta?.eventSub, base.meta.eventSub)
     };
 
     return { sectors, teams, catches, judges, meta };
@@ -318,7 +332,9 @@ function saveData(data, options = {}) {
         Array.isArray(data?.meta?.processedSubmissionIds)
           ? data.meta.processedSubmissionIds
           : current?.meta?.processedSubmissionIds
-      )
+      ),
+      eventName: normalizeEventName(data?.meta?.eventName, current?.meta?.eventName),
+      eventSub: normalizeEventSub(data?.meta?.eventSub, current?.meta?.eventSub)
     }
   };
 

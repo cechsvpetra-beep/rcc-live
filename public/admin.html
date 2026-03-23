@@ -142,6 +142,11 @@ button.danger:hover{
   background:#111826;
   align-items:center;
 }
+.formGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
 input,select{
   width:100%;
   padding:8px 10px;
@@ -329,7 +334,8 @@ label.inline{
   .catchCard,
   .catchTools,
   .footerActions,
-  .resetRow{
+  .resetRow,
+  .formGrid{
     grid-template-columns:1fr;
     display:grid;
   }
@@ -355,6 +361,23 @@ label.inline{
 </div>
 
 <div id="status"></div>
+
+<div class="section">
+  <h2>Nastavenia preteku</h2>
+  <div class="sectionSub">Tu zmeníš názov a podnázov preteku. Zobrazí sa to v LIVE tabuľke.</div>
+
+  <div class="formGrid">
+    <div class="inlineCol">
+      <div class="small">Názov preteku</div>
+      <input id="eventName" placeholder="napr. RCC Live tabuľka" onchange="changeEventName(this.value)">
+    </div>
+
+    <div class="inlineCol">
+      <div class="small">Podnázov preteku</div>
+      <input id="eventSub" placeholder="napr. Ružín Carp Classic" onchange="changeEventSub(this.value)">
+    </div>
+  </div>
+</div>
 
 <div class="section">
   <h2>Sektory</h2>
@@ -453,6 +476,16 @@ function normalizeCatchTime(value) {
   return `${match[1]}:${match[2]}`;
 }
 
+function normalizeEventName(value) {
+  const text = String(value || "").trim();
+  return text || "RCC Live tabuľka";
+}
+
+function normalizeEventSub(value) {
+  const text = String(value || "").trim();
+  return text || "Ružín Carp Classic";
+}
+
 function ensureMeta() {
   if (!adminData.meta || typeof adminData.meta !== "object") {
     adminData.meta = {};
@@ -469,6 +502,9 @@ function ensureMeta() {
   if (!Number.isFinite(Number(adminData.meta.nextJudgeId))) {
     adminData.meta.nextJudgeId = 1;
   }
+
+  adminData.meta.eventName = normalizeEventName(adminData.meta.eventName);
+  adminData.meta.eventSub = normalizeEventSub(adminData.meta.eventSub);
 }
 
 async function loadAdmin() {
@@ -510,6 +546,7 @@ async function loadAdmin() {
       allCatches = [];
     }
 
+    renderEventSettings();
     renderSectors();
     renderTeams();
     renderJudges();
@@ -609,6 +646,12 @@ function normalizeData() {
     Number(adminData.meta.nextJudgeId || 1),
     adminData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1
   );
+}
+
+function renderEventSettings() {
+  ensureMeta();
+  document.getElementById("eventName").value = adminData.meta.eventName || "RCC Live tabuľka";
+  document.getElementById("eventSub").value = adminData.meta.eventSub || "Ružín Carp Classic";
 }
 
 function renderSectors() {
@@ -875,6 +918,16 @@ function renderPhotoThumb(photo) {
   return `<div class="photoPlaceholder">bez foto</div>`;
 }
 
+function changeEventName(value) {
+  ensureMeta();
+  adminData.meta.eventName = normalizeEventName(value);
+}
+
+function changeEventSub(value) {
+  ensureMeta();
+  adminData.meta.eventSub = normalizeEventSub(value);
+}
+
 function changeSectorName(code, value) {
   if (!adminData?.sectors?.[code]) return;
   adminData.sectors[code].name = value.trim() || ("Sektor " + code);
@@ -1062,7 +1115,9 @@ async function saveAdmin() {
       })),
       judges: judgesPayload,
       meta: {
-        judges: judgesPayload
+        judges: judgesPayload,
+        eventName: normalizeEventName(adminData.meta.eventName),
+        eventSub: normalizeEventSub(adminData.meta.eventSub)
       }
     };
 
@@ -1078,6 +1133,7 @@ async function saveAdmin() {
     if (out.ok) {
       await reloadAdminSetupOnly();
       await loadCatches();
+      renderEventSettings();
       renderSectors();
       renderTeams();
       renderJudges();
@@ -1222,6 +1278,7 @@ async function restoreBackup() {
     }
 
     await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
+    renderEventSettings();
     renderSectors();
     renderTeams();
     renderJudges();

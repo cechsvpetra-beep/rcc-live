@@ -16,7 +16,6 @@ const {
   DATA_FILE,
   DEFAULT_TEAM_COUNT,
   defaultSectors,
-  buildDefaultTeams,
   writeJsonAtomic,
   ensureDataFile,
   normalizeSectors,
@@ -178,6 +177,14 @@ function ensureMeta(data) {
     data.meta.nextJudgeId = maxJudgeId + 1;
   }
 
+  if (typeof data.meta.eventName !== "string" || !data.meta.eventName.trim()) {
+    data.meta.eventName = "RCC Live tabuľka";
+  }
+
+  if (typeof data.meta.eventSub !== "string" || !data.meta.eventSub.trim()) {
+    data.meta.eventSub = "Ružín Carp Classic";
+  }
+
   return data.meta;
 }
 
@@ -215,6 +222,16 @@ function normalizeCatchTime(value) {
   if (!match) return null;
 
   return `${match[1]}:${match[2]}`;
+}
+
+function normalizeEventName(value) {
+  const text = String(value || "").trim();
+  return text || "RCC Live tabuľka";
+}
+
+function normalizeEventSub(value) {
+  const text = String(value || "").trim();
+  return text || "Ružín Carp Classic";
 }
 
 function getJudgesFromData(data) {
@@ -462,7 +479,9 @@ app.get("/api/admin/setup", requireAdmin, (req, res) => {
     judges,
     meta: {
       ...meta,
-      judges
+      judges,
+      eventName: normalizeEventName(meta.eventName),
+      eventSub: normalizeEventSub(meta.eventSub)
     }
   });
 });
@@ -543,7 +562,9 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       meta: {
         ...currentMeta,
         judges,
-        nextJudgeId
+        nextJudgeId,
+        eventName: normalizeEventName(incoming?.meta?.eventName || currentMeta.eventName),
+        eventSub: normalizeEventSub(incoming?.meta?.eventSub || currentMeta.eventSub)
       }
     };
 
@@ -657,6 +678,8 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
       (max, j) => Math.max(max, Number(j.id) || 0),
       0
     ) + 1;
+    safeData.meta.eventName = normalizeEventName(safeData.meta.eventName);
+    safeData.meta.eventSub = normalizeEventSub(safeData.meta.eventSub);
 
     if (!safeData.teams.length) {
       return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
@@ -708,7 +731,7 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
             .map(t => normalizeTeam(t, t))
             .filter(t => Number(t.id) > 0)
             .sort((a, b) => Number(a.id) - Number(b.id))
-        : buildDefaultTeams(),
+        : [],
       catches: Array.isArray(parsed.catches)
         ? parsed.catches
             .map(normalizeCatch)
@@ -732,6 +755,8 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
       (max, j) => Math.max(max, Number(j.id) || 0),
       0
     ) + 1;
+    normalized.meta.eventName = normalizeEventName(normalized.meta.eventName);
+    normalized.meta.eventSub = normalizeEventSub(normalized.meta.eventSub);
 
     const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
     normalized.meta.nextTeamId = Math.max(
@@ -860,7 +885,12 @@ app.get("/api/state", (req, res) => {
   try {
     const data = loadData();
     const publicState = stateService.buildPublicState(data);
-    return res.json(publicState);
+
+    return res.json({
+      ...publicState,
+      eventName: data?.meta?.eventName || "RCC Live tabuľka",
+      eventSub: data?.meta?.eventSub || "Ružín Carp Classic"
+    });
   } catch (e) {
     console.error("API /api/state chyba:", e);
     return res.status(500).json({
@@ -870,7 +900,9 @@ app.get("/api/state", (req, res) => {
       topFish: null,
       lastCatch: null,
       teamCatches: {},
-      top3teams: []
+      top3teams: [],
+      eventName: "RCC Live tabuľka",
+      eventSub: "Ružín Carp Classic"
     });
   }
 });

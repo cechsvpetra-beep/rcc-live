@@ -9,6 +9,7 @@ function getDisplayTime(catchItem) {
 function buildPublicState(data) {
   const teams = Array.isArray(data?.teams) ? data.teams : [];
   const catches = Array.isArray(data?.catches) ? data.catches : [];
+  const meta = data?.meta || {};
 
   const lb = teams
     .filter(team => team.active)
@@ -126,6 +127,8 @@ function buildPublicState(data) {
   );
 
   return {
+    eventName: meta.eventName || "RCC Live tabuľka",
+    eventSub: meta.eventSub || "Ružín Carp Classic",
     lb,
     totalWeight: lb.reduce((sum, t) => sum + Number(t.total || 0), 0),
     totalFish: catches.length,
