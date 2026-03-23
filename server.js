@@ -231,7 +231,11 @@ function normalizeJudge(rawJudge, fallback = {}) {
 function getJudgesFromData(data) {
   const meta = ensureMeta(data);
 
-  return (meta.judges || [])
+  const rawJudges = Array.isArray(data?.judges) && data.judges.length
+    ? data.judges
+    : (Array.isArray(meta.judges) ? meta.judges : []);
+
+  return rawJudges
     .map(j => normalizeJudge(j, j))
     .filter(j => Number(j.id) > 0 && j.username && j.password);
 }
@@ -456,14 +460,16 @@ app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
 app.get("/api/admin/setup", requireAdmin, (req, res) => {
   const data = loadData();
   const meta = ensureMeta(data);
+  const judges = getJudgesFromData(data);
 
   res.json({
     sectors: data.sectors || {},
     teams: data.teams || [],
     catches: data.catches || [],
+    judges,
     meta: {
       ...meta,
-      judges: getJudgesFromData(data)
+      judges
     }
   });
 });
@@ -511,7 +517,10 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       .filter(t => Number(t.id) > 0)
       .sort((a, b) => Number(a.id) - Number(b.id));
 
-    const incomingJudges = Array.isArray(incoming?.meta?.judges) ? incoming.meta.judges : [];
+    const incomingJudges = Array.isArray(incoming.judges)
+      ? incoming.judges
+      : (Array.isArray(incoming?.meta?.judges) ? incoming.meta.judges : []);
+
     const usedJudgeUsernames = new Set();
     const judges = [];
 
@@ -545,6 +554,7 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       sectors,
       teams,
       catches: current.catches || [],
+      judges,
       meta: {
         ...currentMeta,
         judges,
@@ -645,13 +655,16 @@ app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"),
           ...c,
           catchTime: normalizeCatchTime(c.catchTime)
         })),
+      judges: Array.isArray(parsed.judges) ? parsed.judges : [],
       meta: parsed.meta || {}
     };
 
     ensureMeta(safeData);
 
-    safeData.meta.judges = getJudgesFromData(safeData);
-    safeData.meta.nextJudgeId = safeData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+    const restoredJudges = getJudgesFromData(safeData);
+    safeData.judges = restoredJudges;
+    safeData.meta.judges = restoredJudges;
+    safeData.meta.nextJudgeId = restoredJudges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
 
     if (!safeData.teams.length) {
       return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
@@ -713,12 +726,14 @@ app.get("/api/admin/download-data", requireAdmin, (req, res) => {
               catchTime: normalizeCatchTime(c.catchTime)
             }))
         : [],
+      judges: Array.isArray(parsed.judges) ? parsed.judges : [],
       meta: parsed.meta || {}
     };
 
     ensureMeta(normalized);
-    normalized.meta.judges = getJudgesFromData(normalized);
-    normalized.meta.nextJudgeId = normalized.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
+    normalized.judges = getJudgesFromData(normalized);
+    normalized.meta.judges = normalized.judges;
+    normalized.meta.nextJudgeId = normalized.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
 
     const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
     normalized.meta.nextTeamId = Math.max(
