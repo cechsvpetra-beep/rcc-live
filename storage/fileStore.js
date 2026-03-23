@@ -42,8 +42,12 @@ function defaultData() {
     sectors: defaultSectors(),
     teams: buildDefaultTeams(),
     catches: [],
+    judges: [],
     meta: {
-      nextTeamId: DEFAULT_TEAM_COUNT + 1
+      nextTeamId: DEFAULT_TEAM_COUNT + 1,
+      nextJudgeId: 1,
+      judges: [],
+      processedSubmissionIds: []
     }
   };
 }
@@ -113,6 +117,16 @@ function normalizeTeam(raw, fallback = {}) {
   };
 }
 
+function normalizeCatchTime(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  const match = raw.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  if (!match) return null;
+
+  return `${match[1]}:${match[2]}`;
+}
+
 function normalizeCatch(raw) {
   const id = Number(raw?.id || 0);
   const teamId = Number(raw?.teamId || 0);
@@ -127,8 +141,63 @@ function normalizeCatch(raw) {
     teamId,
     weight,
     time: raw?.time || new Date().toISOString(),
+    catchTime: normalizeCatchTime(raw?.catchTime),
     photo: raw?.photo || null
   };
+}
+
+function normalizeJudge(raw, fallback = {}) {
+  const id = Number(raw?.id ?? fallback?.id ?? 0);
+  const username = String(raw?.username ?? fallback?.username ?? "").trim();
+  const password = String(raw?.password ?? fallback?.password ?? "").trim();
+
+  return {
+    id,
+    username,
+    password,
+    active: raw?.active !== undefined
+      ? Boolean(raw.active)
+      : Boolean(fallback?.active)
+  };
+}
+
+function normalizeJudges(input) {
+  if (!Array.isArray(input)) return [];
+
+  const out = [];
+  const usedIds = new Set();
+
+  for (const item of input) {
+    const judge = normalizeJudge(item, item);
+    if (!judge.id) continue;
+    if (!judge.username) continue;
+    if (!judge.password) continue;
+    if (usedIds.has(judge.id)) continue;
+
+    usedIds.add(judge.id);
+    out.push(judge);
+  }
+
+  out.sort((a, b) => Number(a.id) - Number(b.id));
+  return out;
+}
+
+function normalizeProcessedSubmissionIds(input) {
+  if (!Array.isArray(input)) return [];
+
+  const out = [];
+  const used = new Set();
+
+  for (const item of input) {
+    const value = String(item || "").trim();
+    if (!value) continue;
+    if (used.has(value)) continue;
+
+    used.add(value);
+    out.push(value);
+  }
+
+  return out.slice(-5000);
 }
 
 function loadData() {
@@ -168,17 +237,31 @@ function loadData() {
       ? parsed.catches.map(normalizeCatch).filter(Boolean)
       : [];
 
+    const rawJudges = Array.isArray(parsed.judges)
+      ? parsed.judges
+      : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : []);
+
+    const judges = normalizeJudges(rawJudges);
+
     const maxTeamId = teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
+    const maxJudgeId = judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0);
 
     const meta = {
       nextTeamId: Math.max(
         Number(parsed?.meta?.nextTeamId || 0),
         maxTeamId + 1,
         DEFAULT_TEAM_COUNT + 1
-      )
+      ),
+      nextJudgeId: Math.max(
+        Number(parsed?.meta?.nextJudgeId || 0),
+        maxJudgeId + 1,
+        1
+      ),
+      judges,
+      processedSubmissionIds: normalizeProcessedSubmissionIds(parsed?.meta?.processedSubmissionIds)
     };
 
-    return { sectors, teams, catches, meta };
+    return { sectors, teams, catches, judges, meta };
   } catch (e) {
     console.error("Chyba pri loadData, obnovujem defaultData:", e);
     const data = defaultData();
@@ -205,17 +288,36 @@ function saveData(data, options = {}) {
     ? data.catches.map(normalizeCatch).filter(Boolean)
     : current.catches;
 
+  const safeJudges = normalizeJudges(
+    Array.isArray(data?.judges)
+      ? data.judges
+      : (Array.isArray(data?.meta?.judges) ? data.meta.judges : current.judges)
+  );
+
   const maxTeamId = safeTeams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
+  const maxJudgeId = safeJudges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0);
 
   const safeData = {
     sectors: normalizeSectors(data?.sectors, current.sectors || defaultSectors()),
     teams: safeTeams,
     catches: safeCatches,
+    judges: safeJudges,
     meta: {
       nextTeamId: Math.max(
         Number(data?.meta?.nextTeamId || 0),
         maxTeamId + 1,
         DEFAULT_TEAM_COUNT + 1
+      ),
+      nextJudgeId: Math.max(
+        Number(data?.meta?.nextJudgeId || 0),
+        maxJudgeId + 1,
+        1
+      ),
+      judges: safeJudges,
+      processedSubmissionIds: normalizeProcessedSubmissionIds(
+        Array.isArray(data?.meta?.processedSubmissionIds)
+          ? data.meta.processedSubmissionIds
+          : current?.meta?.processedSubmissionIds
       )
     }
   };
@@ -243,6 +345,8 @@ module.exports = {
   normalizeSectors,
   normalizeTeam,
   normalizeCatch,
+  normalizeJudge,
+  normalizeJudges,
   loadData,
   saveData
 };
