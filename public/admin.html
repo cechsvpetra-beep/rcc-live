@@ -263,6 +263,30 @@ label.inline{
   border-color:#5b1f1f;
   color:#ffb4b4;
 }
+.resetBox{
+  margin-top:14px;
+  padding:14px;
+  border:1px solid #5b1f1f;
+  border-radius:12px;
+  background:#1a1010;
+}
+.resetTitle{
+  font-weight:900;
+  margin-bottom:6px;
+  color:#ffb4b4;
+}
+.resetText{
+  color:#f3d5d5;
+  font-size:13px;
+  line-height:1.5;
+  margin-bottom:10px;
+}
+.resetRow{
+  display:grid;
+  grid-template-columns:1fr 220px;
+  gap:10px;
+  align-items:center;
+}
 @media (max-width:1200px){
   .rowTeam{
     grid-template-columns:60px 1fr 90px 90px 110px 1fr 120px;
@@ -282,7 +306,8 @@ label.inline{
   .rowTeam,
   .catchCard,
   .catchTools,
-  .footerActions{
+  .footerActions,
+  .resetRow{
     grid-template-columns:1fr;
     display:grid;
   }
@@ -359,6 +384,19 @@ label.inline{
   </div>
 
   <div id="catches"></div>
+
+  <div class="resetBox">
+    <div class="resetTitle">Reset všetkých úlovkov</div>
+    <div class="resetText">
+      Toto zmaže všetky úlovky po skončení pretekov. Tímy, sektory a fotky tímov ostanú zachované.
+      Pred resetom sa spraví bezpečnostná záloha. Pre potvrdenie napíš presne <b>RESET</b>.
+    </div>
+
+    <div class="resetRow">
+      <input id="resetCatchesConfirm" placeholder="Napíš RESET pre potvrdenie">
+      <button class="danger" onclick="resetAllCatches()">Vymazať všetky úlovky</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1010,6 +1048,51 @@ async function deleteCatch(catchId) {
   } catch (e) {
     console.error(e);
     setStatus("Server neodpovedá pri mazaní úlovku", true);
+  }
+}
+
+async function resetAllCatches() {
+  const confirmInput = document.getElementById("resetCatchesConfirm");
+  const confirmText = String(confirmInput?.value || "").trim();
+
+  if (confirmText !== "RESET") {
+    setStatus('Pre reset musíš napísať presne RESET', true);
+    return;
+  }
+
+  const ok = confirm("Naozaj chceš vymazať všetky úlovky? Táto akcia sa nedá vrátiť späť bez obnovy zo zálohy.");
+  if (!ok) return;
+
+  try {
+    setStatus("Mažem všetky úlovky...");
+
+    const res = await fetch("/api/admin/reset-catches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmText }),
+      credentials: "same-origin"
+    });
+
+    const out = await res.json();
+
+    if (!out.ok) {
+      setStatus(out.error || "Reset úlovkov zlyhal", true);
+      return;
+    }
+
+    await Promise.all([reloadAdminSetupOnly(), loadCatches()]);
+    renderTeams();
+    renderCatchSectorFilter();
+    renderCatches();
+
+    if (confirmInput) {
+      confirmInput.value = "";
+    }
+
+    setStatus(`Všetky úlovky boli vymazané ✔ (${out.deletedCount || 0})`);
+  } catch (e) {
+    console.error(e);
+    setStatus("Server neodpovedá pri mazaní všetkých úlovkov", true);
   }
 }
 

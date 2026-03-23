@@ -447,6 +447,51 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
   }
 });
 
+app.post("/api/admin/reset-catches", requireAdmin, (req, res) => {
+  try {
+    const confirmText = String(req.body?.confirmText || "").trim();
+
+    if (confirmText !== "RESET") {
+      return res.status(400).json({
+        ok: false,
+        error: "Pre reset musíš napísať presne RESET"
+      });
+    }
+
+    const data = loadData();
+    const currentCatches = Array.isArray(data.catches) ? data.catches : [];
+
+    backupService.createBackupFromData(data, "pre-reset-catches");
+
+    for (const item of currentCatches) {
+      if (item?.photo) {
+        deletePhysicalFileFromPublic(item.photo);
+      }
+    }
+
+    data.catches = [];
+
+    saveData(data, {
+      onAfterSave: (savedData) => {
+        backupService.createBackupFromData(savedData, "data");
+        buildAndBroadcastLiveState();
+      }
+    });
+
+    return res.json({
+      ok: true,
+      deletedCount: currentCatches.length,
+      message: "Všetky úlovky boli vymazané"
+    });
+  } catch (e) {
+    console.error("Reset catches chyba:", e);
+    return res.status(500).json({
+      ok: false,
+      error: "Reset úlovkov zlyhal"
+    });
+  }
+});
+
 app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"), (req, res) => {
   try {
     if (!req.file) {
