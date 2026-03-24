@@ -607,6 +607,7 @@ app.post("/api/admin/reset-catches", requireAdmin, (req, res) => {
     data.catches = [];
 
     saveData(data, {
+      allowEmptyCatches: true,
       onAfterSave: (savedData) => {
         backupService.createBackupFromData(savedData, "data");
         buildAndBroadcastLiveState();
@@ -859,6 +860,7 @@ app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
     }
 
     saveData(data, {
+      allowEmptyCatches: true,
       onAfterSave: (savedData) => {
         backupService.createBackupFromData(savedData, "data");
         buildAndBroadcastLiveState();

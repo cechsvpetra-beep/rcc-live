@@ -286,8 +286,14 @@ function loadData() {
 
 function saveData(data, options = {}) {
   const current = loadData();
+  const allowEmptyCatches = options.allowEmptyCatches === true;
 
-  if ((current.catches?.length || 0) > 0 && (data?.catches?.length || 0) === 0) {
+  if (
+    !allowEmptyCatches &&
+    (current.catches?.length || 0) > 0 &&
+    Array.isArray(data?.catches) &&
+    (data.catches?.length || 0) === 0
+  ) {
     data.catches = current.catches;
   }
 
