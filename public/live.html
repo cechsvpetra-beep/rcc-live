@@ -86,7 +86,7 @@ button:hover{
 
 .stats{
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(4, 1fr);
   gap:10px;
   margin-bottom:10px;
 }
@@ -398,47 +398,47 @@ tr.rank-fall{ animation:rowFall .9s ease; }
 .detailTopLeft{
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:18px;
   flex-wrap:wrap;
 }
 .detailTeamPhotoWrap{
-  width:88px;
-  height:88px;
-  flex:0 0 88px;
+  width:120px;
+  height:120px;
+  flex:0 0 120px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .detailTeamPhoto{
-  width:88px;
-  height:88px;
+  width:120px;
+  height:120px;
   border-radius:50%;
   object-fit:cover;
-  border:2px solid #2c4058;
+  border:3px solid #2c4058;
   background:#0d1724;
   display:block;
 }
 .detailTeamNoPhoto{
-  width:88px;
-  height:88px;
+  width:120px;
+  height:120px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  border:2px dashed #30455c;
+  border:3px dashed #30455c;
   color:#8ea3b8;
-  font-size:12px;
+  font-size:14px;
   background:#0d1724;
 }
 .detailTitle{
-  font-size:28px;
+  font-size:34px;
   font-weight:900;
   margin:0;
 }
 .detailMeta{
   color:var(--muted);
-  font-size:14px;
-  margin-top:6px;
+  font-size:15px;
+  margin-top:8px;
 }
 .detailStats{
   display:grid;
@@ -785,16 +785,20 @@ tr.rank-fall{ animation:rowFall .9s ease; }
 
   .detailTopLeft{
     align-items:flex-start;
+    gap:14px;
   }
   .detailTeamPhotoWrap{
-    width:72px;
-    height:72px;
-    flex-basis:72px;
+    width:96px;
+    height:96px;
+    flex-basis:96px;
   }
   .detailTeamPhoto,
   .detailTeamNoPhoto{
-    width:72px;
-    height:72px;
+    width:96px;
+    height:96px;
+  }
+  .detailTitle{
+    font-size:26px;
   }
 }
 
