@@ -899,12 +899,12 @@ tr.rank-fall{ animation:rowFall .9s ease; }
           <thead>
             <tr>
               <th class="col-rank">Poradie</th>
-              <th class="col-team">Tím</th>
-              <th class="col-sector">Sektor</th>
-              <th class="col-peg">Stanovište</th>
-              <th class="col-photo">Foto</th>
-              <th class="col-total">Celková váha</th>
-              <th class="col-count">Úlovky</th>
+<th class="col-photo">Foto</th>
+<th class="col-team">Tím</th>
+<th class="col-sector">Sektor</th>
+<th class="col-peg">Stanovište</th>
+<th class="col-total">Celková váha</th>
+<th class="col-count">Úlovky</th>
             </tr>
           </thead>
           <tbody id="lbBody"></tbody>
@@ -1240,6 +1240,7 @@ function renderLeaderboard(rows) {
           <span class="rank">${currentRank}.</span>
         </div>
       </td>
+<td class="col-photo">${photoHtml}</td>
       <td class="col-team">
         <div class="mobileTeamRow">
           <div class="mobileTeamPhotoWrap">${mobilePhotoHtml}</div>
@@ -1251,7 +1252,6 @@ function renderLeaderboard(rows) {
       </td>
       <td class="col-sector">${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td class="col-peg">${escapeHtml(String(team.peg || "-"))}</td>
-      <td class="col-photo">${photoHtml}</td>
       <td class="col-total">
         <span class="badge">${formatKg(Number(team.total || 0))}</span>
       </td>
