@@ -1233,6 +1233,7 @@ function renderLeaderboard(rows) {
     const tr = document.createElement("tr");
     tr.className = `${topRankClass} ${moveClass}`.trim();
     tr.onclick = () => openTeamDetail(team.id);
+
     tr.innerHTML = `
       <td class="col-rank">
         <div class="rankCell">
@@ -1240,25 +1241,33 @@ function renderLeaderboard(rows) {
           <span class="rank">${currentRank}.</span>
         </div>
       </td>
-<td class="col-photo">${photoHtml}</td>
+
+      <td class="col-photo">${photoHtml}</td>
+
       <td class="col-team">
         <div class="mobileTeamRow">
           <div class="mobileTeamPhotoWrap">${mobilePhotoHtml}</div>
           <div>
             <div class="teamName">${escapeHtml(team.name || "-")}</div>
-            <div class="mobileSub">Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}</div>
+            <div class="mobileSub">
+              Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}
+            </div>
           </div>
         </div>
       </td>
+
       <td class="col-sector">${escapeHtml(team.sectorCode || team.sector || "-")}</td>
       <td class="col-peg">${escapeHtml(String(team.peg || "-"))}</td>
+
       <td class="col-total">
         <span class="badge">${formatKg(Number(team.total || 0))}</span>
       </td>
+
       <td class="col-count">
         ${escapeHtml(String(team.count || 0))}
       </td>
     `;
+
     body.appendChild(tr);
   });
 
@@ -1266,7 +1275,6 @@ function renderLeaderboard(rows) {
     previousRankMap = newRankMap;
   }
 }
-
 function openTeamDetail(teamId) {
   selectedTeamId = Number(teamId);
   document.getElementById("livePage").style.display = "none";
