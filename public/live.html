@@ -896,8 +896,9 @@ tr.rank-fall{ animation:rowFall .9s ease; }
     <div class="section" id="mainLeaderboardSection">
       <div class="sectionHead">
         <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
-<div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
-<div class="tabs" id="sectorTabs"></div>
+        <div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
+        <div class="tabs" id="sectorTabs"></div>
+      </div>
 
       <div class="tableWrap">
         <table>
@@ -936,7 +937,7 @@ tr.rank-fall{ animation:rowFall .9s ease; }
         <div class="detailValue" id="detailBiggest">0.00 kg</div>
       </div>
       <div class="detailCard">
-        <div class="detailLabel">Súčet TOP 3</div>
+        <div class="detailLabel">Súčet TOP 5</div>
         <div class="detailValue" id="detailTop3Sum">0.00 kg</div>
       </div>
     </div>
@@ -1001,6 +1002,7 @@ let fallbackTimer = null;
 let previousRankMap = {};
 let currentTeamCatches = {};
 let lastRenderedLb = [];
+let lastRenderedTeamMap = new Map();
 let selectedTeamId = null;
 let currentSectorTab = "ALL";
 let currentLeaderboardMode = "TOTAL";
@@ -1042,6 +1044,38 @@ async function loadState(manual = false) {
   }
 }
 
+function buildTeamIndex(rows) {
+  const map = new Map();
+
+  (rows || [])
+    .filter(Boolean)
+    .forEach(team => {
+      const id = getTeamId(team);
+      if (id === null || id === undefined || id === "") return;
+
+      const key = String(Number(id));
+      const existing = map.get(key) || {};
+
+      map.set(key, {
+        ...existing,
+        ...team,
+        photo: getTeamPhoto(team) || getTeamPhoto(existing) || null
+      });
+    });
+
+  return map;
+}
+
+function findRenderedTeam(teamId) {
+  const key = String(Number(teamId));
+
+  if (lastRenderedTeamMap.has(key)) {
+    return lastRenderedTeamMap.get(key);
+  }
+
+  return lastRenderedLb.find(t => Number(getTeamId(t)) === Number(teamId)) || null;
+}
+
 function renderLive(data) {
   applyEventSettings(data);
 
@@ -1050,9 +1084,7 @@ function renderLive(data) {
   const topFish = data?.topFish || null;
   const lastCatch = data?.lastCatch || null;
 
-  const top5teams = Array.isArray(data?.top5teams)
-    ? data.top5teams
-    : [];
+  const top5teams = Array.isArray(data?.top5teams) ? data.top5teams : [];
 
   const lbByTotal = Array.isArray(data?.lbByTotal)
     ? data.lbByTotal
@@ -1075,6 +1107,13 @@ function renderLive(data) {
       : lbByTotal;
 
   lastRenderedLb = lbByTotal.length ? lbByTotal : lb;
+
+  lastRenderedTeamMap = buildTeamIndex([
+    ...lbByTotal,
+    ...lbByTop5,
+    ...top5teams
+  ]);
+
   currentTeamCatches = data?.teamCatches || {};
   currentTopFish = topFish;
   currentLastCatch = lastCatch;
@@ -1120,13 +1159,28 @@ function renderLive(data) {
     : "–";
 
   const topFishCard = document.getElementById("topFishCard");
-  topFishCard.style.opacity = topFish ? "1" : ".7";
+  if (topFishCard) {
+    topFishCard.style.opacity = topFish ? "1" : ".7";
+  }
 
+  renderLastCatch(lastCatch);
+  renderTop3(top5teams);
+  renderSectorTabs(lb);
+  renderLeaderboard(getFilteredRows(lb));
+
+  if (selectedTeamId !== null) {
+    renderTeamDetail(selectedTeamId);
+  }
+}
+
+function renderLastCatch(lastCatch) {
   const lastCatchBox = document.getElementById("lastCatchBox");
   const lastCatchMain = document.getElementById("lastCatchMain");
   const lastCatchSub = document.getElementById("lastCatchSub");
   const lastCatchHint = document.getElementById("lastCatchHint");
   const lastCatchPhotoWrap = document.getElementById("lastCatchPhotoWrap");
+
+  if (!lastCatchBox || !lastCatchMain || !lastCatchSub || !lastCatchHint || !lastCatchPhotoWrap) return;
 
   if (lastCatch) {
     const teamName = safeText(lastCatch.teamName || lastCatch.team || ("Tím " + (lastCatch.teamId || "")));
@@ -1138,10 +1192,16 @@ function renderLive(data) {
     lastCatchSub.textContent = `Sektor ${sector} • Stanovište ${peg} • ${time}`;
 
     if (lastCatch.photo) {
-      lastCatchPhotoWrap.innerHTML = `<img src="${escapeAttr(lastCatch.photo)}" class="lastCatchThumb" alt="Posledný úlovok">`;
+      lastCatchPhotoWrap.innerHTML =
+        `<img src="${escapeAttr(lastCatch.photo)}" class="lastCatchThumb" alt="Posledný úlovok">`;
+
       lastCatchHint.textContent = "Klikni pre zväčšenie fotky";
       lastCatchBox.classList.add("clickable");
-      lastCatchBox.onclick = () => openImageModal(lastCatch.photo, `${teamName} • ${formatKg(Number(lastCatch.weight || 0))} • ${time}`);
+      lastCatchBox.onclick = () =>
+        openImageModal(
+          lastCatch.photo,
+          `${teamName} • ${formatKg(Number(lastCatch.weight || 0))} • ${time}`
+        );
     } else {
       lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
       lastCatchHint.textContent = "";
@@ -1156,18 +1216,12 @@ function renderLive(data) {
     lastCatchBox.classList.remove("clickable");
     lastCatchBox.onclick = null;
   }
-
-  renderTop3(top5teams);
-  renderSectorTabs(lb);
-  renderLeaderboard(getFilteredRows(lb));
-
-  if (selectedTeamId !== null) {
-    renderTeamDetail(selectedTeamId);
-  }
 }
+
 function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
+  if (!body || !empty) return;
 
   body.innerHTML = "";
 
@@ -1183,6 +1237,7 @@ function renderTop3(rows) {
   empty.style.display = "none";
 
   visibleRows.forEach((team, index) => {
+    const teamId = getTeamId(team);
     const top5 = Array.isArray(team.top5)
       ? [...team.top5]
       : [0, 0, 0, 0, 0];
@@ -1191,24 +1246,25 @@ function renderTop3(rows) {
       top5.push(0);
     }
 
-    const photoHtml = team.photo
-      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
+    const photo = getTeamPhoto(team);
+    const photoHtml = photo
+      ? `<img src="${escapeAttr(photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
     const tr = document.createElement("tr");
-    tr.onclick = () => openTeamDetail(team.id);
     tr.style.cursor = "pointer";
+    tr.onclick = () => openTeamDetail(teamId);
 
     tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
       <td>${photoHtml}</td>
-      <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
+      <td><span class="teamName teamLink">${escapeHtml(getTeamName(team, teamId))}</span></td>
       <td>${formatKg(Number(top5[0] || 0))}</td>
       <td>${formatKg(Number(top5[1] || 0))}</td>
       <td>${formatKg(Number(top5[2] || 0))}</td>
       <td>${formatKg(Number(top5[3] || 0))}</td>
       <td>${formatKg(Number(top5[4] || 0))}</td>
-      <td><span class="badge">${formatKg(Number(team.top5sum || 0))}</span></td>
+      <td><span class="badge">${formatKg(Number(team.top5sum || team.top5Sum || 0))}</span></td>
     `;
 
     body.appendChild(tr);
@@ -1252,6 +1308,7 @@ function getFilteredRows(rows) {
 function renderLeaderboard(rows) {
   const body = document.getElementById("lbBody");
   const empty = document.getElementById("lbEmpty");
+  if (!body || !empty) return;
 
   body.innerHTML = "";
 
@@ -1269,11 +1326,12 @@ function renderLeaderboard(rows) {
   const newRankMap = isOverall ? {} : previousRankMap;
 
   rows.forEach((team, index) => {
+    const teamId = getTeamId(team);
     const currentRank = index + 1;
-    const previousRank = previousRankMap[team.id];
+    const previousRank = previousRankMap[teamId];
 
     if (isOverall) {
-      newRankMap[team.id] = currentRank;
+      newRankMap[teamId] = currentRank;
     }
 
     let moveHtml = `<span class="moveWrap"><span class="moveArrow moveSame">•</span></span>`;
@@ -1291,12 +1349,13 @@ function renderLeaderboard(rows) {
       }
     }
 
-    const photoHtml = team.photo
-      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
+    const photo = getTeamPhoto(team);
+    const photoHtml = photo
+      ? `<img src="${escapeAttr(photo)}" alt="foto tímu" class="teamPhoto">`
       : `<div class="noPhoto">bez<br>foto</div>`;
 
-    const mobilePhotoHtml = team.photo
-      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="mobileTeamPhoto">`
+    const mobilePhotoHtml = photo
+      ? `<img src="${escapeAttr(photo)}" alt="foto tímu" class="mobileTeamPhoto">`
       : `<div class="mobileNoPhoto">bez<br>foto</div>`;
 
     const topRankClass = isOverall
@@ -1309,7 +1368,8 @@ function renderLeaderboard(rows) {
 
     const tr = document.createElement("tr");
     tr.className = `${topRankClass} ${moveClass}`.trim();
-    tr.onclick = () => openTeamDetail(team.id);
+    tr.onclick = () => openTeamDetail(teamId);
+    tr.style.cursor = "pointer";
 
     tr.innerHTML = `
       <td class="col-rank">
@@ -1325,7 +1385,7 @@ function renderLeaderboard(rows) {
         <div class="mobileTeamRow">
           <div class="mobileTeamPhotoWrap">${mobilePhotoHtml}</div>
           <div>
-            <div class="teamName">${escapeHtml(team.name || "-")}</div>
+            <div class="teamName teamLink">${escapeHtml(getTeamName(team, teamId))}</div>
             <div class="mobileSub">
               Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} • Stanovište ${escapeHtml(String(team.peg || "-"))}
             </div>
@@ -1352,6 +1412,7 @@ function renderLeaderboard(rows) {
     previousRankMap = newRankMap;
   }
 }
+
 function openTeamDetail(teamId) {
   selectedTeamId = Number(teamId);
 
@@ -1375,17 +1436,15 @@ function closeTeamDetail() {
 }
 
 function renderTeamDetail(teamId) {
-  const team = lastRenderedLb.find(t => Number(t.id) === Number(teamId));
+  const team = findRenderedTeam(teamId);
 
   if (!team) {
     closeTeamDetail();
     return;
   }
 
-  const photo = typeof team?.photo === "string" && team.photo.trim() !== ""
-    ? team.photo.trim()
-    : "";
-
+  const normalizedTeamId = getTeamId(team) || teamId;
+  const photo = getTeamPhoto(team);
   const detailTop = document.getElementById("detailTop");
 
   detailTop.innerHTML = `
@@ -1399,32 +1458,33 @@ function renderTeamDetail(teamId) {
       </div>
 
       <div>
-        <h2 class="detailTitle">${escapeHtml(team.name || `Tím ${teamId}`)}</h2>
+        <h2 class="detailTitle">${escapeHtml(getTeamName(team, normalizedTeamId))}</h2>
 
         <div class="detailMeta">
           Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} •
-          Stanovište ${escapeHtml(String(team.peg || "-"))} •
-          Aktuálne celkové poradie ${escapeHtml(String(getOverallRank(teamId)))}.
+          Stanovište ${escapeHtml(String(team.peg || team.place || team.stand || "-"))} •
+          Aktuálne celkové poradie ${escapeHtml(String(getOverallRank(normalizedTeamId)))}.
         </div>
       </div>
     </div>
   `;
 
+  const catches = getTeamCatches(normalizedTeamId);
+  const biggest = catches.length
+    ? Math.max(...catches.map(c => Number(c.weight || c.kg || 0)))
+    : Number(team.biggest || team.biggestFish || 0);
+
   document.getElementById("detailTotal").textContent =
-    formatKg(Number(team.total || 0));
+    formatKg(Number(team.total || team.totalWeight || 0));
 
   document.getElementById("detailCount").textContent =
-    String(team.count || 0);
+    String(team.count || team.fishCount || catches.length || 0);
 
   document.getElementById("detailBiggest").textContent =
-    formatKg(Number(team.biggest || 0));
+    formatKg(biggest);
 
   document.getElementById("detailTop3Sum").textContent =
-    formatKg(Number(team.top5sum || team.top3sum || 0));
-
-  const catches = Array.isArray(currentTeamCatches?.[teamId])
-    ? currentTeamCatches[teamId]
-    : [];
+    formatKg(Number(team.top5sum || team.top5Sum || team.top3sum || team.top3Sum || 0));
 
   const wrap = document.getElementById("detailCatchesWrap");
 
@@ -1433,33 +1493,110 @@ function renderTeamDetail(teamId) {
     return;
   }
 
-  const sorted = [...catches].sort((a, b) => Number(a.number || 0) - Number(b.number || 0));
+  const sorted = [...catches].sort((a, b) => {
+    const aNumber = Number(a.number || a.catchNumber || a.order || 0);
+    const bNumber = Number(b.number || b.catchNumber || b.order || 0);
+    if (aNumber !== bNumber) return aNumber - bNumber;
+
+    const aTime = new Date(a.recordedTime || a.time || a.createdAt || a.timestamp || 0).getTime() || 0;
+    const bTime = new Date(b.recordedTime || b.time || b.createdAt || b.timestamp || 0).getTime() || 0;
+    return aTime - bTime;
+  });
 
   wrap.innerHTML = `
     <div class="catchGrid">
-      ${sorted.map(c => `
-        <div class="catchItem">
-          <div class="catchTop">
-            <div class="catchNumber">Úlovok #${escapeHtml(String(c.number || 0))}</div>
-            <div class="catchWeight">${formatKg(Number(c.weight || 0))}</div>
+      ${sorted.map((c, index) => {
+        const catchNumber = c.number || c.catchNumber || c.order || index + 1;
+        const weight = Number(c.weight || c.kg || 0);
+        const time = formatDateTime(c.time || c.catchTime || c.createdAt || c.timestamp || "");
+        const catchPhoto = getCatchPhoto(c);
+
+        return `
+          <div class="catchItem">
+            <div class="catchTop">
+              <div class="catchNumber">Úlovok #${escapeHtml(String(catchNumber))}</div>
+              <div class="catchWeight">${formatKg(weight)}</div>
+            </div>
+            <div class="catchMeta">
+              Čas: ${escapeHtml(time || "-")}
+            </div>
+            ${
+              catchPhoto
+                ? `<img src="${escapeAttr(catchPhoto)}" alt="Úlovok" class="catchPhoto" data-photo="${escapeAttr(catchPhoto)}" data-caption="${escapeAttr(`Úlovok #${catchNumber} • ${formatKg(weight)} • ${time}`)}">`
+                : `<div class="noCatchPhoto">bez fotky</div>`
+            }
           </div>
-          <div class="catchMeta">
-            Čas: ${escapeHtml(formatDateTime(c.time))}
-          </div>
-          ${
-            c.photo
-              ? `<img src="${escapeAttr(c.photo)}" alt="Úlovok" class="catchPhoto" onclick="openImageModal('${escapeJs(c.photo)}','Úlovok #${escapeJs(String(c.number || 0))} • ${escapeJs(formatKg(Number(c.weight || 0)))} • ${escapeJs(formatDateTime(c.time))}')">`
-              : `<div class="noCatchPhoto">bez fotky</div>`
-          }
-        </div>
-      `).join("")}
+        `;
+      }).join("")}
     </div>
   `;
+
+  wrap.querySelectorAll(".catchPhoto").forEach(img => {
+    img.addEventListener("click", () => {
+      openImageModal(img.dataset.photo || img.src, img.dataset.caption || "");
+    });
+  });
 }
 
 function getOverallRank(teamId) {
-  const index = lastRenderedLb.findIndex(t => Number(t.id) === Number(teamId));
+  const index = lastRenderedLb.findIndex(t => Number(getTeamId(t)) === Number(teamId));
   return index >= 0 ? index + 1 : "-";
+}
+
+function getTeamId(team) {
+  return team?.id ?? team?.teamId ?? team?.team_id ?? null;
+}
+
+function getTeamName(team, fallbackId = "") {
+  return team?.name || team?.teamName || team?.team || (fallbackId ? `Tím ${fallbackId}` : "-");
+}
+
+function getTeamPhoto(team) {
+  return firstNonEmpty(
+    team?.photo,
+    team?.teamPhoto,
+    team?.photoUrl,
+    team?.image,
+    team?.imageUrl,
+    team?.logo
+  );
+}
+
+function getCatchPhoto(catchItem) {
+  return firstNonEmpty(
+    catchItem?.photo,
+    catchItem?.photoUrl,
+    catchItem?.image,
+    catchItem?.imageUrl,
+    catchItem?.file,
+    catchItem?.url
+  );
+}
+
+function getTeamCatches(teamId) {
+  const idNumber = Number(teamId);
+  const possibleKeys = [
+    String(teamId),
+    String(idNumber),
+    teamId
+  ];
+
+  for (const key of possibleKeys) {
+    if (Array.isArray(currentTeamCatches?.[key])) {
+      return currentTeamCatches[key];
+    }
+  }
+
+  return [];
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim() !== "") {
+      return value.trim();
+    }
+  }
+  return "";
 }
 
 function openTopFishModal() {
@@ -1573,7 +1710,10 @@ function formatDateTime(value) {
       return raw;
     }
 
-    return new Date(raw).toLocaleString("sk-SK");
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return raw;
+
+    return date.toLocaleString("sk-SK");
   } catch {
     return value || "";
   }
