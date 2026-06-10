@@ -874,6 +874,7 @@ tr.rank-fall{ animation:rowFall .9s ease; }
       <thead>
         <tr>
           <th>Poradie</th>
+          <th>Foto</th>
           <th>Tím</th>
           <th>1. ryba</th>
           <th>2. ryba</th>
@@ -1190,9 +1191,14 @@ function renderTop3(rows) {
       top5.push(0);
     }
 
+    const photoHtml = team.photo
+      ? `<img src="${escapeAttr(team.photo)}" alt="foto tímu" class="teamPhoto">`
+      : `<div class="noPhoto">bez<br>foto</div>`;
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
+      <td>${photoHtml}</td>
       <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
       <td>${formatKg(Number(top5[0] || 0))}</td>
       <td>${formatKg(Number(top5[1] || 0))}</td>
@@ -1201,6 +1207,7 @@ function renderTop3(rows) {
       <td>${formatKg(Number(top5[4] || 0))}</td>
       <td><span class="badge">${formatKg(Number(team.top5sum || 0))}</span></td>
     `;
+
     body.appendChild(tr);
   });
 }
