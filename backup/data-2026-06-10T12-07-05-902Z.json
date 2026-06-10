@@ -443,8 +443,24 @@
       "photo": null
     }
   ],
-  "catches": [],
+  "catches": [
+    {
+      "id": 1774016734558,
+      "teamId": 1,
+      "weight": 5.5,
+      "time": "2026-03-20T14:25:34.558Z",
+      "catchTime": null,
+      "photo": null
+    }
+  ],
+  "judges": [],
   "meta": {
-    "nextTeamId": 51
+    "nextTeamId": 51,
+    "nextJudgeId": 1,
+    "judges": [],
+    "processedSubmissionIds": [],
+    "eventName": "RCC Live tabuľka",
+    "eventSub": "Ružín Carp Classic",
+    "leaderboardMode": "TOP5"
   }
 }
