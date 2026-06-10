@@ -1074,7 +1074,7 @@ function renderLive(data) {
       ? lbByTop5
       : lbByTotal;
 
-  lastRenderedLb = lb;
+  lastRenderedLb = lbByTotal.length ? lbByTotal : lb;
   currentTeamCatches = data?.teamCatches || {};
   currentTopFish = topFish;
   currentLastCatch = lastCatch;
@@ -1196,9 +1196,10 @@ function renderTop3(rows) {
       : `<div class="noPhoto">bez<br>foto</div>`;
 
     const tr = document.createElement("tr");
-tr.onclick = () => openTeamDetail(team.id);
+    tr.onclick = () => openTeamDetail(team.id);
+    tr.style.cursor = "pointer";
 
-tr.innerHTML = `
+    tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
       <td>${photoHtml}</td>
       <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
@@ -1353,18 +1354,23 @@ function renderLeaderboard(rows) {
 }
 function openTeamDetail(teamId) {
   selectedTeamId = Number(teamId);
+
   document.getElementById("livePage").style.display = "none";
   document.getElementById("detailPage").style.display = "block";
   document.getElementById("backToLiveBtn").classList.remove("hidden");
+
   renderTeamDetail(selectedTeamId);
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function closeTeamDetail() {
   selectedTeamId = null;
+
   document.getElementById("detailPage").style.display = "none";
   document.getElementById("livePage").style.display = "block";
   document.getElementById("backToLiveBtn").classList.add("hidden");
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -1381,6 +1387,7 @@ function renderTeamDetail(teamId) {
     : "";
 
   const detailTop = document.getElementById("detailTop");
+
   detailTop.innerHTML = `
     <div class="detailTopLeft">
       <div class="detailTeamPhotoWrap">
@@ -1390,8 +1397,10 @@ function renderTeamDetail(teamId) {
             : `<div class="detailTeamNoPhoto">bez foto</div>`
         }
       </div>
+
       <div>
         <h2 class="detailTitle">${escapeHtml(team.name || `Tím ${teamId}`)}</h2>
+
         <div class="detailMeta">
           Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} •
           Stanovište ${escapeHtml(String(team.peg || "-"))} •
@@ -1401,12 +1410,22 @@ function renderTeamDetail(teamId) {
     </div>
   `;
 
-  document.getElementById("detailTotal").textContent = formatKg(Number(team.total || 0));
-  document.getElementById("detailCount").textContent = String(team.count || 0);
-  document.getElementById("detailBiggest").textContent = formatKg(Number(team.biggest || 0));
-  document.getElementById("detailTop3Sum").textContent = formatKg(Number(team.top3sum || 0));
+  document.getElementById("detailTotal").textContent =
+    formatKg(Number(team.total || 0));
 
-  const catches = Array.isArray(currentTeamCatches?.[teamId]) ? currentTeamCatches[teamId] : [];
+  document.getElementById("detailCount").textContent =
+    String(team.count || 0);
+
+  document.getElementById("detailBiggest").textContent =
+    formatKg(Number(team.biggest || 0));
+
+  document.getElementById("detailTop3Sum").textContent =
+    formatKg(Number(team.top5sum || team.top3sum || 0));
+
+  const catches = Array.isArray(currentTeamCatches?.[teamId])
+    ? currentTeamCatches[teamId]
+    : [];
+
   const wrap = document.getElementById("detailCatchesWrap");
 
   if (!catches.length) {
