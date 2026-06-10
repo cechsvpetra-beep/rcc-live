@@ -1,9 +1,17 @@
 function getDisplayTime(catchItem) {
   const catchTime = String(catchItem?.catchTime || "").trim();
-  if (catchTime) {
-    return catchTime;
-  }
+  if (catchTime) return catchTime;
   return catchItem?.time || "";
+}
+
+function getTopWeights(teamCatches, count) {
+  const top = [...teamCatches]
+    .sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0))
+    .slice(0, count)
+    .map(c => Number(c.weight || 0));
+
+  while (top.length < count) top.push(0);
+  return top;
 }
 
 function buildPublicState(data) {
@@ -11,27 +19,20 @@ function buildPublicState(data) {
   const catches = Array.isArray(data?.catches) ? data.catches : [];
   const meta = data?.meta || {};
 
-  const lb = teams
+  const baseRows = teams
     .filter(team => team.active)
     .map(team => {
       const teamCatches = catches.filter(c => Number(c.teamId) === Number(team.id));
-
       const total = teamCatches.reduce((sum, c) => sum + Number(c.weight || 0), 0);
-
       const biggest = teamCatches.length
         ? Math.max(...teamCatches.map(c => Number(c.weight || 0)))
         : 0;
 
-      const sortedTop = [...teamCatches]
-        .sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0))
-        .slice(0, 3)
-        .map(c => Number(c.weight || 0));
+      const top3 = getTopWeights(teamCatches, 3);
+      const top3sum = top3.reduce((a, b) => a + b, 0);
 
-      while (sortedTop.length < 3) {
-        sortedTop.push(0);
-      }
-
-      const top3sum = sortedTop.reduce((a, b) => a + b, 0);
+      const top5 = getTopWeights(teamCatches, 5);
+      const top5sum = top5.reduce((a, b) => a + b, 0);
 
       return {
         id: team.id,
@@ -43,22 +44,32 @@ function buildPublicState(data) {
         total,
         count: teamCatches.length,
         biggest,
-        top3: sortedTop,
-        top3sum
+        top3,
+        top3sum,
+        top5,
+        top5sum
       };
     });
 
-  lb.sort((a, b) => {
+  const lbByTotal = [...baseRows].sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
     if (b.biggest !== a.biggest) return b.biggest - a.biggest;
-    return a.id - b.id;
+    return Number(a.id) - Number(b.id);
   });
 
-  const top3teams = [...lb].sort((a, b) => {
+  const lbByTop5 = [...baseRows].sort((a, b) => {
+    if (b.top5sum !== a.top5sum) return b.top5sum - a.top5sum;
+    if (b.biggest !== a.biggest) return b.biggest - a.biggest;
+    return Number(a.id) - Number(b.id);
+  });
+
+  const top3teams = [...baseRows].sort((a, b) => {
     if (b.top3sum !== a.top3sum) return b.top3sum - a.top3sum;
     if (b.biggest !== a.biggest) return b.biggest - a.biggest;
-    return a.id - b.id;
+    return Number(a.id) - Number(b.id);
   });
+
+  const top5teams = lbByTop5;
 
   const topFishCatch = catches.length
     ? catches.reduce((max, c) => Number(c.weight || 0) > Number(max.weight || 0) ? c : max)
@@ -129,13 +140,19 @@ function buildPublicState(data) {
   return {
     eventName: meta.eventName || "RCC Live tabuľka",
     eventSub: meta.eventSub || "Ružín Carp Classic",
-    lb,
-    totalWeight: lb.reduce((sum, t) => sum + Number(t.total || 0), 0),
+
+    lb: lbByTotal,
+    lbByTotal,
+    lbByTop5,
+
+    totalWeight: lbByTotal.reduce((sum, t) => sum + Number(t.total || 0), 0),
     totalFish: catches.length,
     topFish,
     lastCatch,
     teamCatches,
-    top3teams
+
+    top3teams,
+    top5teams
   };
 }
 

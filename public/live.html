@@ -891,7 +891,15 @@ tr.rank-fall{ animation:rowFall .9s ease; }
         <h2>Poradie tímov</h2>
         <div class="sectionSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
       </div>
+<div class="tabs" id="leaderboardModeTabs">
+  <button class="tabBtn" onclick="setLeaderboardMode('TOTAL')">
+    CELKOVÁ VÁHA
+  </button>
 
+  <button class="tabBtn" onclick="setLeaderboardMode('TOP5')">
+    TOP 5 RÝB
+  </button>
+</div>
       <div class="tabs" id="sectorTabs"></div>
 
       <div class="tableWrap">
@@ -998,6 +1006,7 @@ let currentTeamCatches = {};
 let lastRenderedLb = [];
 let selectedTeamId = null;
 let currentSectorTab = "ALL";
+let currentLeaderboardMode = "TOTAL";
 let currentTopFish = null;
 let currentLastCatch = null;
 const FALLBACK_MS = 30000;
@@ -1043,8 +1052,14 @@ function renderLive(data) {
   const totalFish = Number(data?.totalFish || 0);
   const topFish = data?.topFish || null;
   const lastCatch = data?.lastCatch || null;
+
   const top3teams = Array.isArray(data?.top3teams) ? data.top3teams : [];
-  const lb = Array.isArray(data?.lb) ? data.lb : [];
+  const lbByTotal = Array.isArray(data?.lbByTotal) ? data.lbByTotal : (Array.isArray(data?.lb) ? data.lb : []);
+  const lbByTop5 = Array.isArray(data?.lbByTop5) ? data.lbByTop5 : lbByTotal;
+
+  const lb = currentLeaderboardMode === "TOP5"
+    ? lbByTop5
+    : lbByTotal;
 
   lastRenderedLb = lb;
   currentTeamCatches = data?.teamCatches || {};
@@ -1137,7 +1152,22 @@ function renderTop3(rows) {
     body.appendChild(tr);
   });
 }
+function setLeaderboardMode(mode) {
+  currentLeaderboardMode = mode === "TOP5" ? "TOP5" : "TOTAL";
 
+  const buttons = document.querySelectorAll("#leaderboardModeTabs .tabBtn");
+  buttons.forEach(btn => btn.classList.remove("active"));
+
+  const activeButton = currentLeaderboardMode === "TOP5"
+    ? buttons[1]
+    : buttons[0];
+
+  if (activeButton) {
+    activeButton.classList.add("active");
+  }
+
+  loadState(false);
+}
 function renderSectorTabs(rows) {
   const wrap = document.getElementById("sectorTabs");
   if (!wrap) return;
