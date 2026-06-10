@@ -1196,7 +1196,9 @@ function renderTop3(rows) {
       : `<div class="noPhoto">bez<br>foto</div>`;
 
     const tr = document.createElement("tr");
-    tr.innerHTML = `
+tr.onclick = () => openTeamDetail(team.id);
+
+tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
       <td>${photoHtml}</td>
       <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
