@@ -10,7 +10,10 @@ function getTopWeights(teamCatches, count) {
     .slice(0, count)
     .map(c => Number(c.weight || 0));
 
-  while (top.length < count) top.push(0);
+  while (top.length < count) {
+    top.push(0);
+  }
+
   return top;
 }
 
@@ -69,7 +72,11 @@ function buildPublicState(data) {
     return Number(a.id) - Number(b.id);
   });
 
-  const top5teams = lbByTop5;
+  const top5teams = [...baseRows].sort((a, b) => {
+    if (b.top5sum !== a.top5sum) return b.top5sum - a.top5sum;
+    if (b.biggest !== a.biggest) return b.biggest - a.biggest;
+    return Number(a.id) - Number(b.id);
+  });
 
   const topFishCatch = catches.length
     ? catches.reduce((max, c) => Number(c.weight || 0) > Number(max.weight || 0) ? c : max)
