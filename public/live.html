@@ -467,12 +467,14 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
   gap:12px;
 }
+
 .catchItem{
   background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
   border:1px solid var(--line);
   border-radius:14px;
   padding:12px;
 }
+
 .catchTop{
   display:flex;
   justify-content:space-between;
@@ -480,27 +482,38 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   gap:10px;
   margin-bottom:8px;
 }
+
 .catchNumber{
   font-weight:900;
 }
+
 .catchWeight{
   font-weight:900;
   color:#dff7e7;
 }
+
 .catchMeta{
   color:var(--muted);
   font-size:12px;
   line-height:1.45;
 }
+
 .catchPhoto{
   width:100%;
+  max-width:320px;
   height:180px;
   object-fit:cover;
   border-radius:12px;
   border:1px solid #24364b;
   background:#09111b;
-  margin-top:10px;
+  margin:10px auto 0 auto;
   cursor:pointer;
+  display:block;
+  transition:transform .15s ease;
+}
+
+.catchPhoto:hover{
+  transform:scale(1.02);
 }
 .catchPhoto:hover{
   opacity:.92;
