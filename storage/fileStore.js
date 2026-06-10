@@ -49,7 +49,8 @@ function defaultData() {
       judges: [],
       processedSubmissionIds: [],
       eventName: "RCC Live tabuľka",
-      eventSub: "Ružín Carp Classic"
+eventSub: "Ružín Carp Classic",
+leaderboardMode: "TOTAL"
     }
   };
 }
@@ -259,21 +260,37 @@ function loadData() {
     const maxJudgeId = judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0);
 
     const meta = {
-      nextTeamId: Math.max(
-        Number(parsed?.meta?.nextTeamId || 0),
-        maxTeamId + 1,
-        DEFAULT_TEAM_COUNT + 1
-      ),
-      nextJudgeId: Math.max(
-        Number(parsed?.meta?.nextJudgeId || 0),
-        maxJudgeId + 1,
-        1
-      ),
-      judges,
-      processedSubmissionIds: normalizeProcessedSubmissionIds(parsed?.meta?.processedSubmissionIds),
-      eventName: normalizeEventName(parsed?.meta?.eventName, base.meta.eventName),
-      eventSub: normalizeEventSub(parsed?.meta?.eventSub, base.meta.eventSub)
-    };
+  nextTeamId: Math.max(
+    Number(parsed?.meta?.nextTeamId || 0),
+    maxTeamId + 1,
+    DEFAULT_TEAM_COUNT + 1
+  ),
+
+  nextJudgeId: Math.max(
+    Number(parsed?.meta?.nextJudgeId || 0),
+    maxJudgeId + 1,
+    1
+  ),
+
+  judges,
+
+  processedSubmissionIds: normalizeProcessedSubmissionIds(
+    parsed?.meta?.processedSubmissionIds
+  ),
+
+  eventName: normalizeEventName(
+    parsed?.meta?.eventName,
+    base.meta.eventName
+  ),
+
+  eventSub: normalizeEventSub(
+    parsed?.meta?.eventSub,
+    base.meta.eventSub
+  ),
+
+  leaderboardMode:
+    parsed?.meta?.leaderboardMode || "TOTAL"
+};
 
     return { sectors, teams, catches, judges, meta };
   } catch (e) {
@@ -340,7 +357,11 @@ function saveData(data, options = {}) {
           : current?.meta?.processedSubmissionIds
       ),
       eventName: normalizeEventName(data?.meta?.eventName, current?.meta?.eventName),
-      eventSub: normalizeEventSub(data?.meta?.eventSub, current?.meta?.eventSub)
+eventSub: normalizeEventSub(data?.meta?.eventSub, current?.meta?.eventSub),
+leaderboardMode:
+  data?.meta?.leaderboardMode ||
+  current?.meta?.leaderboardMode ||
+  "TOTAL"
     }
   };
 

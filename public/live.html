@@ -863,34 +863,39 @@ tr.rank-fall{ animation:rowFall .9s ease; }
     <div class="infoLine" id="infoLine"></div>
     <div class="updated" id="updatedAt"></div>
 
-    <div class="section">
-      <div class="sectionHead">
-        <h2>TOP 3 ryby tímov</h2>
-        <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
-      </div>
-      <div class="tableWrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Poradie</th>
-              <th>Tím</th>
-              <th>1. ryba</th>
-              <th>2. ryba</th>
-              <th>3. ryba</th>
-              <th>Súčet TOP 3</th>
-            </tr>
-          </thead>
-          <tbody id="top3Body"></tbody>
-        </table>
-      </div>
-      <div id="top3Empty" class="empty" style="display:none;">Zatiaľ nie sú dostupné dáta pre TOP 3.</div>
-    </div>
+    <div class="section" id="top5Section">
+  <div class="sectionHead">
+    <h2 id="top5Title">TOP 5 rýb tímov</h2>
+    <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
+  </div>
 
-    <div class="section">
+  <div class="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Poradie</th>
+          <th>Tím</th>
+          <th>1. ryba</th>
+          <th>2. ryba</th>
+          <th>3. ryba</th>
+          <th>4. ryba</th>
+          <th>5. ryba</th>
+          <th>Súčet TOP 5</th>
+        </tr>
+      </thead>
+      <tbody id="top3Body"></tbody>
+    </table>
+  </div>
+
+  <div id="top3Empty" class="empty" style="display:none;">
+    Zatiaľ nie sú dostupné dáta pre TOP 5.
+  </div>
+</div>
+
+    <div class="section" id="mainLeaderboardSection">
       <div class="sectionHead">
-        <h2>Poradie tímov</h2>
-        <div class="sectionSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
-      </div>
+        <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
+<div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
 <div class="tabs" id="sectorTabs"></div>
 
       <div class="tableWrap">
@@ -1036,34 +1041,72 @@ async function loadState(manual = false) {
   }
 }
 
-const top3teams = Array.isArray(data?.top3teams)
-  ? data.top3teams
-  : [];
+function renderLive(data) {
+  applyEventSettings(data);
 
-const lbByTotal = Array.isArray(data?.lbByTotal)
-  ? data.lbByTotal
-  : (Array.isArray(data?.lb) ? data.lb : []);
+  const totalWeight = Number(data?.totalWeight || 0);
+  const totalFish = Number(data?.totalFish || 0);
+  const topFish = data?.topFish || null;
+  const lastCatch = data?.lastCatch || null;
 
-const lbByTop5 = Array.isArray(data?.lbByTop5)
-  ? data.lbByTop5
-  : lbByTotal;
+  const top5teams = Array.isArray(data?.top5teams)
+    ? data.top5teams
+    : [];
 
-const leaderboardMode = data?.leaderboardMode || "TOTAL";
+  const lbByTotal = Array.isArray(data?.lbByTotal)
+    ? data.lbByTotal
+    : (Array.isArray(data?.lb) ? data.lb : []);
 
-currentLeaderboardMode =
-  leaderboardMode === "TOP5" || leaderboardMode === "BOTH"
-    ? leaderboardMode
-    : "TOTAL";
-
-const lb =
-  currentLeaderboardMode === "TOP5"
-    ? lbByTop5
+  const lbByTop5 = Array.isArray(data?.lbByTop5)
+    ? data.lbByTop5
     : lbByTotal;
 
-lastRenderedLb = lb;
-currentTeamCatches = data?.teamCatches || {};
-currentTopFish = topFish;
-currentLastCatch = lastCatch;
+  const leaderboardMode = data?.leaderboardMode || "TOTAL";
+
+  currentLeaderboardMode =
+    leaderboardMode === "TOP5" || leaderboardMode === "BOTH"
+      ? leaderboardMode
+      : "TOTAL";
+
+  const lb =
+    currentLeaderboardMode === "TOP5"
+      ? lbByTop5
+      : lbByTotal;
+
+  lastRenderedLb = lb;
+  currentTeamCatches = data?.teamCatches || {};
+  currentTopFish = topFish;
+  currentLastCatch = lastCatch;
+
+  const top5Section = document.getElementById("top5Section");
+  const mainLeaderboardSection = document.getElementById("mainLeaderboardSection");
+  const mainLeaderboardTitle = document.getElementById("mainLeaderboardTitle");
+  const mainLeaderboardSub = document.getElementById("mainLeaderboardSub");
+
+  if (top5Section) {
+    top5Section.style.display =
+      currentLeaderboardMode === "TOTAL" ? "none" : "block";
+  }
+
+  if (mainLeaderboardSection) {
+    mainLeaderboardSection.style.display =
+      currentLeaderboardMode === "TOP5" ? "none" : "block";
+  }
+
+  if (mainLeaderboardTitle) {
+    mainLeaderboardTitle.textContent =
+      currentLeaderboardMode === "BOTH"
+        ? "Poradie tímov – celková váha"
+        : "Poradie tímov";
+  }
+
+  if (mainLeaderboardSub) {
+    mainLeaderboardSub.textContent =
+      currentLeaderboardMode === "BOTH"
+        ? "Hlavná tabuľka podľa celkovej váhy. TOP 5 je zobrazené ako doplnková tabuľka."
+        : "Prepínaj medzi celkovým poradím a jednotlivými sektormi.";
+  }
+
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
   document.getElementById("totalFish").textContent = String(totalFish);
 
@@ -1113,7 +1156,7 @@ currentLastCatch = lastCatch;
     lastCatchBox.onclick = null;
   }
 
-  renderTop3(top3teams);
+  renderTop3(top5teams);
   renderSectorTabs(lb);
   renderLeaderboard(getFilteredRows(lb));
 
@@ -1121,13 +1164,15 @@ currentLastCatch = lastCatch;
     renderTeamDetail(selectedTeamId);
   }
 }
-
 function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
 
   body.innerHTML = "";
-  const visibleRows = rows.slice(0, 3);
+
+  const visibleRows = currentLeaderboardMode === "BOTH"
+    ? rows.slice(0, 3)
+    : rows;
 
   if (!visibleRows.length) {
     empty.style.display = "block";
@@ -1137,35 +1182,29 @@ function renderTop3(rows) {
   empty.style.display = "none";
 
   visibleRows.forEach((team, index) => {
-    const top3 = Array.isArray(team.top3) ? team.top3 : [0, 0, 0];
+    const top5 = Array.isArray(team.top5)
+      ? [...team.top5]
+      : [0, 0, 0, 0, 0];
+
+    while (top5.length < 5) {
+      top5.push(0);
+    }
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="rank">${index + 1}.</span></td>
       <td><span class="teamName teamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(team.id)})">${escapeHtml(team.name || "-")}</span></td>
-      <td>${formatKg(Number(top3[0] || 0))}</td>
-      <td>${formatKg(Number(top3[1] || 0))}</td>
-      <td>${formatKg(Number(top3[2] || 0))}</td>
-      <td><span class="badge">${formatKg(Number(team.top3sum || 0))}</span></td>
+      <td>${formatKg(Number(top5[0] || 0))}</td>
+      <td>${formatKg(Number(top5[1] || 0))}</td>
+      <td>${formatKg(Number(top5[2] || 0))}</td>
+      <td>${formatKg(Number(top5[3] || 0))}</td>
+      <td>${formatKg(Number(top5[4] || 0))}</td>
+      <td><span class="badge">${formatKg(Number(team.top5sum || 0))}</span></td>
     `;
     body.appendChild(tr);
   });
 }
-function setLeaderboardMode(mode) {
-  currentLeaderboardMode = mode === "TOP5" ? "TOP5" : "TOTAL";
 
-  const buttons = document.querySelectorAll("#leaderboardModeTabs .tabBtn");
-  buttons.forEach(btn => btn.classList.remove("active"));
-
-  const activeButton = currentLeaderboardMode === "TOP5"
-    ? buttons[1]
-    : buttons[0];
-
-  if (activeButton) {
-    activeButton.classList.add("active");
-  }
-
-  loadState(false);
-}
 function renderSectorTabs(rows) {
   const wrap = document.getElementById("sectorTabs");
   if (!wrap) return;
