@@ -891,16 +891,7 @@ tr.rank-fall{ animation:rowFall .9s ease; }
         <h2>Poradie tímov</h2>
         <div class="sectionSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
       </div>
-<div class="tabs" id="leaderboardModeTabs">
-  <button class="tabBtn" onclick="setLeaderboardMode('TOTAL')">
-    CELKOVÁ VÁHA
-  </button>
-
-  <button class="tabBtn" onclick="setLeaderboardMode('TOP5')">
-    TOP 5 RÝB
-  </button>
-</div>
-      <div class="tabs" id="sectorTabs"></div>
+<div class="tabs" id="sectorTabs"></div>
 
       <div class="tableWrap">
         <table>
@@ -1045,27 +1036,34 @@ async function loadState(manual = false) {
   }
 }
 
-function renderLive(data) {
-  applyEventSettings(data);
+const top3teams = Array.isArray(data?.top3teams)
+  ? data.top3teams
+  : [];
 
-  const totalWeight = Number(data?.totalWeight || 0);
-  const totalFish = Number(data?.totalFish || 0);
-  const topFish = data?.topFish || null;
-  const lastCatch = data?.lastCatch || null;
+const lbByTotal = Array.isArray(data?.lbByTotal)
+  ? data.lbByTotal
+  : (Array.isArray(data?.lb) ? data.lb : []);
 
-  const top3teams = Array.isArray(data?.top3teams) ? data.top3teams : [];
-  const lbByTotal = Array.isArray(data?.lbByTotal) ? data.lbByTotal : (Array.isArray(data?.lb) ? data.lb : []);
-  const lbByTop5 = Array.isArray(data?.lbByTop5) ? data.lbByTop5 : lbByTotal;
+const lbByTop5 = Array.isArray(data?.lbByTop5)
+  ? data.lbByTop5
+  : lbByTotal;
 
-  const lb = currentLeaderboardMode === "TOP5"
+const leaderboardMode = data?.leaderboardMode || "TOTAL";
+
+currentLeaderboardMode =
+  leaderboardMode === "TOP5" || leaderboardMode === "BOTH"
+    ? leaderboardMode
+    : "TOTAL";
+
+const lb =
+  currentLeaderboardMode === "TOP5"
     ? lbByTop5
     : lbByTotal;
 
-  lastRenderedLb = lb;
-  currentTeamCatches = data?.teamCatches || {};
-  currentTopFish = topFish;
-  currentLastCatch = lastCatch;
-
+lastRenderedLb = lb;
+currentTeamCatches = data?.teamCatches || {};
+currentTopFish = topFish;
+currentLastCatch = lastCatch;
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
   document.getElementById("totalFish").textContent = String(totalFish);
 

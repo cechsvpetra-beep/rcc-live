@@ -564,7 +564,11 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
         judges,
         nextJudgeId,
         eventName: normalizeEventName(incoming?.meta?.eventName || currentMeta.eventName),
-        eventSub: normalizeEventSub(incoming?.meta?.eventSub || currentMeta.eventSub)
+eventSub: normalizeEventSub(incoming?.meta?.eventSub || currentMeta.eventSub),
+leaderboardMode:
+  incoming?.meta?.leaderboardMode === "TOP5" || incoming?.meta?.leaderboardMode === "BOTH"
+    ? incoming.meta.leaderboardMode
+    : "TOTAL"
       }
     };
 

@@ -145,12 +145,13 @@ function buildPublicState(data) {
   );
 
   return {
-    eventName: meta.eventName || "RCC Live tabuľka",
-    eventSub: meta.eventSub || "Ružín Carp Classic",
+  eventName: meta.eventName || "RCC Live tabuľka",
+  eventSub: meta.eventSub || "Ružín Carp Classic",
+  leaderboardMode: meta.leaderboardMode || "TOTAL",
 
-    lb: lbByTotal,
-    lbByTotal,
-    lbByTop5,
+  lb: lbByTotal,
+  lbByTotal,
+  lbByTop5,
 
     totalWeight: lbByTotal.reduce((sum, t) => sum + Number(t.total || 0), 0),
     totalFish: catches.length,

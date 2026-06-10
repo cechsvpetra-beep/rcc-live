@@ -366,6 +366,10 @@ label.inline{
   <h2>Nastavenia preteku</h2>
   <div class="sectionSub">Tu zmeníš názov a podnázov preteku. Zobrazí sa to v LIVE tabuľke.</div>
 
+  <div class="section">
+  <h2>Nastavenia preteku</h2>
+  <div class="sectionSub">Tu zmeníš názov, podnázov a režim LIVE tabuľky.</div>
+
   <div class="formGrid">
     <div class="inlineCol">
       <div class="small">Názov preteku</div>
@@ -375,6 +379,15 @@ label.inline{
     <div class="inlineCol">
       <div class="small">Podnázov preteku</div>
       <input id="eventSub" placeholder="napr. Ružín Carp Classic" onchange="changeEventSub(this.value)">
+    </div>
+
+    <div class="inlineCol">
+      <div class="small">Režim LIVE tabuľky</div>
+      <select id="leaderboardMode" onchange="changeLeaderboardMode(this.value)">
+        <option value="TOTAL">Celková váha</option>
+        <option value="TOP5">TOP 5 rýb</option>
+        <option value="BOTH">Celková váha + TOP 5</option>
+      </select>
     </div>
   </div>
 </div>
@@ -650,8 +663,18 @@ function normalizeData() {
 
 function renderEventSettings() {
   ensureMeta();
-  document.getElementById("eventName").value = adminData.meta.eventName || "RCC Live tabuľka";
-  document.getElementById("eventSub").value = adminData.meta.eventSub || "Ružín Carp Classic";
+
+  document.getElementById("eventName").value =
+    adminData.meta.eventName || "RCC Live tabuľka";
+
+  document.getElementById("eventSub").value =
+    adminData.meta.eventSub || "Ružín Carp Classic";
+
+  const leaderboardModeEl = document.getElementById("leaderboardMode");
+
+  if (leaderboardModeEl) {
+    leaderboardModeEl.value = adminData.meta.leaderboardMode || "TOTAL";
+  }
 }
 
 function renderSectors() {
@@ -928,6 +951,15 @@ function changeEventSub(value) {
   adminData.meta.eventSub = normalizeEventSub(value);
 }
 
+function changeLeaderboardMode(value) {
+  ensureMeta();
+
+  adminData.meta.leaderboardMode =
+    value === "TOP5" || value === "BOTH"
+      ? value
+      : "TOTAL";
+}
+
 function changeSectorName(code, value) {
   if (!adminData?.sectors?.[code]) return;
   adminData.sectors[code].name = value.trim() || ("Sektor " + code);
@@ -1115,10 +1147,11 @@ async function saveAdmin() {
       })),
       judges: judgesPayload,
       meta: {
-        judges: judgesPayload,
-        eventName: normalizeEventName(adminData.meta.eventName),
-        eventSub: normalizeEventSub(adminData.meta.eventSub)
-      }
+  judges: judgesPayload,
+  eventName: normalizeEventName(adminData.meta.eventName),
+  eventSub: normalizeEventSub(adminData.meta.eventSub),
+  leaderboardMode: adminData.meta.leaderboardMode || "TOTAL"
+}
     };
 
     const res = await fetch("/api/admin/setup", {
