@@ -864,7 +864,207 @@ tr.rank-fall{ animation:rowFall .9s ease; }
 </style>
 </head>
 <body>
+/* =========================
+   RCC PRO THEME OVERRIDE
+   ========================= */
 
+:root{
+  --bg:#050505;
+  --panel:#11100c;
+  --panel2:#080806;
+  --line:rgba(212,154,55,.34);
+  --text:#fff7e6;
+  --muted:#c7a96a;
+  --green:#d49a37;
+  --red:#ff5c5c;
+  --gold:rgba(255,190,73,.22);
+  --silver:rgba(220,220,220,.16);
+  --bronze:rgba(205,127,50,.20);
+  --riseFlash:rgba(255,190,73,.18);
+  --fallFlash:rgba(255,92,92,.14);
+}
+
+body{
+  background:
+    radial-gradient(circle at top left, rgba(255,174,61,.24) 0%, transparent 28%),
+    radial-gradient(circle at top right, rgba(255,92,20,.12) 0%, transparent 32%),
+    linear-gradient(135deg,#030303 0%,#090806 45%,#150d05 100%);
+}
+
+.wrap{
+  padding:14px;
+}
+
+.topbar{
+  background:linear-gradient(90deg, rgba(255,190,73,.14), rgba(0,0,0,.15));
+  border:1px solid rgba(255,190,73,.22);
+  border-radius:20px;
+  padding:14px;
+  margin-bottom:14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+}
+
+.logo{
+  width:72px;
+  height:72px;
+  border-radius:18px;
+  border:1px solid rgba(255,190,73,.45);
+  background:rgba(0,0,0,.35);
+  box-shadow:0 0 28px rgba(255,190,73,.18);
+}
+
+.titleBox h1{
+  font-size:28px;
+  letter-spacing:.5px;
+  color:#ffd27a;
+  text-shadow:0 0 18px rgba(255,190,73,.35);
+}
+
+.titleBox .sub{
+  color:#e5bd73;
+  font-weight:700;
+}
+
+button{
+  background:linear-gradient(180deg,#f2b84b,#9b5e17);
+  color:#100b04;
+  border:1px solid rgba(255,221,139,.45);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+button:hover{
+  background:linear-gradient(180deg,#ffd071,#b66e1d);
+}
+
+.stat,
+.section,
+.detailCard,
+.catchItem,
+.modal{
+  background:
+    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
+    linear-gradient(180deg,#14110b 0%, #070604 100%);
+  border:1px solid rgba(255,190,73,.25);
+  box-shadow:0 18px 46px rgba(0,0,0,.34);
+}
+
+.statLabel,
+.detailLabel,
+.sectionSub{
+  color:#d9b76f;
+}
+
+.statValue,
+.detailValue{
+  color:#fff2c6;
+  text-shadow:0 0 16px rgba(255,190,73,.18);
+}
+
+.lastCatch{
+  background:
+    linear-gradient(90deg, rgba(255,190,73,.26), rgba(150,75,18,.18)),
+    linear-gradient(180deg,#171008,#080604);
+  border:1px solid rgba(255,190,73,.38);
+  box-shadow:0 18px 50px rgba(0,0,0,.38);
+}
+
+.lastCatchTitle{
+  color:#ffe2a3;
+}
+
+.lastCatchMain{
+  color:#fff3cd;
+}
+
+.lastCatchSub,
+.lastCatchHint{
+  color:#f3d28b;
+}
+
+.sectionHead{
+  background:linear-gradient(90deg, rgba(255,190,73,.10), transparent);
+  border-bottom:1px solid rgba(255,190,73,.18);
+}
+
+.sectionHead h2{
+  color:#ffd27a;
+  letter-spacing:.3px;
+}
+
+th{
+  background:rgba(255,190,73,.09);
+  color:#ffd991;
+}
+
+td{
+  color:#fff7e6;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+
+tbody tr:hover{
+  background:rgba(255,190,73,.08);
+}
+
+.badge{
+  background:linear-gradient(180deg,#2a1c0b,#120d06);
+  color:#ffd27a;
+  border:1px solid rgba(255,190,73,.32);
+}
+
+.teamPhoto,
+.mobileTeamPhoto,
+.detailTeamPhoto{
+  border-color:rgba(255,190,73,.60);
+  box-shadow:0 0 20px rgba(255,190,73,.16);
+}
+
+.noPhoto,
+.mobileNoPhoto,
+.detailTeamNoPhoto{
+  border-color:rgba(255,190,73,.35);
+  color:#caa86a;
+}
+
+.rank{
+  color:#ffd27a;
+}
+
+tr.rank-top-1{
+  background:linear-gradient(90deg, rgba(255,190,73,.24), rgba(255,190,73,.06)) !important;
+}
+
+tr.rank-top-2{
+  background:linear-gradient(90deg, rgba(220,220,220,.16), rgba(220,220,220,.04)) !important;
+}
+
+tr.rank-top-3{
+  background:linear-gradient(90deg, rgba(205,127,50,.20), rgba(205,127,50,.05)) !important;
+}
+
+.tabBtn{
+  background:#15100a;
+  color:#f4d086;
+  border:1px solid rgba(255,190,73,.22);
+}
+
+.tabBtn.active{
+  background:linear-gradient(180deg,#ffd071,#b66e1d);
+  color:#120b03;
+}
+
+.catchTickerItem{
+  color:#fff1c2;
+  text-shadow:0 0 10px rgba(255,190,73,.18);
+}
+
+.catchTickerPhoto{
+  border-color:rgba(255,190,73,.55);
+  box-shadow:0 0 14px rgba(255,190,73,.16);
+}
+
+.imageModalImg{
+  border:1px solid rgba(255,190,73,.30);
+}
 <div class="wrap">
   <div class="topbar">
     <div class="brand">
