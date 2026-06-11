@@ -17,6 +17,22 @@ function getTopWeights(teamCatches, count) {
   return top;
 }
 
+function buildCatchPublicItem(catchItem, team) {
+  return {
+    id: catchItem.id,
+    weight: Number(catchItem.weight || 0),
+    teamId: Number(catchItem.teamId || 0),
+    team: team?.name || "",
+    teamName: team?.name || "",
+    sector: team?.sector || "",
+    peg: team?.peg || "",
+    time: getDisplayTime(catchItem),
+    catchTime: catchItem.catchTime || "",
+    recordedTime: catchItem.time || "",
+    photo: catchItem.photo || null
+  };
+}
+
 function buildPublicState(data) {
   const teams = Array.isArray(data?.teams) ? data.teams : [];
   const catches = Array.isArray(data?.catches) ? data.catches : [];
@@ -78,6 +94,10 @@ function buildPublicState(data) {
     return Number(a.id) - Number(b.id);
   });
 
+  const sortedByTimeDesc = [...catches].sort(
+    (a, b) => new Date(b.time || 0) - new Date(a.time || 0)
+  );
+
   const topFishCatch = catches.length
     ? catches.reduce((max, c) => Number(c.weight || 0) > Number(max.weight || 0) ? c : max)
     : null;
@@ -87,24 +107,8 @@ function buildPublicState(data) {
     : null;
 
   const topFish = topFishCatch
-    ? {
-        id: topFishCatch.id,
-        weight: Number(topFishCatch.weight || 0),
-        teamId: Number(topFishCatch.teamId || 0),
-        team: topFishTeam?.name || "",
-        teamName: topFishTeam?.name || "",
-        sector: topFishTeam?.sector || "",
-        peg: topFishTeam?.peg || "",
-        time: getDisplayTime(topFishCatch),
-        catchTime: topFishCatch.catchTime || "",
-        recordedTime: topFishCatch.time || "",
-        photo: topFishCatch.photo || null
-      }
+    ? buildCatchPublicItem(topFishCatch, topFishTeam)
     : null;
-
-  const sortedByTimeDesc = [...catches].sort(
-    (a, b) => new Date(b.time || 0) - new Date(a.time || 0)
-  );
 
   const lastCatchRaw = sortedByTimeDesc.length ? sortedByTimeDesc[0] : null;
   const lastCatchTeam = lastCatchRaw
@@ -112,20 +116,13 @@ function buildPublicState(data) {
     : null;
 
   const lastCatch = lastCatchRaw
-    ? {
-        id: lastCatchRaw.id,
-        weight: Number(lastCatchRaw.weight || 0),
-        teamId: Number(lastCatchRaw.teamId || 0),
-        team: lastCatchTeam?.name || "",
-        teamName: lastCatchTeam?.name || "",
-        sector: lastCatchTeam?.sector || "",
-        peg: lastCatchTeam?.peg || "",
-        time: getDisplayTime(lastCatchRaw),
-        catchTime: lastCatchRaw.catchTime || "",
-        recordedTime: lastCatchRaw.time || "",
-        photo: lastCatchRaw.photo || null
-      }
+    ? buildCatchPublicItem(lastCatchRaw, lastCatchTeam)
     : null;
+
+  const recentCatches = sortedByTimeDesc.slice(0, 10).map(c => {
+    const team = teams.find(t => Number(t.id) === Number(c.teamId));
+    return buildCatchPublicItem(c, team);
+  });
 
   const teamCatches = Object.fromEntries(
     teams.map(team => [
@@ -145,18 +142,19 @@ function buildPublicState(data) {
   );
 
   return {
-  eventName: meta.eventName || "RCC Live tabuľka",
-  eventSub: meta.eventSub || "Ružín Carp Classic",
-  leaderboardMode: meta.leaderboardMode || "TOTAL",
+    eventName: meta.eventName || "RCC Live tabuľka",
+    eventSub: meta.eventSub || "Ružín Carp Classic",
+    leaderboardMode: meta.leaderboardMode || "TOTAL",
 
-  lb: lbByTotal,
-  lbByTotal,
-  lbByTop5,
+    lb: lbByTotal,
+    lbByTotal,
+    lbByTop5,
 
     totalWeight: lbByTotal.reduce((sum, t) => sum + Number(t.total || 0), 0),
     totalFish: catches.length,
     topFish,
     lastCatch,
+    recentCatches,
     teamCatches,
 
     top3teams,
