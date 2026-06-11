@@ -1,0 +1,26 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"eventName":"ĽUBOVNIANSKY KAPOR","eventSub":"JESEŇ 2026","leaderboardMode":"TOP5","lb":[{"id":3,"n
+                    ame":"CT Pardubice","sector":"C","sectorCode":"C","peg":"8","photo":"/uploads/1774878303346_1_MIEST
+                    O_...
+RawContent        : HTTP/1.1 200 OK
+                    Transfer-Encoding: chunked
+                    Connection: keep-alive
+                    cf-cache-status: DYNAMIC
+                    rndr-id: f30151db-2fc1-4b5c
+                    vary: Accept-Encoding
+                    x-render-origin-server: Render
+                    CF-RAY: a09916befaf11...
+Forms             : 
+Headers           : {[Transfer-Encoding, chunked], [Connection, keep-alive], [cf-cache-status, DYNAMIC], [rndr-id, f301
+                    51db-2fc1-4b5c]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : 
+RawContentLength  : 22716
+
+
+
