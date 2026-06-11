@@ -1047,6 +1047,82 @@ tr.rank-top-3{background:linear-gradient(90deg, rgba(190,90,28,.24), rgba(190,90
 .bottomTickerItem{min-width:180px;font-family:var(--font-head);}
 .bottomTickerItem img{width:62px;height:62px;border:1px solid rgba(255,190,73,.52);}
 .detailPage{padding-top:8px;}
+
+/* Sponsor slider panel */
+.sponsorPanel{
+  margin-top:14px;
+  min-height:190px;
+  padding:16px;
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255,190,73,.18), transparent 34%),
+    linear-gradient(180deg, rgba(255,190,73,.09), rgba(0,0,0,.55));
+}
+.sponsorPanel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(110deg, transparent 0%, rgba(255,190,73,.10) 48%, transparent 70%);
+  opacity:.55;
+  pointer-events:none;
+}
+.sponsorTitle{
+  position:relative;
+  z-index:1;
+  font-family:var(--font-head);
+  color:#ffd27a;
+  font-size:24px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:14px;
+  text-shadow:0 0 20px rgba(255,190,73,.20);
+}
+.sponsorSliderWindow{
+  position:relative;
+  z-index:1;
+  overflow:hidden;
+  width:100%;
+}
+.sponsorSlider{
+  display:inline-flex;
+  gap:28px;
+  align-items:center;
+  white-space:nowrap;
+  animation:sponsorMove 36s linear infinite;
+}
+.sponsorLogoBox{
+  width:160px;
+  height:86px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:16px;
+  background:rgba(0,0,0,.34);
+  border:1px solid rgba(255,190,73,.24);
+  box-shadow:0 0 20px rgba(255,190,73,.08);
+  flex:0 0 auto;
+}
+.sponsorLogo{
+  max-width:135px;
+  max-height:62px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 14px rgba(255,190,73,.22));
+}
+.sponsorPlaceholder{
+  color:#c7a96a;
+  font-size:14px;
+  line-height:1.4;
+}
+@keyframes sponsorMove{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+
+/* Fix horného odsadenia, aby titul nebol schovaný pod oknom prehliadača */
+.wrap{ padding-top:34px; }
+.topbar{ margin-top:12px; }
+
 @media (max-width:1500px){
   .logo{width:280px;height:280px}.titleBox{left:310px}.titleBox h1{font-size:54px}.topbar::after{left:330px}.heroStats{padding-left:320px;margin-top:-128px}.rccDashboard{grid-template-columns:1fr 1.7fr;}.rccRight{grid-column:1 / 3;display:grid;grid-template-columns:1fr 1fr;gap:14px}.promoBox{min-height:210px}
 }
@@ -1204,6 +1280,13 @@ tr.rank-top-3{background:linear-gradient(90deg, rgba(190,90,28,.24), rgba(190,90
             <div class="promoHash">#RCC2026</div>
           </div>
         </div>
+
+        <div class="sidePanel sponsorPanel" id="sponsorPanel">
+          <div class="sponsorTitle">Partneri preteku</div>
+          <div class="sponsorSliderWindow">
+            <div class="sponsorSlider" id="sponsorSlider"></div>
+          </div>
+        </div>
       </aside>
     </div>
 
@@ -1275,6 +1358,13 @@ const FALLBACK_MS = 30000;
 function applyEventSettings(data) {
   document.getElementById("eventNameTitle").textContent = data?.eventName || "RCC Live tabuľka";
   document.getElementById("eventSubTitle").textContent = data?.eventSub || "Ružín Carp Classic";
+
+  const logoEl = document.getElementById("eventLogo");
+  const logoSrc = firstNonEmpty(data?.eventLogo, data?.eventLogoUrl, data?.logo, data?.logoUrl);
+  if (logoEl && logoSrc) {
+    logoEl.src = logoSrc;
+    logoEl.style.display = "block";
+  }
 }
 
 async function loadState(manual = false) {
@@ -1437,6 +1527,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   renderTop3(top5teams);
   renderSectorTabs(lb);
   renderSectorSummary(lbByTotal);
+  renderSponsors(data);
   renderTopFishPanel(top5teams);
   renderLeaderboard(getFilteredRows(lb));
 
@@ -1689,6 +1780,55 @@ function renderSectorTabs(rows) {
     const cls = currentSectorTab === tab ? "tabBtn active" : "tabBtn";
     return `<button class="${cls}" onclick="setSectorTab('${escapeJs(tab)}')">${escapeHtml(label)}</button>`;
   }).join("");
+}
+
+
+function normalizeSponsorLogo(item) {
+  if (!item) return "";
+  if (typeof item === "string") return item.trim();
+  return firstNonEmpty(
+    item.logo,
+    item.photo,
+    item.image,
+    item.url,
+    item.src,
+    item.file,
+    item.logoUrl,
+    item.imageUrl
+  );
+}
+
+function renderSponsors(data) {
+  const panel = document.getElementById("sponsorPanel");
+  const wrap = document.getElementById("sponsorSlider");
+  if (!panel || !wrap) return;
+
+  const rawSponsors = Array.isArray(data?.sponsors)
+    ? data.sponsors
+    : (Array.isArray(data?.meta?.sponsors) ? data.meta.sponsors : []);
+
+  const sponsors = rawSponsors
+    .map(normalizeSponsorLogo)
+    .filter(src => typeof src === "string" && src.trim() !== "");
+
+  if (!sponsors.length) {
+    panel.style.display = "block";
+    wrap.innerHTML = `
+      <div class="sponsorPlaceholder">
+        Logá sponzorov sa zobrazia tu po pridaní v adminovi.
+      </div>
+    `;
+    return;
+  }
+
+  panel.style.display = "block";
+  const doubled = [...sponsors, ...sponsors];
+
+  wrap.innerHTML = doubled.map(src => `
+    <div class="sponsorLogoBox">
+      <img src="${escapeAttr(src)}" class="sponsorLogo" alt="Sponzor">
+    </div>
+  `).join("");
 }
 
 function renderSectorSummary(rows) {
