@@ -1022,6 +1022,7 @@ let currentLeaderboardMode = "TOTAL";
 let currentTopFish = null;
 let currentLastCatch = null;
 let currentRecentCatches = [];
+let recentCatchIndex = 0;
 const FALLBACK_MS = 30000;
 
 function applyEventSettings(data) {
@@ -1260,8 +1261,12 @@ function renderRecentCatches(items) {
     return;
   }
 
-  const nowIndex = Math.floor(Date.now() / 5000) % catches.length;
-  const item = catches[nowIndex];
+  if (recentCatchIndex >= catches.length) {
+  recentCatchIndex = 0;
+}
+
+const item = catches[recentCatchIndex];
+const nowIndex = recentCatchIndex;
 
   const teamName = safeText(item.teamName || item.team || ("Tím " + (item.teamId || "")));
   const sector = safeText(item.sector || "-");
@@ -1730,7 +1735,15 @@ function connectSocket() {
       infoLine.className = "infoLine error";
       startFallbackRefresh();
       setInterval(() => {
-      renderRecentCatches(currentRecentCatches);
+  if (currentRecentCatches.length > 1) {
+    recentCatchIndex = recentCatchIndex + 1;
+
+    if (recentCatchIndex >= currentRecentCatches.length) {
+      recentCatchIndex = 0;
+    }
+  }
+
+  renderRecentCatches(currentRecentCatches);
 }, 5000);
     });
 
