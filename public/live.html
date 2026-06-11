@@ -1476,7 +1476,7 @@ function renderTeamDetail(teamId) {
         <div class="detailMeta">
           Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} •
           Stanovište ${escapeHtml(String(team.peg || team.place || team.stand || "-"))} •
-          Aktuálne celkové poradie ${escapeHtml(String(getOverallRank(normalizedTeamId)))}.
+          Aktuálne celkové poradie #${escapeHtml(String(getOverallRank(normalizedTeamId)))} z ${escapeHtml(String(getTotalTeamsCount()))} tímov.
         </div>
       </div>
     </div>
@@ -1554,6 +1554,10 @@ function renderTeamDetail(teamId) {
 function getOverallRank(teamId) {
   const index = lastRenderedLb.findIndex(t => Number(getTeamId(t)) === Number(teamId));
   return index >= 0 ? index + 1 : "-";
+}
+
+function getTotalTeamsCount() {
+  return Array.isArray(lastRenderedLb) ? lastRenderedLb.length : 0;
 }
 
 function getTeamId(team) {
