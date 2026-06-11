@@ -1267,6 +1267,11 @@ function renderTop3(rows) {
 
     const tr = document.createElement("tr");
     tr.style.cursor = "pointer";
+
+    if (index === 0) tr.classList.add("rank-top-1");
+    if (index === 1) tr.classList.add("rank-top-2");
+    if (index === 2) tr.classList.add("rank-top-3");
+
     tr.onclick = () => openTeamDetail(teamId);
 
     tr.innerHTML = `
@@ -1284,33 +1289,12 @@ function renderTop3(rows) {
     body.appendChild(tr);
   });
 }
+
 function getMedalRank(index) {
   if (index === 0) return "1 🏆";
   if (index === 1) return "2 🥈";
   if (index === 2) return "3 🥉";
   return (index + 1) + ".";
-}
-function renderSectorTabs(rows) {
-  const wrap = document.getElementById("sectorTabs");
-  if (!wrap) return;
-
-  const sectors = [...new Set(
-    rows
-      .map(t => String(t.sectorCode || t.sector || "").trim())
-      .filter(Boolean)
-  )].sort((a, b) => a.localeCompare(b));
-
-  if (currentSectorTab !== "ALL" && !sectors.includes(currentSectorTab)) {
-    currentSectorTab = "ALL";
-  }
-
-  const tabs = ["ALL", ...sectors];
-
-  wrap.innerHTML = tabs.map(tab => {
-    const label = tab === "ALL" ? "CELKOVÉ" : tab;
-    const cls = currentSectorTab === tab ? "tabBtn active" : "tabBtn";
-    return `<button class="${cls}" onclick="setSectorTab('${escapeJs(tab)}')">${escapeHtml(label)}</button>`;
-  }).join("");
 }
 
 function setSectorTab(tab) {
