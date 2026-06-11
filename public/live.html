@@ -20,1531 +20,111 @@
   --riseFlash:rgba(255,190,73,.18);
   --fallFlash:rgba(255,92,92,.14);
 }
-
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-
 body{
   font-family:Arial,sans-serif;
   color:var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(255,174,61,.24) 0%, transparent 28%),
-    radial-gradient(circle at top right, rgba(255,92,20,.12) 0%, transparent 32%),
-    linear-gradient(135deg,#030303 0%,#090806 45%,#150d05 100%);
   min-height:100vh;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255,190,73,.22), transparent 34%),
+    radial-gradient(circle at 8% 8%, rgba(255,120,20,.16), transparent 30%),
+    linear-gradient(135deg,#020201 0%,#090604 45%,#1a0b03 100%);
 }
-
-.wrap{
-  width:100%;
-  max-width:100%;
-  margin:0 auto;
-  padding:14px;
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(255,190,73,.035) 1px, transparent 1px),
+    linear-gradient(rgba(255,190,73,.025) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(to bottom, rgba(0,0,0,.75), transparent 85%);
 }
-
+.wrap{width:100%;max-width:1920px;margin:0 auto;padding:14px}
 .topbar{
   position:relative;
   overflow:hidden;
-  min-height:190px;
+  min-height:230px;
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  gap:14px;
-  flex-wrap:wrap;
-  background:
-    radial-gradient(circle at 68% 0%, rgba(255,190,73,.35) 0%, transparent 22%),
-    linear-gradient(90deg, rgba(0,0,0,.92), rgba(32,17,4,.78)),
-    linear-gradient(135deg,#070503,#1a0f05);
+  gap:18px;
+  padding:24px;
+  margin-bottom:14px;
   border:1px solid rgba(255,190,73,.38);
-  border-radius:24px;
-  padding:22px;
-  margin-bottom:16px;
-  box-shadow:0 24px 70px rgba(0,0,0,.48);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 58% 42%, rgba(255,174,61,.22), transparent 26%),
+    linear-gradient(90deg, rgba(0,0,0,.96), rgba(38,18,4,.76)),
+    linear-gradient(135deg,#050302,#201005);
+  box-shadow:0 28px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,230,170,.12);
 }
-
 .topbar::before{
   content:"";
-  position:absolute;
-  inset:0;
+  position:absolute;inset:0;
   background:
-    linear-gradient(120deg, transparent 0%, rgba(255,190,73,.10) 45%, transparent 70%),
-    radial-gradient(circle at 48% 55%, rgba(255,120,30,.18), transparent 28%);
+    linear-gradient(120deg, transparent 0%, rgba(255,190,73,.10) 46%, transparent 70%),
+    radial-gradient(circle at 72% 10%, rgba(255,190,73,.25), transparent 18%);
   pointer-events:none;
 }
-
 .topbar::after{
   content:"LIVE TABUĽKA • RYBÁRSKE PRETEKY";
   position:absolute;
-  left:220px;
-  top:108px;
-  color:rgba(255,235,190,.78);
-  letter-spacing:6px;
-  font-size:14px;
-  font-weight:900;
-  text-transform:uppercase;
-}
-
-.brand{
-  position:relative;
-  z-index:2;
-  display:flex;
-  align-items:center;
-  gap:22px;
-}
-
-.logo{
-  width:150px;
-  height:150px;
-  object-fit:contain;
-  border-radius:22px;
-  border:1px solid rgba(255,190,73,.55);
-  background:rgba(0,0,0,.30);
-  box-shadow:0 0 45px rgba(255,190,73,.22);
-}
-
-.titleBox h1{
-  margin-top:18px;
-  margin-bottom:0;
-  font-size:46px;
-  line-height:1;
-  letter-spacing:1.2px;
-  color:#ffd27a;
-  text-transform:uppercase;
-  text-shadow:
-    0 0 20px rgba(255,190,73,.45),
-    0 3px 0 rgba(0,0,0,.75);
-}
-
-.titleBox .sub{
-  margin-top:12px;
-  color:#f2c979;
-  font-size:17px;
-  font-weight:900;
-  letter-spacing:2px;
-  text-transform:uppercase;
-}
-
-.actions{
-  position:relative;
-  z-index:3;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-button{
-  border:none;
-  border-radius:12px;
-  padding:11px 15px;
-  font-weight:800;
-  cursor:pointer;
-  background:linear-gradient(180deg,#f2b84b,#9b5e17);
-  color:#100b04;
-  font-size:14px;
-  border:1px solid rgba(255,221,139,.45);
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
-}
-
-button:hover{
-  background:linear-gradient(180deg,#ffd071,#b66e1d);
-}
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.stat{
-  background:
-    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
-    linear-gradient(180deg,#14110b 0%, #070604 100%);
-  border:1px solid rgba(255,190,73,.25);
-  border-radius:14px;
-  padding:14px;
-  min-height:74px;
-  box-shadow:0 18px 46px rgba(0,0,0,.34);
-}
-
-.statLabel{
-  color:#d9b76f;
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.statValue{
-  font-size:24px;
-  font-weight:900;
-  color:#fff2c6;
-  text-shadow:0 0 16px rgba(255,190,73,.18);
-}
-
-.statSub{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.clickableStat{
-  cursor:pointer;
-}
-
-.clickableStat:hover{
-  border-color:rgba(255,190,73,.50);
-}
-
-.lastCatch{
-  margin-bottom:10px;
-  background:
-    linear-gradient(90deg, rgba(255,190,73,.26), rgba(150,75,18,.18)),
-    linear-gradient(180deg,#171008,#080604);
-  border:1px solid rgba(255,190,73,.38);
-  border-radius:14px;
-  padding:14px;
-  box-shadow:0 18px 50px rgba(0,0,0,.38);
-}
-
-.lastCatch.clickable{
-  cursor:pointer;
-}
-
-.lastCatch.clickable:hover{
-  border-color:rgba(255,235,190,.45);
-}
-
-.lastCatchTitle{
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:1px;
-  color:#ffe2a3;
-  text-transform:uppercase;
-  margin-bottom:6px;
-}
-
-.lastCatchRow{
-  display:flex;
-  gap:14px;
-  align-items:center;
-}
-
-.lastCatchThumb{
-  width:88px;
-  height:88px;
-  object-fit:cover;
-  border-radius:12px;
-  border:1px solid rgba(255,190,73,.45);
-  background:#09111b;
-  flex:0 0 auto;
-}
-
-.lastCatchNoThumb{
-  width:88px;
-  height:88px;
-  border-radius:12px;
-  border:1px dashed rgba(255,190,73,.35);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#f3d28b;
-  font-size:12px;
-  flex:0 0 auto;
-}
-
-.lastCatchText{
-  min-width:0;
-}
-
-.lastCatchMain{
-  font-size:24px;
-  font-weight:900;
-  line-height:1.15;
-  color:#fff3cd;
-}
-
-.lastCatchSub{
-  margin-top:4px;
-  color:#f3d28b;
-  font-size:14px;
-}
-
-.lastCatchHint{
-  margin-top:6px;
-  color:#f3d28b;
-  font-size:12px;
-}
-
-.infoLine{
-  min-height:18px;
-  margin:8px 2px 14px 2px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.infoLine.error{ color:var(--red); }
-.infoLine.ok{ color:#ffd27a; }
-
-.updated{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.section{
-  background:
-    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
-    linear-gradient(180deg,#14110b 0%, #070604 100%);
-  border:1px solid rgba(255,190,73,.25);
-  border-radius:16px;
-  margin-bottom:12px;
-  overflow:hidden;
-  box-shadow:0 18px 46px rgba(0,0,0,.34);
-}
-
-.sectionHead{
-  padding:14px 14px 10px 14px;
-  background:linear-gradient(90deg, rgba(255,190,73,.10), transparent);
-  border-bottom:1px solid rgba(255,190,73,.18);
-}
-
-.sectionHead h2{
-  margin:0;
-  font-size:17px;
-  color:#ffd27a;
-  letter-spacing:.3px;
-}
-
-.sectionSub{
-  margin-top:4px;
-  color:#d9b76f;
-  font-size:12px;
-}
-
-.tableWrap{
-  width:100%;
-  overflow:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:900px;
-}
-
-th, td{
-  padding:11px 10px;
-  border-bottom:1px solid rgba(255,255,255,.045);
-  text-align:left;
-  font-size:13px;
-}
-
-th{
-  color:#ffd991;
-  font-size:12px;
-  text-transform:uppercase;
-  background:rgba(255,190,73,.09);
-}
-
-td{
-  color:#fff7e6;
-}
-
-tbody tr:hover{
-  background:rgba(255,190,73,.08);
-}
-
-.rank{
-  font-weight:900;
-  color:#ffd27a;
-}
-
-.teamName{
-  font-weight:800;
-}
-
-.teamLink{
-  cursor:pointer;
-}
-
-.teamLink:hover{
-  text-decoration:underline;
-}
-
-.badge{
-  display:inline-block;
-  padding:4px 8px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:800;
-  background:linear-gradient(180deg,#2a1c0b,#120d06);
-  color:#ffd27a;
-  border:1px solid rgba(255,190,73,.32);
-}
-
-.teamPhoto{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid rgba(255,190,73,.60);
-  background:#0d1724;
-  box-shadow:0 0 20px rgba(255,190,73,.16);
-}
-
-.noPhoto{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px dashed rgba(255,190,73,.35);
-  color:#caa86a;
-  font-size:10px;
-}
-
-.mobileTeamRow{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-}
-
-.mobileTeamPhotoWrap{
-  display:none;
-}
-
-.mobileTeamPhoto{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid rgba(255,190,73,.60);
-  background:#0d1724;
-}
-
-.mobileNoPhoto{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px dashed rgba(255,190,73,.35);
-  color:#caa86a;
-  font-size:9px;
-}
-
-.empty{
-  padding:18px 14px;
-  color:var(--muted);
-  font-size:14px;
-}
-
-.rankCell{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.moveWrap{
-  min-width:42px;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-}
-
-.moveArrow{
-  font-size:14px;
-  font-weight:900;
-  line-height:1;
-  display:inline-block;
-}
-
-.moveDelta{
-  font-size:11px;
-  font-weight:800;
-}
-
-.moveUp{
-  color:#ffd27a;
-  animation:popUp .45s ease;
-}
-
-.moveDown{
-  color:var(--red);
-  animation:popDown .45s ease;
-}
-
-.moveSame{
-  color:transparent;
-}
-
-tr.rank-top-1{
-  background:linear-gradient(90deg, rgba(255,190,73,.24), rgba(255,190,73,.06)) !important;
-}
-
-tr.rank-top-2{
-  background:linear-gradient(90deg, rgba(220,220,220,.16), rgba(220,220,220,.04)) !important;
-}
-
-tr.rank-top-3{
-  background:linear-gradient(90deg, rgba(205,127,50,.20), rgba(205,127,50,.05)) !important;
-}
-
-tr.rank-rise{ animation:rowRise .9s ease; }
-tr.rank-fall{ animation:rowFall .9s ease; }
-
-.tabs{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  padding:12px 14px 0 14px;
-}
-.tabBtn{
-  border:none;
-  border-radius:999px;
-  padding:8px 14px;
-  background:#132235;
-  color:#dce8f5;
-  font-weight:800;
-  cursor:pointer;
-  font-size:13px;
-}
-.tabBtn:hover{
-  background:#1d3048;
-}
-.tabBtn.active{
-  background:var(--green);
-  color:#07111f;
-}
-
-.detailPage{
-  display:none;
-}
-.detailTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:12px;
-}
-.detailTopLeft{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  flex-wrap:wrap;
-}
-.detailTeamPhotoWrap{
-  width:120px;
-  height:120px;
-  flex:0 0 120px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.detailTeamPhoto{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  object-fit:cover;
-  border:3px solid #2c4058;
-  background:#0d1724;
-  display:block;
-}
-.detailTeamNoPhoto{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:3px dashed #30455c;
-  color:#8ea3b8;
-  font-size:14px;
-  background:#0d1724;
-}
-.detailTitle{
-  font-size:34px;
-  font-weight:900;
-  margin:0;
-}
-.detailMeta{
-  color:var(--muted);
-  font-size:15px;
-  margin-top:8px;
-}
-.detailStats{
-  display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:10px;
-  margin-bottom:12px;
-}
-.detailCard{
-  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:14px;
-}
-.detailLabel{
-  color:#b6c6d9;
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-.detailValue{
-  font-size:22px;
-  font-weight:900;
-}
-.catchGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-  gap:12px;
-}
-
-.catchItem{
-  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-}
-
-.catchTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:8px;
-}
-
-.catchNumber{
-  font-weight:900;
-}
-
-.catchWeight{
-  font-weight:900;
-  color:#dff7e7;
-}
-
-.catchMeta{
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.45;
-}
-
-.catchPhoto{
-  width:100%;
-  max-width:320px;
-  height:180px;
-  object-fit:cover;
-  border-radius:12px;
-  border:1px solid #24364b;
-  background:#09111b;
-  margin:10px auto 0 auto;
-  cursor:pointer;
-  display:block;
-  transition:transform .15s ease;
-}
-.catchTicker{
-  width:100%;
-  overflow:hidden;
-  white-space:nowrap;
-  margin-top:6px;
-}
-
-.catchTickerTrack{
-  display:inline-block;
-  white-space:nowrap;
-  animation:catchTickerMove 38s linear infinite;
-}
-
-.catchTickerItem{
-  display:inline-block;
-  margin-right:44px;
-  font-size:18px;
-  color:#e8fff0;
-}
-.catchTickerPhoto{
-  width:42px;
-  height:42px;
-  object-fit:cover;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,.25);
-  vertical-align:middle;
-  margin-right:10px;
-}
-
-.catchTickerNoPhoto{
-  display:inline-block;
-  margin-right:8px;
-}
-@keyframes catchTickerMove{
-  from{
-    transform:translateX(0);
-  }
-  to{
-    transform:translateX(-50%);
-  }
-}
-.catchPhoto:hover{
-  transform:scale(1.02);
-}
-.catchPhoto:hover{
-  opacity:.92;
-}
-.noCatchPhoto{
-  margin-top:10px;
-  color:var(--muted);
-  font-size:12px;
-}
-.hidden{
-  display:none !important;
-}
-
-.modalOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.72);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  z-index:9999;
-}
-.modal{
-  width:min(760px, 100%);
-  background:linear-gradient(180deg,#0d192a 0%, #0a1422 100%);
-  border:1px solid var(--line);
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 30px 80px rgba(0,0,0,.45);
-}
-.modalHead{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:14px 16px;
-  border-bottom:1px solid rgba(255,255,255,.05);
-}
-.modalTitle{
-  font-size:18px;
-  font-weight:900;
-  margin:0;
-}
-.modalClose{
-  background:#1b2c42;
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:8px 12px;
-  cursor:pointer;
-  font-weight:800;
-}
-.modalBody{
-  padding:16px;
-}
-.bigFishGrid{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:16px;
-}
-.bigFishImage{
-  width:100%;
-  height:360px;
-  object-fit:cover;
-  border-radius:14px;
-  border:1px solid #24364b;
-  background:#09111b;
-}
-.bigFishNoImage{
-  width:100%;
-  height:360px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  border:1px dashed #30455c;
-  color:#8ea3b8;
-  background:#09111b;
-  font-size:14px;
-}
-.bigFishInfo{
-  display:grid;
-  gap:10px;
-}
-.bigFishBox{
-  background:#0c1625;
-  border:1px solid #223447;
-  border-radius:12px;
-  padding:12px;
-}
-.bigFishLabel{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:6px;
-}
-.bigFishValue{
-  font-size:18px;
-  font-weight:900;
-}
-
-.imageModal{
-  width:min(1000px, 100%);
-  background:transparent;
-  border:none;
-  box-shadow:none;
-}
-.imageModalInner{
-  position:relative;
-}
-.imageModalImg{
-  width:100%;
-  max-height:85vh;
-  object-fit:contain;
-  border-radius:16px;
-  background:#09111b;
-}
-.imageModalClose{
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:rgba(0,0,0,.55);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:8px 12px;
-  cursor:pointer;
-  font-weight:800;
-}
-.imageModalCaption{
-  margin-top:10px;
-  color:#dfe8f3;
-  text-align:center;
-  font-size:14px;
-}
-
-.mobileSub{
-  display:none;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.35;
-  margin-top:3px;
-}
-.mobileWeight{
-  display:none;
-}
-.mobileCount{
-  display:none;
-}
-
-@keyframes popUp{
-  0%{ transform:translateY(6px) scale(.8); opacity:.2; }
-  70%{ transform:translateY(-2px) scale(1.15); opacity:1; }
-  100%{ transform:translateY(0) scale(1); opacity:1; }
-}
-@keyframes popDown{
-  0%{ transform:translateY(-6px) scale(.8); opacity:.2; }
-  70%{ transform:translateY(2px) scale(1.15); opacity:1; }
-  100%{ transform:translateY(0) scale(1); opacity:1; }
-}
-@keyframes rowRise{
-  0%{ background:var(--riseFlash); }
-  100%{ background:transparent; }
-}
-@keyframes rowFall{
-  0%{ background:var(--fallFlash); }
-  100%{ background:transparent; }
-}
-
-@media (max-width:900px){
-  .wrap{ padding:8px; }
-  .titleBox h1{ font-size:18px; }
-  .stats{ grid-template-columns:1fr; }
-  .statValue{ font-size:22px; }
-  .lastCatchMain{ font-size:20px; }
-  .detailStats{ grid-template-columns:1fr 1fr; }
-  .bigFishGrid{ grid-template-columns:1fr; }
-  .bigFishImage, .bigFishNoImage{ height:260px; }
-  .lastCatchRow{ align-items:flex-start; }
-  .lastCatchThumb, .lastCatchNoThumb{
-    width:72px;
-    height:72px;
-  }
-
-  .tableWrap{ overflow:visible; }
-  table{
-    min-width:0;
-    width:100%;
-  }
-  th, td{
-    padding:9px 8px;
-    font-size:13px;
-  }
-
-  th.col-sector,
-  td.col-sector,
-  th.col-peg,
-  td.col-peg,
-  th.col-photo,
-  td.col-photo{
-    display:none;
-  }
-
-  th.col-rank,
-  td.col-rank{
-    width:68px;
-    white-space:nowrap;
-    vertical-align:top;
-  }
-
-  th.col-team,
-  td.col-team{
-    width:auto;
-  }
-
-  th.col-total,
-  td.col-total{
-    width:92px;
-    white-space:nowrap;
-    text-align:right;
-    vertical-align:top;
-  }
-
-  th.col-count,
-  td.col-count{
-    width:66px;
-    white-space:nowrap;
-    text-align:right;
-    vertical-align:top;
-  }
-
-  .mobileSub{
-    display:block;
-  }
-  .mobileWeight,
-  .mobileCount{
-    display:inline;
-  }
-  .mobileTeamPhotoWrap{
-    display:block;
-  }
-
-  .teamName{
-    font-size:14px;
-  }
-
-  .badge{
-    font-size:11px;
-    padding:4px 7px;
-  }
-
-  .rankCell{
-    gap:5px;
-  }
-  .moveWrap{
-    min-width:34px;
-    gap:2px;
-  }
-  .moveDelta{
-    font-size:10px;
-  }
-
-  .tabs{
-    gap:6px;
-    padding:10px 10px 0 10px;
-  }
-  .tabBtn{
-    padding:8px 12px;
-    font-size:13px;
-  }
-
-  .sectionHead{
-    padding:12px 12px 9px 12px;
-  }
-  .sectionHead h2{
-    font-size:16px;
-  }
-
-  .catchGrid{
-    grid-template-columns:1fr;
-  }
-
-  .detailTopLeft{
-    align-items:flex-start;
-    gap:14px;
-  }
-  .detailTeamPhotoWrap{
-    width:96px;
-    height:96px;
-    flex-basis:96px;
-  }
-  .detailTeamPhoto,
-  .detailTeamNoPhoto{
-    width:96px;
-    height:96px;
-  }
-  .detailTitle{
-    font-size:26px;
-  }
-}
-
-@media print{
-  .actions, .infoLine, .updated, .modalOverlay { display:none !important; }
-  body{ background:#fff; color:#000; }
-  .section, .stat, .lastCatch, .detailCard, .catchItem{ background:#fff; color:#000; border:1px solid #ccc; }
-  th, td{ color:#000; border-color:#ddd; }
-}
-
-
-/* =========================
-   RCC PRO THEME OVERRIDE
-   ========================= */
-
-:root{
-  --bg:#050505;
-  --panel:#11100c;
-  --panel2:#080806;
-  --line:rgba(212,154,55,.34);
-  --text:#fff7e6;
-  --muted:#c7a96a;
-  --green:#d49a37;
-  --red:#ff5c5c;
-  --gold:rgba(255,190,73,.22);
-  --silver:rgba(220,220,220,.16);
-  --bronze:rgba(205,127,50,.20);
-  --riseFlash:rgba(255,190,73,.18);
-  --fallFlash:rgba(255,92,92,.14);
-}
-
-body{
-  background:
-    radial-gradient(circle at top left, rgba(255,174,61,.24) 0%, transparent 28%),
-    radial-gradient(circle at top right, rgba(255,92,20,.12) 0%, transparent 32%),
-    linear-gradient(135deg,#030303 0%,#090806 45%,#150d05 100%);
-}
-
-.wrap{
-  padding:14px;
-}
-
-.topbar{
-  background:linear-gradient(90deg, rgba(255,190,73,.14), rgba(0,0,0,.15));
-  border:1px solid rgba(255,190,73,.22);
-  border-radius:20px;
-  padding:14px;
-  margin-bottom:14px;
-  box-shadow:0 18px 50px rgba(0,0,0,.35);
-}
-
-.logo{
-  width:72px;
-  height:72px;
-  border-radius:18px;
-  border:1px solid rgba(255,190,73,.45);
-  background:rgba(0,0,0,.35);
-  box-shadow:0 0 28px rgba(255,190,73,.18);
-}
-
-.titleBox h1{
-  font-size:28px;
-  letter-spacing:.5px;
-  color:#ffd27a;
-  text-shadow:0 0 18px rgba(255,190,73,.35);
-}
-
-.titleBox .sub{
-  color:#e5bd73;
-  font-weight:700;
-}
-
-button{
-  background:linear-gradient(180deg,#f2b84b,#9b5e17);
-  color:#100b04;
-  border:1px solid rgba(255,221,139,.45);
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
-}
-
-button:hover{
-  background:linear-gradient(180deg,#ffd071,#b66e1d);
-}
-
-.stat,
-.section,
-.detailCard,
-.catchItem,
-.modal{
-  background:
-    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
-    linear-gradient(180deg,#14110b 0%, #070604 100%);
-  border:1px solid rgba(255,190,73,.25);
-  box-shadow:0 18px 46px rgba(0,0,0,.34);
-}
-
-.statLabel,
-.detailLabel,
-.sectionSub{
-  color:#d9b76f;
-}
-
-.statValue,
-.detailValue{
-  color:#fff2c6;
-  text-shadow:0 0 16px rgba(255,190,73,.18);
-}
-
-.lastCatch{
-  background:
-    linear-gradient(90deg, rgba(255,190,73,.26), rgba(150,75,18,.18)),
-    linear-gradient(180deg,#171008,#080604);
-  border:1px solid rgba(255,190,73,.38);
-  box-shadow:0 18px 50px rgba(0,0,0,.38);
-}
-
-.lastCatchTitle{
-  color:#ffe2a3;
-}
-
-.lastCatchMain{
-  color:#fff3cd;
-}
-
-.lastCatchSub,
-.lastCatchHint{
-  color:#f3d28b;
-}
-
-.sectionHead{
-  background:linear-gradient(90deg, rgba(255,190,73,.10), transparent);
-  border-bottom:1px solid rgba(255,190,73,.18);
-}
-
-.sectionHead h2{
-  color:#ffd27a;
-  letter-spacing:.3px;
-}
-
-th{
-  background:rgba(255,190,73,.09);
-  color:#ffd991;
-}
-
-td{
-  color:#fff7e6;
-  border-bottom:1px solid rgba(255,255,255,.045);
-}
-
-tbody tr:hover{
-  background:rgba(255,190,73,.08);
-}
-
-.badge{
-  background:linear-gradient(180deg,#2a1c0b,#120d06);
-  color:#ffd27a;
-  border:1px solid rgba(255,190,73,.32);
-}
-
-.teamPhoto,
-.mobileTeamPhoto,
-.detailTeamPhoto{
-  border-color:rgba(255,190,73,.60);
-  box-shadow:0 0 20px rgba(255,190,73,.16);
-}
-
-.noPhoto,
-.mobileNoPhoto,
-.detailTeamNoPhoto{
-  border-color:rgba(255,190,73,.35);
-  color:#caa86a;
-}
-
-.rank{
-  color:#ffd27a;
-}
-
-tr.rank-top-1{
-  background:linear-gradient(90deg, rgba(255,190,73,.24), rgba(255,190,73,.06)) !important;
-}
-
-tr.rank-top-2{
-  background:linear-gradient(90deg, rgba(220,220,220,.16), rgba(220,220,220,.04)) !important;
-}
-
-tr.rank-top-3{
-  background:linear-gradient(90deg, rgba(205,127,50,.20), rgba(205,127,50,.05)) !important;
-}
-
-.tabBtn{
-  background:#15100a;
-  color:#f4d086;
-  border:1px solid rgba(255,190,73,.22);
-}
-
-.tabBtn.active{
-  background:linear-gradient(180deg,#ffd071,#b66e1d);
-  color:#120b03;
-}
-
-.catchTickerItem{
-  color:#fff1c2;
-  text-shadow:0 0 10px rgba(255,190,73,.18);
-}
-
-.catchTickerPhoto{
-  border-color:rgba(255,190,73,.55);
-  box-shadow:0 0 14px rgba(255,190,73,.16);
-}
-
-.imageModalImg{
-  border:1px solid rgba(255,190,73,.30);
-}
-
-/* =========================
-   RCC PRO FINAL LAYOUT
-   všetky ID ostávajú rovnaké pre JS/admin
-   ========================= */
-
-body{
-  background:
-    radial-gradient(circle at 14% 4%, rgba(255,190,73,.28) 0%, transparent 25%),
-    radial-gradient(circle at 86% 14%, rgba(204,85,21,.18) 0%, transparent 30%),
-    radial-gradient(circle at 50% 95%, rgba(255,190,73,.10) 0%, transparent 36%),
-    linear-gradient(135deg,#020202 0%,#0c0804 45%,#1a0f05 100%);
-}
-
-.wrap{
-  max-width:1920px;
-  padding:16px;
-}
-
-.topbar{
-  min-height:210px;
-  display:grid;
-  grid-template-columns:1fr auto;
-  align-items:start;
-  position:relative;
-  overflow:hidden;
-  border-radius:28px;
-  padding:24px;
-  margin-bottom:16px;
-  background:
-    linear-gradient(90deg, rgba(0,0,0,.96), rgba(35,18,4,.80)),
-    radial-gradient(circle at 78% 0%, rgba(255,190,73,.32), transparent 28%),
-    linear-gradient(135deg,#050302,#1d1005);
-  border:1px solid rgba(255,190,73,.46);
-  box-shadow:
-    0 24px 80px rgba(0,0,0,.55),
-    inset 0 1px 0 rgba(255,255,255,.08);
-}
-
-.topbar::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  background:
-    linear-gradient(120deg, transparent 0%, rgba(255,190,73,.10) 42%, transparent 62%),
-    radial-gradient(circle at 40% 62%, rgba(255,115,25,.18), transparent 30%);
-  pointer-events:none;
-}
-
-.topbar::after{
-  content:"RCC LIVE • PREMIUM LEADERBOARD";
-  position:absolute;
-  left:205px;
-  bottom:28px;
+  left:250px;
+  top:136px;
   color:rgba(255,235,190,.82);
   letter-spacing:6px;
-  font-size:13px;
-  font-weight:900;
-  text-transform:uppercase;
-}
-
-.brand{
-  position:relative;
-  z-index:2;
-  display:flex;
-  gap:24px;
-  align-items:center;
-  min-width:0;
-}
-
-.logo{
-  width:150px;
-  height:150px;
-  border-radius:26px;
-  border:1px solid rgba(255,205,109,.60);
-  background:rgba(0,0,0,.34);
-  box-shadow:
-    0 0 52px rgba(255,190,73,.24),
-    inset 0 0 25px rgba(255,190,73,.06);
-}
-
-.titleBox h1{
-  font-size:clamp(30px, 4.2vw, 72px);
-  line-height:.95;
-  margin:0;
-  color:#ffd27a;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  text-shadow:
-    0 0 24px rgba(255,190,73,.48),
-    0 4px 0 rgba(0,0,0,.80);
-}
-
-.titleBox .sub{
-  margin-top:14px;
-  color:#f2c979;
-  font-size:clamp(14px, 1.2vw, 22px);
-  font-weight:900;
-  letter-spacing:3px;
-  text-transform:uppercase;
-}
-
-.actions{
-  position:relative;
-  z-index:3;
-  justify-content:flex-end;
-}
-
-button{
-  border-radius:999px;
-  padding:12px 16px;
-  font-weight:900;
-}
-
-.proStats{
-  display:grid;
-  grid-template-columns:repeat(4, minmax(0, 1fr));
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.proDashboardGrid{
-  display:grid;
-  grid-template-columns:minmax(360px, .95fr) minmax(620px, 1.7fr);
-  gap:12px;
-  align-items:start;
-}
-
-.proLeftStack{
-  display:grid;
-  gap:12px;
-}
-
-.proMainStack{
-  display:grid;
-  gap:12px;
-}
-
-.proStatusLine{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-  margin:6px 2px 12px 2px;
-}
-
-.proStatusLine .infoLine,
-.proStatusLine .updated{
-  margin:0;
-}
-
-.stat,
-.section,
-.lastCatch,
-.detailCard,
-.catchItem,
-.modal{
-  border-color:rgba(255,190,73,.34);
-  box-shadow:
-    0 18px 48px rgba(0,0,0,.42),
-    inset 0 1px 0 rgba(255,255,255,.055);
-}
-
-.stat{
-  position:relative;
-  overflow:hidden;
-  min-height:96px;
-  border-radius:18px;
-}
-
-.stat::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg, transparent, rgba(255,190,73,.07), transparent);
-  pointer-events:none;
-}
-
-.statLabel{
-  text-transform:uppercase;
-  letter-spacing:1.4px;
-  color:#d9b76f;
-}
-
-.statValue{
-  font-size:clamp(24px, 2.3vw, 42px);
-}
-
-.statSub{
-  color:#e8c77c;
-  font-weight:800;
-}
-
-.lastCatch{
-  border-radius:20px;
-  padding:16px;
-}
-
-.lastCatchTitle{
-  font-size:13px;
-  letter-spacing:2px;
-}
-
-.lastCatchMain{
-  font-size:clamp(22px, 2vw, 34px);
-}
-
-.catchTickerItem{
-  font-size:18px;
-  color:#fff1c2;
-  cursor:pointer;
-}
-
-.catchTickerPhoto{
-  width:46px;
-  height:46px;
-  border-radius:10px;
-  border-color:rgba(255,190,73,.60);
-  box-shadow:0 0 16px rgba(255,190,73,.20);
-}
-
-.section{
-  border-radius:20px;
-}
-
-.sectionHead{
-  padding:16px 18px 12px 18px;
-}
-
-.sectionHead h2{
-  font-size:20px;
-  letter-spacing:.7px;
-  text-transform:uppercase;
-}
-
-.tableWrap{
-  overflow:auto;
-}
-
-th{
-  font-size:12px;
-  letter-spacing:.7px;
-}
-
-td{
   font-size:14px;
-}
-
-.badge{
-  font-size:12px;
-  padding:5px 10px;
-}
-
-.teamPhoto{
-  width:48px;
-  height:48px;
-}
-
-.noPhoto{
-  width:48px;
-  height:48px;
-}
-
-.tabs{
-  padding:12px 0 0 0;
-}
-
-.tabBtn{
-  background:#15100a;
-  color:#f4d086;
-  border:1px solid rgba(255,190,73,.25);
-}
-
-.tabBtn.active{
-  background:linear-gradient(180deg,#ffd071,#b66e1d);
-  color:#120b03;
-  box-shadow:0 0 18px rgba(255,190,73,.20);
-}
-
-.detailTop{
-  padding:18px;
-  border:1px solid rgba(255,190,73,.32);
-  border-radius:24px;
-  background:
-    linear-gradient(90deg, rgba(255,190,73,.13), transparent),
-    linear-gradient(180deg,#14110b 0%, #070604 100%);
-}
-
-.detailTeamPhoto,
-.detailTeamNoPhoto{
-  border-color:rgba(255,190,73,.60);
-  box-shadow:0 0 30px rgba(255,190,73,.16);
-}
-
-.detailTitle{
-  color:#ffd27a;
+  font-weight:900;
   text-transform:uppercase;
-  text-shadow:0 0 18px rgba(255,190,73,.25);
 }
-
-.detailCard{
-  background:
-    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
-    linear-gradient(180deg,#14110b 0%, #070604 100%);
-  border-color:rgba(255,190,73,.25);
+.brand{position:relative;z-index:2;display:flex;align-items:center;gap:24px;min-width:0}
+.logo{
+  width:180px;height:180px;object-fit:contain;border-radius:26px;
+  border:1px solid rgba(255,190,73,.55);background:rgba(0,0,0,.34);
+  box-shadow:0 0 55px rgba(255,190,73,.24), inset 0 0 18px rgba(255,190,73,.06);
+  flex:0 0 auto;
 }
-
-@media (max-width:1100px){
-  .topbar{
-    grid-template-columns:1fr;
-    min-height:auto;
-  }
-
-  .topbar::after{
-    display:none;
-  }
-
-  .brand{
-    align-items:center;
-  }
-
-  .logo{
-    width:96px;
-    height:96px;
-  }
-
-  .proStats{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .proDashboardGrid{
-    grid-template-columns:1fr;
-  }
+.titleBox{min-width:0;padding-top:20px}
+.titleBox h1{
+  margin:0;font-size:54px;line-height:.98;letter-spacing:1.5px;text-transform:uppercase;
+  color:#ffd27a;text-shadow:0 0 22px rgba(255,190,73,.48),0 4px 0 rgba(0,0,0,.72);
+  max-width:980px;
 }
-
-@media (max-width:900px){
-  .wrap{padding:8px;}
-  .topbar{padding:14px;border-radius:18px;}
-  .brand{gap:12px;}
-  .logo{width:72px;height:72px;border-radius:16px;}
-  .titleBox h1{font-size:24px;}
-  .titleBox .sub{font-size:12px;letter-spacing:1.5px;}
-  .proStats{grid-template-columns:1fr;}
-  .statValue{font-size:26px;}
+.titleBox .sub{margin-top:14px;color:#f2c979;font-size:18px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
+.actions{position:relative;z-index:3;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+button{border:none;border-radius:12px;padding:11px 15px;font-weight:900;cursor:pointer;background:linear-gradient(180deg,#ffd071,#9b5e17);color:#120b03;font-size:14px;border:1px solid rgba(255,221,139,.55);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+button:hover{background:linear-gradient(180deg,#ffe09a,#b66e1d)}
+.heroStats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.stat,.section,.detailCard,.catchItem,.modal,.sidePanel{
+  background:linear-gradient(180deg,rgba(255,190,73,.10),rgba(0,0,0,.12)),linear-gradient(180deg,#151007 0%,#070503 100%);
+  border:1px solid rgba(255,190,73,.28);border-radius:16px;box-shadow:0 18px 46px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,230,170,.08)
 }
-
+.stat{padding:16px;min-height:92px}
+.statIcon{font-size:28px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 0 10px rgba(255,190,73,.35))}
+.statLabel,.detailLabel,.sectionSub{color:#d9b76f;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.statValue,.detailValue{font-size:34px;font-weight:900;color:#fff2c6;text-shadow:0 0 16px rgba(255,190,73,.22);line-height:1.05;margin-top:8px}
+.statSub{margin-top:6px;color:#c7a96a;font-size:13px;font-weight:700}
+.clickableStat{cursor:pointer}.clickableStat:hover{border-color:rgba(255,190,73,.55)}
+.proLiveGrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start}
+.proMain{min-width:0}.proSide{display:grid;gap:12px}
+.lastCatch{margin-bottom:12px;background:linear-gradient(90deg,rgba(255,190,73,.26),rgba(150,75,18,.18)),linear-gradient(180deg,#171008,#080604);border:1px solid rgba(255,190,73,.42);border-radius:16px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.42)}
+.lastCatchTitle,.sideTitle{font-size:13px;font-weight:900;letter-spacing:1.5px;color:#ffe2a3;text-transform:uppercase;margin-bottom:10px}
+.lastCatchRow{display:flex;gap:14px;align-items:center}.lastCatchText{min-width:0;flex:1}.lastCatchMain{font-size:28px;font-weight:900;line-height:1.1;color:#fff3cd}.lastCatchSub{margin-top:6px;color:#f3d28b;font-size:14px}.lastCatchHint{margin-top:7px;color:#d8b770;font-size:12px}.lastCatchThumb,.lastCatchNoThumb{width:86px;height:86px;border-radius:14px;flex:0 0 auto}.lastCatchThumb{object-fit:cover;border:1px solid rgba(255,190,73,.45);background:#09111b}.lastCatchNoThumb{border:1px dashed rgba(255,190,73,.35);display:flex;align-items:center;justify-content:center;color:#f3d28b;font-size:12px}
+.infoRow{display:flex;justify-content:space-between;gap:12px;margin:8px 2px 12px 2px}.infoLine,.updated{color:var(--muted);font-size:12px}.infoLine.error{color:var(--red)}.infoLine.ok{color:#8dffb2}.updated{text-align:right}
+.section{margin-bottom:12px;overflow:hidden}.sectionHead{padding:14px 14px 10px;background:linear-gradient(90deg,rgba(255,190,73,.12),transparent);border-bottom:1px solid rgba(255,190,73,.18)}.sectionHead h2{margin:0;font-size:20px;color:#ffd27a;letter-spacing:.6px;text-transform:uppercase}.tableWrap{width:100%;overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.045);text-align:left;font-size:13px}th{color:#ffd991;font-size:12px;text-transform:uppercase;background:rgba(255,190,73,.09)}td{color:#fff7e6}tbody tr:hover{background:rgba(255,190,73,.08)}.rank{font-weight:900;color:#ffd27a}.teamName{font-weight:900}.teamLink{cursor:pointer}.teamLink:hover{text-decoration:underline}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;background:linear-gradient(180deg,#2a1c0b,#120d06);color:#ffd27a;border:1px solid rgba(255,190,73,.32)}.teamPhoto,.mobileTeamPhoto,.detailTeamPhoto{border-color:rgba(255,190,73,.60)!important;box-shadow:0 0 20px rgba(255,190,73,.16)}.teamPhoto{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#0d1724}.noPhoto,.mobileNoPhoto,.detailTeamNoPhoto{border-color:rgba(255,190,73,.35)!important;color:#caa86a!important}.noPhoto{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,190,73,.35);font-size:10px}.empty{padding:18px 14px;color:var(--muted);font-size:14px}.smallEmpty{padding:10px 0}.rankCell{display:flex;align-items:center;gap:8px}.moveWrap{min-width:42px;display:inline-flex;align-items:center;gap:4px}.moveArrow{font-size:14px;font-weight:900;line-height:1;display:inline-block}.moveDelta{font-size:11px;font-weight:800}.moveUp{color:#ffd27a;animation:popUp .45s ease}.moveDown{color:var(--red);animation:popDown .45s ease}.moveSame{color:transparent}tr.rank-top-1{background:linear-gradient(90deg,rgba(255,190,73,.24),rgba(255,190,73,.06))!important}tr.rank-top-2{background:linear-gradient(90deg,rgba(220,220,220,.16),rgba(220,220,220,.04))!important}tr.rank-top-3{background:linear-gradient(90deg,rgba(205,127,50,.20),rgba(205,127,50,.05))!important}tr.rank-rise{animation:rowRise .9s ease}tr.rank-fall{animation:rowFall .9s ease}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px 0}.tabBtn{border-radius:999px;padding:8px 14px;background:#15100a;color:#f4d086;border:1px solid rgba(255,190,73,.22);font-weight:900;font-size:13px}.tabBtn:hover{background:#241808}.tabBtn.active{background:linear-gradient(180deg,#ffd071,#b66e1d);color:#120b03}
+.sidePanel{padding:14px;overflow:hidden}.sectorRow{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.sectorRow:last-child{border-bottom:0}.sectorRowTop{display:flex;justify-content:space-between;gap:12px;color:#fff3cd;font-size:14px}.sectorRowTop span{color:#ffd27a;font-weight:900}.sectorBar{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0}.sectorBar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ffd071,#b66e1d)}.sectorRowSub{color:#c7a96a;font-size:12px}.promoBox{min-height:210px;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 30%,rgba(255,190,73,.20),transparent 38%),linear-gradient(135deg,#100905,#050403);}.promoBig{font-size:46px;line-height:1;font-weight:900;color:#ffd27a;text-transform:uppercase;text-shadow:0 0 24px rgba(255,190,73,.30)}.promoSmall{margin-top:12px;color:#f3d28b;font-size:17px;font-weight:900;letter-spacing:1px}
+.catchTicker{width:100%;overflow:hidden;white-space:nowrap;margin-top:6px}.catchTickerTrack{display:inline-block;white-space:nowrap;animation:catchTickerMove 38s linear infinite}.catchTickerItem{display:inline-block;margin-right:44px;font-size:18px;color:#fff1c2;text-shadow:0 0 10px rgba(255,190,73,.18);cursor:pointer}.catchTickerPhoto{width:42px;height:42px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,190,73,.55);vertical-align:middle;margin-right:10px;box-shadow:0 0 14px rgba(255,190,73,.16)}.catchTickerNoPhoto{display:inline-block;margin-right:8px}@keyframes catchTickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.detailPage{display:none}.detailTop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.detailTopLeft{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.detailTeamPhotoWrap{width:120px;height:120px;flex:0 0 120px;display:flex;align-items:center;justify-content:center}.detailTeamPhoto,.detailTeamNoPhoto{width:120px;height:120px;border-radius:50%;object-fit:cover;background:#0d1724;border:3px solid rgba(255,190,73,.60);display:flex;align-items:center;justify-content:center}.detailTitle{font-size:34px;font-weight:900;margin:0;color:#ffd27a}.detailMeta{color:var(--muted);font-size:15px;margin-top:8px}.detailStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}.detailCard{padding:14px}.detailValue{font-size:22px}.catchGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.catchItem{padding:12px}.catchTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}.catchNumber,.catchWeight{font-weight:900}.catchWeight{color:#dff7e7}.catchMeta{color:var(--muted);font-size:12px;line-height:1.45}.catchPhoto{width:100%;max-width:320px;height:180px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,190,73,.35);background:#09111b;margin:10px auto 0;cursor:pointer;display:block;transition:transform .15s ease}.catchPhoto:hover{transform:scale(1.02);opacity:.92}.noCatchPhoto{margin-top:10px;color:var(--muted);font-size:12px}.hidden{display:none!important}
+.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}.modal{width:min(760px,100%);overflow:hidden}.modalHead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05)}.modalTitle{font-size:18px;font-weight:900;margin:0}.modalClose{background:#1b2c42;color:#fff}.modalBody{padding:16px}.bigFishGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.bigFishImage,.bigFishNoImage{width:100%;height:360px;border-radius:14px;background:#09111b}.bigFishImage{object-fit:cover;border:1px solid rgba(255,190,73,.35)}.bigFishNoImage{display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,190,73,.35);color:#8ea3b8}.bigFishInfo{display:grid;gap:10px}.bigFishBox{background:#0c1625;border:1px solid #223447;border-radius:12px;padding:12px}.bigFishLabel{color:var(--muted);font-size:12px;margin-bottom:6px}.bigFishValue{font-size:18px;font-weight:900}.imageModal{width:min(1000px,100%);background:transparent;border:none;box-shadow:none}.imageModalInner{position:relative}.imageModalImg{width:100%;max-height:85vh;object-fit:contain;border-radius:16px;background:#09111b;border:1px solid rgba(255,190,73,.30)}.imageModalClose{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff}.imageModalCaption{margin-top:10px;color:#dfe8f3;text-align:center;font-size:14px}.mobileSub{display:none;color:var(--muted);font-size:12px;line-height:1.35;margin-top:3px}.mobileTeamRow{display:flex;align-items:flex-start;gap:10px}.mobileTeamPhotoWrap{display:none}.mobileTeamPhoto,.mobileNoPhoto{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#0d1724}.mobileNoPhoto{display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,190,73,.35);font-size:9px}
+@keyframes popUp{0%{transform:translateY(6px) scale(.8);opacity:.2}70%{transform:translateY(-2px) scale(1.15);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}@keyframes popDown{0%{transform:translateY(-6px) scale(.8);opacity:.2}70%{transform:translateY(2px) scale(1.15);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}@keyframes rowRise{0%{background:var(--riseFlash)}100%{background:transparent}}@keyframes rowFall{0%{background:var(--fallFlash)}100%{background:transparent}}
+@media (max-width:1200px){.proLiveGrid{grid-template-columns:1fr}.proSide{grid-template-columns:1fr 1fr}.titleBox h1{font-size:42px}.logo{width:150px;height:150px}.topbar::after{left:220px}}
+@media (max-width:900px){.wrap{padding:8px}.topbar{min-height:auto;padding:14px}.topbar::after{display:none}.brand{gap:12px;align-items:center}.logo{width:82px;height:82px;border-radius:18px}.titleBox{padding-top:0}.titleBox h1{font-size:24px;line-height:1.05}.titleBox .sub{font-size:12px;letter-spacing:1px}.actions{width:100%;justify-content:flex-start}.heroStats{grid-template-columns:1fr 1fr}.statValue{font-size:24px}.lastCatchMain{font-size:22px}.proSide{grid-template-columns:1fr}.tableWrap{overflow:auto}table{min-width:760px}.detailStats{grid-template-columns:1fr 1fr}.bigFishGrid{grid-template-columns:1fr}.bigFishImage,.bigFishNoImage{height:260px}.lastCatchRow{align-items:flex-start}.lastCatchThumb,.lastCatchNoThumb{width:62px;height:62px}.catchTickerItem{font-size:14px}.catchTickerPhoto{width:34px;height:34px}th.col-sector,td.col-sector,th.col-peg,td.col-peg,th.col-photo,td.col-photo{display:none}table#mainLbTable{min-width:0}th.col-rank,td.col-rank{width:68px;white-space:nowrap;vertical-align:top}th.col-team,td.col-team{width:auto}th.col-total,td.col-total{width:92px;white-space:nowrap;text-align:right;vertical-align:top}th.col-count,td.col-count{width:66px;white-space:nowrap;text-align:right;vertical-align:top}.mobileSub{display:block}.mobileTeamPhotoWrap{display:block}.teamName{font-size:14px}.badge{font-size:11px;padding:4px 7px}.rankCell{gap:5px}.moveWrap{min-width:34px;gap:2px}.moveDelta{font-size:10px}.tabs{gap:6px;padding:10px}.tabBtn{padding:8px 12px;font-size:13px}.sectionHead{padding:12px}.sectionHead h2{font-size:16px}.catchGrid{grid-template-columns:1fr}.detailTopLeft{align-items:flex-start;gap:14px}.detailTeamPhotoWrap,.detailTeamPhoto,.detailTeamNoPhoto{width:96px;height:96px;flex-basis:96px}.detailTitle{font-size:26px}}
+@media (max-width:520px){.heroStats{grid-template-columns:1fr}.topbar{border-radius:18px}.lastCatch{padding:12px}.lastCatchSub{font-size:13px}.promoBig{font-size:34px}}
+@media print{.actions,.infoLine,.updated,.modalOverlay,.sidePanel.promoBox{display:none!important}body{background:#fff;color:#000}.section,.stat,.lastCatch,.detailCard,.catchItem{background:#fff;color:#000;border:1px solid #ccc;box-shadow:none}th,td{color:#000;border-color:#ddd}}
 </style>
 </head>
 <body>
@@ -1566,27 +146,28 @@ td{
   </div>
 
   <div id="livePage">
-    <div class="proStats stats">
+    <div class="heroStats">
       <div class="stat">
+        <div class="statIcon">🐟</div>
         <div class="statLabel">Celková váha rýb</div>
         <div class="statValue" id="totalWeight">0.00 kg</div>
       </div>
-
       <div class="stat">
+        <div class="statIcon">🎣</div>
         <div class="statLabel">Počet ulovených rýb</div>
         <div class="statValue" id="totalFish">0</div>
       </div>
-
       <div class="stat clickableStat" id="topFishCard" onclick="openTopFishModal()">
+        <div class="statIcon">🏆</div>
         <div class="statLabel">Najväčšia ryba</div>
         <div class="statValue" id="topFishWeight">0.00 kg</div>
         <div class="statSub" id="topFishTeam">–</div>
       </div>
-
       <div class="stat">
-        <div class="statLabel">LIVE status</div>
-        <div class="statValue">ONLINE</div>
-        <div class="statSub">Realtime leaderboard</div>
+        <div class="statIcon">👥</div>
+        <div class="statLabel">Počet tímov</div>
+        <div class="statValue" id="totalTeamsCount">0</div>
+        <div class="statSub">registrovaných tímov</div>
       </div>
     </div>
 
@@ -1602,19 +183,18 @@ td{
       </div>
     </div>
 
-    <div class="proStatusLine">
+    <div class="infoRow">
       <div class="infoLine" id="infoLine"></div>
       <div class="updated" id="updatedAt"></div>
     </div>
 
-    <div class="proDashboardGrid">
-      <div class="proLeftStack">
+    <div class="proLiveGrid">
+      <div class="proMain">
         <div class="section" id="top5Section">
           <div class="sectionHead">
             <h2 id="top5Title">TOP 5 rýb tímov</h2>
             <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
           </div>
-
           <div class="tableWrap">
             <table>
               <thead>
@@ -1633,23 +213,17 @@ td{
               <tbody id="top3Body"></tbody>
             </table>
           </div>
-
-          <div id="top3Empty" class="empty" style="display:none;">
-            Zatiaľ nie sú dostupné dáta pre TOP 5.
-          </div>
+          <div id="top3Empty" class="empty" style="display:none;">Zatiaľ nie sú dostupné dáta pre TOP 5.</div>
         </div>
-      </div>
 
-      <div class="proMainStack">
         <div class="section" id="mainLeaderboardSection">
           <div class="sectionHead">
-            <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
+            <h2 id="mainLeaderboardTitle">Celkové poradie tímov</h2>
             <div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
             <div class="tabs" id="sectorTabs"></div>
           </div>
-
           <div class="tableWrap">
-            <table>
+            <table id="mainLbTable">
               <thead>
                 <tr>
                   <th class="col-rank">Poradie</th>
@@ -1664,8 +238,20 @@ td{
               <tbody id="lbBody"></tbody>
             </table>
           </div>
-
           <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
+        </div>
+      </div>
+
+      <div class="proSide">
+        <div class="sidePanel">
+          <div class="sideTitle">Rozloženie podľa sektorov</div>
+          <div id="sectorSummaryBody"></div>
+        </div>
+        <div class="sidePanel promoBox">
+          <div>
+            <div class="promoBig">Bojuj</div>
+            <div class="promoSmall">o každý záber<br>o každé kilo</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1673,31 +259,14 @@ td{
 
   <div id="detailPage" class="detailPage">
     <div class="detailTop" id="detailTop"></div>
-
     <div class="detailStats">
-      <div class="detailCard">
-        <div class="detailLabel">Celková váha</div>
-        <div class="detailValue" id="detailTotal">0.00 kg</div>
-      </div>
-      <div class="detailCard">
-        <div class="detailLabel">Počet úlovkov</div>
-        <div class="detailValue" id="detailCount">0</div>
-      </div>
-      <div class="detailCard">
-        <div class="detailLabel">Najväčšia ryba</div>
-        <div class="detailValue" id="detailBiggest">0.00 kg</div>
-      </div>
-      <div class="detailCard">
-        <div class="detailLabel">Súčet TOP 5</div>
-        <div class="detailValue" id="detailTop3Sum">0.00 kg</div>
-      </div>
+      <div class="detailCard"><div class="detailLabel">Celková váha</div><div class="detailValue" id="detailTotal">0.00 kg</div></div>
+      <div class="detailCard"><div class="detailLabel">Počet úlovkov</div><div class="detailValue" id="detailCount">0</div></div>
+      <div class="detailCard"><div class="detailLabel">Najväčšia ryba</div><div class="detailValue" id="detailBiggest">0.00 kg</div></div>
+      <div class="detailCard"><div class="detailLabel">Súčet TOP 5</div><div class="detailValue" id="detailTop3Sum">0.00 kg</div></div>
     </div>
-
     <div class="section">
-      <div class="sectionHead">
-        <h2>Úlovky tímu</h2>
-        <div class="sectionSub">Zoradené podľa poradia úlovku</div>
-      </div>
+      <div class="sectionHead"><h2>Úlovky tímu</h2><div class="sectionSub">Zoradené podľa poradia úlovku</div></div>
       <div id="detailCatchesWrap" style="padding:14px;"></div>
     </div>
   </div>
@@ -1705,30 +274,15 @@ td{
 
 <div id="topFishModal" class="modalOverlay" onclick="closeTopFishModal(event)">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modalHead">
-      <h3 class="modalTitle">Najväčšia ryba</h3>
-      <button class="modalClose" onclick="closeTopFishModal()">Zavrieť</button>
-    </div>
+    <div class="modalHead"><h3 class="modalTitle">Najväčšia ryba</h3><button class="modalClose" onclick="closeTopFishModal()">Zavrieť</button></div>
     <div class="modalBody">
       <div class="bigFishGrid">
         <div id="topFishImageWrap"></div>
         <div class="bigFishInfo">
-          <div class="bigFishBox">
-            <div class="bigFishLabel">Váha</div>
-            <div class="bigFishValue" id="modalTopFishWeight">0.00 kg</div>
-          </div>
-          <div class="bigFishBox">
-            <div class="bigFishLabel">Tím</div>
-            <div class="bigFishValue" id="modalTopFishTeam">–</div>
-          </div>
-          <div class="bigFishBox">
-            <div class="bigFishLabel">Sektor / Stanovište</div>
-            <div class="bigFishValue" id="modalTopFishPlace">–</div>
-          </div>
-          <div class="bigFishBox">
-            <div class="bigFishLabel">Čas</div>
-            <div class="bigFishValue" id="modalTopFishTime">–</div>
-          </div>
+          <div class="bigFishBox"><div class="bigFishLabel">Váha</div><div class="bigFishValue" id="modalTopFishWeight">0.00 kg</div></div>
+          <div class="bigFishBox"><div class="bigFishLabel">Tím</div><div class="bigFishValue" id="modalTopFishTeam">–</div></div>
+          <div class="bigFishBox"><div class="bigFishLabel">Sektor / Stanovište</div><div class="bigFishValue" id="modalTopFishPlace">–</div></div>
+          <div class="bigFishBox"><div class="bigFishLabel">Čas</div><div class="bigFishValue" id="modalTopFishTime">–</div></div>
         </div>
       </div>
     </div>
@@ -1744,7 +298,6 @@ td{
     </div>
   </div>
 </div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let socket = null;
@@ -1764,24 +317,8 @@ let recentCatchIndex = 0;
 const FALLBACK_MS = 30000;
 
 function applyEventSettings(data) {
-  const title = document.getElementById("eventNameTitle");
-  const sub = document.getElementById("eventSubTitle");
-  const logo = document.getElementById("eventLogo");
-
-  if (title) title.textContent = data?.eventName || "RCC Live tabuľka";
-  if (sub) sub.textContent = data?.eventSub || "Ružín Carp Classic";
-
-  const logoSrc = firstNonEmpty(
-    data?.eventLogo,
-    data?.eventLogoUrl,
-    data?.logo,
-    data?.logoUrl
-  );
-
-  if (logo && logoSrc) {
-    logo.src = logoSrc;
-    logo.style.display = "";
-  }
+  document.getElementById("eventNameTitle").textContent = data?.eventName || "RCC Live tabuľka";
+  document.getElementById("eventSubTitle").textContent = data?.eventSub || "Ružín Carp Classic";
 }
 
 async function loadState(manual = false) {
@@ -1922,6 +459,11 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   document.getElementById("totalWeight").textContent = formatKg(totalWeight);
   document.getElementById("totalFish").textContent = String(totalFish);
 
+  const totalTeamsCount = document.getElementById("totalTeamsCount");
+  if (totalTeamsCount) {
+    totalTeamsCount.textContent = String(Array.isArray(lbByTotal) ? lbByTotal.length : 0);
+  }
+
   document.getElementById("topFishWeight").textContent = topFish
     ? formatKg(Number(topFish.weight || 0))
     : "0.00 kg";
@@ -1938,6 +480,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   renderRecentCatches(currentRecentCatches);
   renderTop3(top5teams);
   renderSectorTabs(lb);
+  renderSectorSummary(lbByTotal);
   renderLeaderboard(getFilteredRows(lb));
 
   if (selectedTeamId !== null) {
@@ -2045,9 +588,7 @@ function renderRecentCatches(items) {
   `;
 
   lastCatchHint.textContent = "Posledných 10 úlovkov v pohybe";
-}
-
-function renderTop3(rows) {
+}function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
   if (!body || !empty) return;
@@ -2131,9 +672,46 @@ function renderSectorTabs(rows) {
   const tabs = ["ALL", ...sectors];
 
   wrap.innerHTML = tabs.map(tab => {
-    const label = tab === "ALL" ? "CELKOVÉ" : tab;
+    const label = tab === "ALL" ? "CELKOVÉ" : `SEKTOR ${tab}`;
     const cls = currentSectorTab === tab ? "tabBtn active" : "tabBtn";
     return `<button class="${cls}" onclick="setSectorTab('${escapeJs(tab)}')">${escapeHtml(label)}</button>`;
+  }).join("");
+}
+
+function renderSectorSummary(rows) {
+  const wrap = document.getElementById("sectorSummaryBody");
+  if (!wrap) return;
+
+  const totals = {};
+  const counts = {};
+
+  (rows || []).forEach(team => {
+    const sector = String(team.sectorCode || team.sector || "?").trim() || "?";
+    totals[sector] = (totals[sector] || 0) + Number(team.total || 0);
+    counts[sector] = (counts[sector] || 0) + Number(team.count || 0);
+  });
+
+  const entries = Object.keys(totals).sort((a, b) => a.localeCompare(b));
+  const grandTotal = entries.reduce((sum, s) => sum + totals[s], 0);
+
+  if (!entries.length) {
+    wrap.innerHTML = `<div class="empty smallEmpty">Zatiaľ bez sektorových dát.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = entries.map(sector => {
+    const weight = totals[sector] || 0;
+    const percent = grandTotal > 0 ? Math.round((weight / grandTotal) * 100) : 0;
+    return `
+      <div class="sectorRow">
+        <div class="sectorRowTop">
+          <span>Sektor ${escapeHtml(sector)}</span>
+          <b>${formatKg(weight)}</b>
+        </div>
+        <div class="sectorBar"><span style="width:${percent}%"></span></div>
+        <div class="sectorRowSub">${escapeHtml(String(counts[sector] || 0))} rýb • ${percent}% celkovej váhy</div>
+      </div>
+    `;
   }).join("");
 }
 
