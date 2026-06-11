@@ -1251,6 +1251,7 @@ function renderTop3(rows) {
 
   visibleRows.forEach((team, index) => {
     const teamId = getTeamId(team);
+
     const top5 = Array.isArray(team.top5)
       ? [...team.top5]
       : [0, 0, 0, 0, 0];
@@ -1269,7 +1270,7 @@ function renderTop3(rows) {
     tr.onclick = () => openTeamDetail(teamId);
 
     tr.innerHTML = `
-      <td><span class="rank">${index + 1}.</span></td>
+      <td><span class="rank">${getMedalRank(index)}</span></td>
       <td>${photoHtml}</td>
       <td><span class="teamName teamLink">${escapeHtml(getTeamName(team, teamId))}</span></td>
       <td>${formatKg(Number(top5[0] || 0))}</td>
@@ -1283,7 +1284,12 @@ function renderTop3(rows) {
     body.appendChild(tr);
   });
 }
-
+function getMedalRank(index) {
+  if (index === 0) return "🥇";
+  if (index === 1) return "🥈";
+  if (index === 2) return "🥉";
+  return (index + 1) + ".";
+}
 function renderSectorTabs(rows) {
   const wrap = document.getElementById("sectorTabs");
   if (!wrap) return;
