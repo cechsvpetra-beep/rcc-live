@@ -1198,6 +1198,353 @@ tr.rank-top-3{
 .imageModalImg{
   border:1px solid rgba(255,190,73,.30);
 }
+
+/* =========================
+   RCC PRO FINAL LAYOUT
+   všetky ID ostávajú rovnaké pre JS/admin
+   ========================= */
+
+body{
+  background:
+    radial-gradient(circle at 14% 4%, rgba(255,190,73,.28) 0%, transparent 25%),
+    radial-gradient(circle at 86% 14%, rgba(204,85,21,.18) 0%, transparent 30%),
+    radial-gradient(circle at 50% 95%, rgba(255,190,73,.10) 0%, transparent 36%),
+    linear-gradient(135deg,#020202 0%,#0c0804 45%,#1a0f05 100%);
+}
+
+.wrap{
+  max-width:1920px;
+  padding:16px;
+}
+
+.topbar{
+  min-height:210px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:start;
+  position:relative;
+  overflow:hidden;
+  border-radius:28px;
+  padding:24px;
+  margin-bottom:16px;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.96), rgba(35,18,4,.80)),
+    radial-gradient(circle at 78% 0%, rgba(255,190,73,.32), transparent 28%),
+    linear-gradient(135deg,#050302,#1d1005);
+  border:1px solid rgba(255,190,73,.46);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.topbar::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    linear-gradient(120deg, transparent 0%, rgba(255,190,73,.10) 42%, transparent 62%),
+    radial-gradient(circle at 40% 62%, rgba(255,115,25,.18), transparent 30%);
+  pointer-events:none;
+}
+
+.topbar::after{
+  content:"RCC LIVE • PREMIUM LEADERBOARD";
+  position:absolute;
+  left:205px;
+  bottom:28px;
+  color:rgba(255,235,190,.82);
+  letter-spacing:6px;
+  font-size:13px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.brand{
+  position:relative;
+  z-index:2;
+  display:flex;
+  gap:24px;
+  align-items:center;
+  min-width:0;
+}
+
+.logo{
+  width:150px;
+  height:150px;
+  border-radius:26px;
+  border:1px solid rgba(255,205,109,.60);
+  background:rgba(0,0,0,.34);
+  box-shadow:
+    0 0 52px rgba(255,190,73,.24),
+    inset 0 0 25px rgba(255,190,73,.06);
+}
+
+.titleBox h1{
+  font-size:clamp(30px, 4.2vw, 72px);
+  line-height:.95;
+  margin:0;
+  color:#ffd27a;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  text-shadow:
+    0 0 24px rgba(255,190,73,.48),
+    0 4px 0 rgba(0,0,0,.80);
+}
+
+.titleBox .sub{
+  margin-top:14px;
+  color:#f2c979;
+  font-size:clamp(14px, 1.2vw, 22px);
+  font-weight:900;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.actions{
+  position:relative;
+  z-index:3;
+  justify-content:flex-end;
+}
+
+button{
+  border-radius:999px;
+  padding:12px 16px;
+  font-weight:900;
+}
+
+.proStats{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.proDashboardGrid{
+  display:grid;
+  grid-template-columns:minmax(360px, .95fr) minmax(620px, 1.7fr);
+  gap:12px;
+  align-items:start;
+}
+
+.proLeftStack{
+  display:grid;
+  gap:12px;
+}
+
+.proMainStack{
+  display:grid;
+  gap:12px;
+}
+
+.proStatusLine{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:6px 2px 12px 2px;
+}
+
+.proStatusLine .infoLine,
+.proStatusLine .updated{
+  margin:0;
+}
+
+.stat,
+.section,
+.lastCatch,
+.detailCard,
+.catchItem,
+.modal{
+  border-color:rgba(255,190,73,.34);
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.055);
+}
+
+.stat{
+  position:relative;
+  overflow:hidden;
+  min-height:96px;
+  border-radius:18px;
+}
+
+.stat::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, transparent, rgba(255,190,73,.07), transparent);
+  pointer-events:none;
+}
+
+.statLabel{
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:#d9b76f;
+}
+
+.statValue{
+  font-size:clamp(24px, 2.3vw, 42px);
+}
+
+.statSub{
+  color:#e8c77c;
+  font-weight:800;
+}
+
+.lastCatch{
+  border-radius:20px;
+  padding:16px;
+}
+
+.lastCatchTitle{
+  font-size:13px;
+  letter-spacing:2px;
+}
+
+.lastCatchMain{
+  font-size:clamp(22px, 2vw, 34px);
+}
+
+.catchTickerItem{
+  font-size:18px;
+  color:#fff1c2;
+  cursor:pointer;
+}
+
+.catchTickerPhoto{
+  width:46px;
+  height:46px;
+  border-radius:10px;
+  border-color:rgba(255,190,73,.60);
+  box-shadow:0 0 16px rgba(255,190,73,.20);
+}
+
+.section{
+  border-radius:20px;
+}
+
+.sectionHead{
+  padding:16px 18px 12px 18px;
+}
+
+.sectionHead h2{
+  font-size:20px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+
+.tableWrap{
+  overflow:auto;
+}
+
+th{
+  font-size:12px;
+  letter-spacing:.7px;
+}
+
+td{
+  font-size:14px;
+}
+
+.badge{
+  font-size:12px;
+  padding:5px 10px;
+}
+
+.teamPhoto{
+  width:48px;
+  height:48px;
+}
+
+.noPhoto{
+  width:48px;
+  height:48px;
+}
+
+.tabs{
+  padding:12px 0 0 0;
+}
+
+.tabBtn{
+  background:#15100a;
+  color:#f4d086;
+  border:1px solid rgba(255,190,73,.25);
+}
+
+.tabBtn.active{
+  background:linear-gradient(180deg,#ffd071,#b66e1d);
+  color:#120b03;
+  box-shadow:0 0 18px rgba(255,190,73,.20);
+}
+
+.detailTop{
+  padding:18px;
+  border:1px solid rgba(255,190,73,.32);
+  border-radius:24px;
+  background:
+    linear-gradient(90deg, rgba(255,190,73,.13), transparent),
+    linear-gradient(180deg,#14110b 0%, #070604 100%);
+}
+
+.detailTeamPhoto,
+.detailTeamNoPhoto{
+  border-color:rgba(255,190,73,.60);
+  box-shadow:0 0 30px rgba(255,190,73,.16);
+}
+
+.detailTitle{
+  color:#ffd27a;
+  text-transform:uppercase;
+  text-shadow:0 0 18px rgba(255,190,73,.25);
+}
+
+.detailCard{
+  background:
+    linear-gradient(180deg, rgba(255,190,73,.08), rgba(0,0,0,.10)),
+    linear-gradient(180deg,#14110b 0%, #070604 100%);
+  border-color:rgba(255,190,73,.25);
+}
+
+@media (max-width:1100px){
+  .topbar{
+    grid-template-columns:1fr;
+    min-height:auto;
+  }
+
+  .topbar::after{
+    display:none;
+  }
+
+  .brand{
+    align-items:center;
+  }
+
+  .logo{
+    width:96px;
+    height:96px;
+  }
+
+  .proStats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .proDashboardGrid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:900px){
+  .wrap{padding:8px;}
+  .topbar{padding:14px;border-radius:18px;}
+  .brand{gap:12px;}
+  .logo{width:72px;height:72px;border-radius:16px;}
+  .titleBox h1{font-size:24px;}
+  .titleBox .sub{font-size:12px;letter-spacing:1.5px;}
+  .proStats{grid-template-columns:1fr;}
+  .statValue{font-size:26px;}
+}
+
 </style>
 </head>
 <body>
@@ -1219,7 +1566,7 @@ tr.rank-top-3{
   </div>
 
   <div id="livePage">
-    <div class="stats">
+    <div class="proStats stats">
       <div class="stat">
         <div class="statLabel">Celková váha rýb</div>
         <div class="statValue" id="totalWeight">0.00 kg</div>
@@ -1235,10 +1582,16 @@ tr.rank-top-3{
         <div class="statValue" id="topFishWeight">0.00 kg</div>
         <div class="statSub" id="topFishTeam">–</div>
       </div>
+
+      <div class="stat">
+        <div class="statLabel">LIVE status</div>
+        <div class="statValue">ONLINE</div>
+        <div class="statSub">Realtime leaderboard</div>
+      </div>
     </div>
 
     <div class="lastCatch" id="lastCatchBox">
-      <div class="lastCatchTitle">Posledný úlovok</div>
+      <div class="lastCatchTitle">Posledných 10 úlovkov</div>
       <div class="lastCatchRow">
         <div id="lastCatchPhotoWrap"></div>
         <div class="lastCatchText">
@@ -1249,63 +1602,72 @@ tr.rank-top-3{
       </div>
     </div>
 
-    <div class="infoLine" id="infoLine"></div>
-    <div class="updated" id="updatedAt"></div>
+    <div class="proStatusLine">
+      <div class="infoLine" id="infoLine"></div>
+      <div class="updated" id="updatedAt"></div>
+    </div>
 
-    <div class="section" id="top5Section">
-  <div class="sectionHead">
-    <h2 id="top5Title">TOP 5 rýb tímov</h2>
-    <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
-  </div>
+    <div class="proDashboardGrid">
+      <div class="proLeftStack">
+        <div class="section" id="top5Section">
+          <div class="sectionHead">
+            <h2 id="top5Title">TOP 5 rýb tímov</h2>
+            <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
+          </div>
 
-  <div class="tableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Poradie</th>
-          <th>Foto</th>
-          <th>Tím</th>
-          <th>1. ryba</th>
-          <th>2. ryba</th>
-          <th>3. ryba</th>
-          <th>4. ryba</th>
-          <th>5. ryba</th>
-          <th>Súčet TOP 5</th>
-        </tr>
-      </thead>
-      <tbody id="top3Body"></tbody>
-    </table>
-  </div>
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Poradie</th>
+                  <th>Foto</th>
+                  <th>Tím</th>
+                  <th>1. ryba</th>
+                  <th>2. ryba</th>
+                  <th>3. ryba</th>
+                  <th>4. ryba</th>
+                  <th>5. ryba</th>
+                  <th>Súčet TOP 5</th>
+                </tr>
+              </thead>
+              <tbody id="top3Body"></tbody>
+            </table>
+          </div>
 
-  <div id="top3Empty" class="empty" style="display:none;">
-    Zatiaľ nie sú dostupné dáta pre TOP 5.
-  </div>
-</div>
-
-    <div class="section" id="mainLeaderboardSection">
-      <div class="sectionHead">
-        <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
-        <div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
-        <div class="tabs" id="sectorTabs"></div>
+          <div id="top3Empty" class="empty" style="display:none;">
+            Zatiaľ nie sú dostupné dáta pre TOP 5.
+          </div>
+        </div>
       </div>
 
-      <div class="tableWrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="col-rank">Poradie</th>
-<th class="col-photo">Foto</th>
-<th class="col-team">Tím</th>
-<th class="col-sector">Sektor</th>
-<th class="col-peg">Stanovište</th>
-<th class="col-total">Celková váha</th>
-<th class="col-count">Úlovky</th>
-            </tr>
-          </thead>
-          <tbody id="lbBody"></tbody>
-        </table>
+      <div class="proMainStack">
+        <div class="section" id="mainLeaderboardSection">
+          <div class="sectionHead">
+            <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
+            <div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
+            <div class="tabs" id="sectorTabs"></div>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-rank">Poradie</th>
+                  <th class="col-photo">Foto</th>
+                  <th class="col-team">Tím</th>
+                  <th class="col-sector">Sektor</th>
+                  <th class="col-peg">Stanovište</th>
+                  <th class="col-total">Celková váha</th>
+                  <th class="col-count">Úlovky</th>
+                </tr>
+              </thead>
+              <tbody id="lbBody"></tbody>
+            </table>
+          </div>
+
+          <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
+        </div>
       </div>
-      <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
     </div>
   </div>
 
@@ -1402,8 +1764,24 @@ let recentCatchIndex = 0;
 const FALLBACK_MS = 30000;
 
 function applyEventSettings(data) {
-  document.getElementById("eventNameTitle").textContent = data?.eventName || "RCC Live tabuľka";
-  document.getElementById("eventSubTitle").textContent = data?.eventSub || "Ružín Carp Classic";
+  const title = document.getElementById("eventNameTitle");
+  const sub = document.getElementById("eventSubTitle");
+  const logo = document.getElementById("eventLogo");
+
+  if (title) title.textContent = data?.eventName || "RCC Live tabuľka";
+  if (sub) sub.textContent = data?.eventSub || "Ružín Carp Classic";
+
+  const logoSrc = firstNonEmpty(
+    data?.eventLogo,
+    data?.eventLogoUrl,
+    data?.logo,
+    data?.logoUrl
+  );
+
+  if (logo && logoSrc) {
+    logo.src = logoSrc;
+    logo.style.display = "";
+  }
 }
 
 async function loadState(manual = false) {
@@ -1508,7 +1886,7 @@ function renderLive(data) {
   currentTeamCatches = data?.teamCatches || {};
   currentTopFish = topFish;
 currentLastCatch = lastCatch;
-currentRecentCatches = Array.isArray(data.recentCatches)
+currentRecentCatches = Array.isArray(data?.recentCatches)
   ? data.recentCatches
   : [];
 
@@ -1667,7 +2045,9 @@ function renderRecentCatches(items) {
   `;
 
   lastCatchHint.textContent = "Posledných 10 úlovkov v pohybe";
-}function renderTop3(rows) {
+}
+
+function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
   if (!body || !empty) return;
@@ -1731,6 +2111,30 @@ function getMedalRank(index) {
   if (index === 1) return "2 🥈";
   if (index === 2) return "3 🥉";
   return (index + 1) + ".";
+}
+
+
+function renderSectorTabs(rows) {
+  const wrap = document.getElementById("sectorTabs");
+  if (!wrap) return;
+
+  const sectors = [...new Set(
+    (rows || [])
+      .map(t => String(t.sectorCode || t.sector || "").trim())
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  if (currentSectorTab !== "ALL" && !sectors.includes(currentSectorTab)) {
+    currentSectorTab = "ALL";
+  }
+
+  const tabs = ["ALL", ...sectors];
+
+  wrap.innerHTML = tabs.map(tab => {
+    const label = tab === "ALL" ? "CELKOVÉ" : tab;
+    const cls = currentSectorTab === tab ? "tabBtn active" : "tabBtn";
+    return `<button class="${cls}" onclick="setSectorTab('${escapeJs(tab)}')">${escapeHtml(label)}</button>`;
+  }).join("");
 }
 
 function setSectorTab(tab) {
