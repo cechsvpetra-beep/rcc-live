@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RCC Live tabuľka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#050505;
@@ -393,6 +396,667 @@ tr.rank-top-3{
   .lastCatchTitle::after{display:none}
 }
 
+
+
+/* =========================
+   RCC MOBILE + PC POLISH FIX
+   opravuje mobilnú hlavičku, tabuľky a šírky
+   ========================= */
+@media (min-width:1201px){
+  .wrap{max-width:1500px;}
+  .topbar{min-height:210px;}
+  .logo{width:160px;height:160px;}
+  .titleBox h1{font-size:50px;}
+}
+
+@media (max-width:900px){
+  body{background:#120904;}
+  .wrap{padding:10px;}
+
+  .topbar{
+    display:grid !important;
+    grid-template-columns:1fr;
+    gap:14px;
+    padding:14px !important;
+    min-height:auto !important;
+    border-radius:22px;
+  }
+
+  .brand{
+    width:100%;
+    display:grid !important;
+    grid-template-columns:96px minmax(0,1fr);
+    gap:14px !important;
+    align-items:center !important;
+  }
+
+  .logo{
+    width:96px !important;
+    height:96px !important;
+    border-radius:20px !important;
+  }
+
+  .titleBox{
+    padding-top:0 !important;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .titleBox h1{
+    font-size:27px !important;
+    line-height:1.02 !important;
+    letter-spacing:.3px !important;
+    max-width:100% !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+
+  .titleBox .sub{
+    font-size:13px !important;
+    letter-spacing:1.8px !important;
+    margin-top:8px !important;
+  }
+
+  .actions{
+    width:100%;
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .actions button{
+    width:100%;
+    padding:12px 10px;
+    font-size:14px;
+    border-radius:16px;
+  }
+
+  .heroStats{
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .stat{
+    min-height:128px;
+    padding:18px;
+  }
+
+  .statIcon{font-size:32px;}
+  .statValue{font-size:34px !important;}
+  .statLabel{font-size:13px;}
+
+  .lastCatch{
+    overflow:hidden;
+  }
+
+  .lastCatchMain{
+    font-size:25px !important;
+  }
+
+  .catchTickerItem{
+    font-size:16px !important;
+    margin-right:34px !important;
+  }
+
+  .catchTickerPhoto{
+    width:38px !important;
+    height:38px !important;
+  }
+
+  .infoRow{
+    display:grid !important;
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .updated{text-align:left !important;}
+
+  .proLiveGrid{
+    grid-template-columns:1fr !important;
+  }
+
+  .sectionHead h2{
+    font-size:21px !important;
+    line-height:1.1;
+  }
+
+  .sectionSub{
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  .tableWrap{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #top5Section table{
+    min-width:760px !important;
+  }
+
+  #top5Section th,
+  #top5Section td{
+    padding:12px 10px;
+    font-size:14px;
+  }
+
+  #top5Section .teamPhoto{
+    width:54px;
+    height:54px;
+  }
+
+  #mainLbTable{
+    min-width:0 !important;
+  }
+
+  #mainLbTable th.col-photo,
+  #mainLbTable td.col-photo,
+  #mainLbTable th.col-sector,
+  #mainLbTable td.col-sector,
+  #mainLbTable th.col-peg,
+  #mainLbTable td.col-peg{
+    display:none !important;
+  }
+
+  #mainLbTable th.col-rank,
+  #mainLbTable td.col-rank{
+    width:54px !important;
+    padding-left:8px;
+    padding-right:4px;
+  }
+
+  #mainLbTable th.col-team,
+  #mainLbTable td.col-team{
+    width:auto !important;
+  }
+
+  #mainLbTable th.col-total,
+  #mainLbTable td.col-total{
+    width:98px !important;
+    text-align:right;
+  }
+
+  #mainLbTable th.col-count,
+  #mainLbTable td.col-count{
+    width:62px !important;
+    text-align:right;
+  }
+
+  .mobileTeamPhotoWrap{display:block !important;}
+  .mobileSub{display:block !important;}
+  .mobileTeamPhoto,.mobileNoPhoto{width:52px;height:52px;}
+  .teamName{font-size:17px !important;}
+  .mobileSub{font-size:14px !important;}
+
+  .proSide{
+    grid-template-columns:1fr !important;
+  }
+}
+
+@media (max-width:420px){
+  .brand{
+    grid-template-columns:86px minmax(0,1fr);
+  }
+  .logo{
+    width:86px !important;
+    height:86px !important;
+  }
+  .titleBox h1{
+    font-size:24px !important;
+  }
+  .actions{
+    grid-template-columns:1fr 1fr;
+  }
+  .statValue{font-size:31px !important;}
+  #top5Section table{min-width:720px !important;}
+}
+
+
+
+/* =========================
+   RCC FINAL DASHBOARD LAYOUT
+   blízko k mockupu: 3 stĺpce + spodný ticker
+   ========================= */
+.wrap{
+  max-width:1920px;
+  padding:14px 14px 18px;
+}
+.topbar{
+  min-height:310px;
+  display:grid;
+  grid-template-columns:340px 1fr 210px;
+  align-items:start;
+  padding:26px 30px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 60% 78%, rgba(255,190,73,.32), transparent 15%),
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.82)),
+    linear-gradient(90deg, rgba(0,0,0,.92), rgba(30,13,4,.72)),
+    url('/logo.png');
+  background-size:auto, auto, auto, 420px 420px;
+  background-position:center, center, center, left -70px top -55px;
+  background-repeat:no-repeat;
+}
+.topbar::before{
+  background:
+    linear-gradient(110deg, transparent 0%, rgba(255,190,73,.13) 42%, transparent 64%),
+    radial-gradient(circle at 55% 70%, rgba(255,130,31,.22), transparent 16%);
+}
+.topbar::after{
+  content:"LIVE TABUĽKA • RYBÁRSKE PRETEKY";
+  left:50%;
+  top:92px;
+  transform:translateX(-50%);
+  font-size:20px;
+  letter-spacing:8px;
+  white-space:nowrap;
+}
+.brand{
+  grid-column:1 / 3;
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:34px;
+  align-items:start;
+}
+.logo{
+  width:300px;
+  height:300px;
+  border:none;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  filter:drop-shadow(0 0 30px rgba(255,190,73,.35));
+}
+.titleBox{
+  padding-top:30px;
+  text-align:center;
+  align-self:start;
+}
+.titleBox h1{
+  font-size:58px;
+  max-width:none;
+  line-height:.95;
+  letter-spacing:2px;
+}
+.titleBox .sub{
+  margin-top:18px;
+  font-size:18px;
+  letter-spacing:7px;
+  color:#e8dfd0;
+}
+.actions{
+  grid-column:3;
+  justify-self:end;
+}
+.heroStats{
+  margin-top:-100px;
+  position:relative;
+  z-index:2;
+  padding-left:410px;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:18px;
+}
+.stat{
+  min-height:128px;
+  display:grid;
+  grid-template-columns:70px 1fr;
+  grid-template-rows:auto auto auto;
+  column-gap:16px;
+  align-items:center;
+  padding:22px 28px;
+  backdrop-filter:blur(8px);
+}
+.statIcon{
+  grid-row:1 / 4;
+  font-size:46px;
+  text-align:center;
+}
+.statLabel{font-size:14px;text-align:center;color:#f4bd4d;}
+.statValue{font-size:46px;text-align:center;margin:0;}
+.statSub{text-align:center;text-transform:uppercase;letter-spacing:1px;color:#ddd0bd;}
+.rccDashboard{
+  display:grid;
+  grid-template-columns:500px minmax(0,1fr) 450px;
+  gap:14px;
+  align-items:start;
+}
+.rccLeft,.rccRight{display:grid;gap:14px;}
+.rccCenter{min-width:0;}
+.proLiveGrid,.proMain,.proSide{display:contents;}
+.lastCatch{margin:0;}
+.lastCatchHead{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.livePill{font-size:12px;font-weight:900;color:#fff;background:#8c2017;border:1px solid rgba(255,120,80,.55);border-radius:999px;padding:4px 10px;box-shadow:0 0 16px rgba(255,70,40,.25)}
+.lastCatchRow{display:block;}
+.lastCatchPhotoWrap,#lastCatchPhotoWrap{display:none;}
+.lastCatchMain{display:none;}
+.recentCards{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:0;
+  margin-top:8px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  overflow:hidden;
+  background:rgba(0,0,0,.20);
+}
+.recentCard{
+  padding:12px 8px;
+  text-align:center;
+  border-right:1px solid rgba(255,255,255,.10);
+  cursor:pointer;
+  min-width:0;
+}
+.recentCard:last-child{border-right:0;}
+.recentCard img,.recentNoPhoto{
+  width:58px;height:58px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:1px solid rgba(255,190,73,.36);background:#0b0b0b;
+}
+.recentTeam{font-size:11px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recentWeight{font-size:17px;font-weight:900;color:#ffd27a;margin-top:6px;}
+.recentPlace,.recentTime{font-size:11px;color:#c7a96a;margin-top:3px;}
+.lastCatchHint{margin-left:8px;}
+.bigFishList{padding:10px;display:grid;gap:8px;}
+.bigFishRow{
+  display:grid;grid-template-columns:42px 95px 44px 1fr 90px;align-items:center;gap:10px;
+  padding:10px;border:1px solid rgba(255,190,73,.12);border-radius:10px;background:rgba(0,0,0,.25);cursor:pointer;
+}
+.bigFishRow:nth-child(1){background:linear-gradient(90deg,rgba(255,190,73,.26),rgba(0,0,0,.20));}
+.bigFishMedal{font-size:24px;text-align:center;font-weight:900;}
+.bigFishKg{font-size:18px;font-weight:900;color:#ffd27a;}
+.bigFishAvatar img,.bigFishAvatar span{width:40px;height:40px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,190,73,.35);font-size:10px;color:#c7a96a;}
+.bigFishTeam{font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bigFishMeta{font-size:12px;color:#d9b76f;text-align:right;}
+#top5Section .sectionHead h2{font-size:24px;}
+#mainLeaderboardSection{margin-top:14px;}
+.sidePanel{border-radius:12px;}
+.sectorDonutWrap{display:grid;grid-template-columns:160px 1fr;gap:18px;align-items:center;padding:10px;}
+.sectorDonut{
+  width:160px;height:160px;border-radius:50%;position:relative;background:conic-gradient(#f5c45d 0 33%, #d78a2b 33% 66%, #8e4a22 66% 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2),0 0 28px rgba(255,190,73,.18);
+}
+.sectorDonut::after{content:"";position:absolute;inset:38px;border-radius:50%;background:radial-gradient(circle,#171008,#050403);border:1px solid rgba(255,255,255,.12)}
+.sectorDonut span{position:absolute;inset:52px;border-radius:50%;background:rgba(255,190,73,.08);z-index:2;}
+.sectorLegend .sectorRow{padding:8px 0;}
+.sectorLegend .sectorBar{display:none;}
+.promoBox{min-height:285px;background:radial-gradient(circle at 70% 45%,rgba(255,190,73,.16),transparent 28%),linear-gradient(135deg,rgba(255,190,73,.10),rgba(0,0,0,.5)),url('/logo.png');background-size:auto,auto,230px 230px;background-position:center,center,right -55px bottom -55px;background-repeat:no-repeat;}
+.promoBig{font-size:62px;font-family:Arial Black,Arial,sans-serif;transform:rotate(-3deg);}
+.promoHash{margin-top:18px;color:#d28b30;font-weight:900;letter-spacing:1px;}
+.bottomLiveTicker{margin-top:14px;border:1px solid rgba(255,190,73,.28);border-radius:12px;padding:12px;background:linear-gradient(180deg,rgba(255,190,73,.08),rgba(0,0,0,.45));box-shadow:0 18px 46px rgba(0,0,0,.36);}
+.bottomTickerTitle{font-size:14px;color:#ffd27a;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.bottomTickerWindow{overflow:hidden;white-space:nowrap;}
+.bottomTickerTrack{display:inline-block;animation:catchTickerMove 55s linear infinite;}
+.bottomTickerItem{display:inline-flex;align-items:center;gap:10px;margin-right:38px;color:#fff3cd;font-size:14px;}
+.bottomTickerItem img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,190,73,.36);}
+.bottomTickerItem em{font-style:normal;color:#ffd27a;font-weight:900;}
+.bottomTickerItem small{color:#c7a96a;font-size:12px;}
+@media (max-width:1500px){
+  .topbar{grid-template-columns:250px 1fr 190px;min-height:260px;}
+  .brand{grid-template-columns:220px 1fr;}
+  .logo{width:220px;height:220px;}
+  .titleBox h1{font-size:46px;}
+  .heroStats{padding-left:300px;margin-top:-82px;}
+  .rccDashboard{grid-template-columns:1fr 2fr 360px;}
+}
+@media (max-width:1180px){
+  .heroStats{padding-left:0;margin-top:0;grid-template-columns:repeat(2,1fr);}
+  .rccDashboard{grid-template-columns:1fr;}
+  .rccLeft,.rccRight{grid-template-columns:1fr 1fr;}
+  .topbar{grid-template-columns:1fr;min-height:auto;}
+  .brand{grid-template-columns:140px 1fr;}
+  .logo{width:140px;height:140px;}
+  .actions{grid-column:auto;justify-self:start;}
+}
+@media (max-width:900px){
+  .topbar{padding:14px;border-radius:18px;}
+  .brand{grid-template-columns:92px 1fr;gap:14px;}
+  .logo{width:92px;height:92px;}
+  .titleBox h1{font-size:29px;line-height:1.05;text-align:left;}
+  .titleBox .sub{text-align:left;letter-spacing:2px;}
+  .heroStats{grid-template-columns:1fr;gap:10px;}
+  .stat{grid-template-columns:56px 1fr;min-height:120px;}
+  .statValue{text-align:left;font-size:42px;}
+  .statLabel,.statSub{text-align:left;}
+  .rccLeft,.rccRight{grid-template-columns:1fr;}
+  .recentCards{grid-template-columns:1fr;}
+  .recentCard{display:grid;grid-template-columns:60px 1fr 90px;align-items:center;text-align:left;gap:10px;border-right:0;border-bottom:1px solid rgba(255,255,255,.08);}
+  .recentCard img,.recentNoPhoto{margin:0;grid-row:1 / 4;}
+  .recentWeight{text-align:right;margin:0;}
+  .recentPlace,.recentTime{grid-column:2 / 4;}
+  .bigFishRow{grid-template-columns:36px 80px 42px 1fr;}
+  .bigFishMeta{grid-column:4;text-align:left;}
+  .sectorDonutWrap{grid-template-columns:1fr;justify-items:center;}
+  .bottomTickerItem img{width:42px;height:42px;}
+}
+
+
+
+/* ======================================================
+   RCC PRO 2026 FINAL POLISH - closer to reference mockup
+   ====================================================== */
+:root{
+  --font-head:"Oswald","Arial Narrow",Impact,sans-serif;
+  --font-ui:"Rajdhani",Arial,sans-serif;
+  --gold-bright:#ffd878;
+  --gold-mid:#d99a2b;
+  --gold-dark:#7a3f0d;
+  --ice:#e8e8e8;
+}
+html{background:#030302;}
+body{
+  font-family:var(--font-ui);
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255,190,73,.33), transparent 18%),
+    radial-gradient(circle at 88% 8%, rgba(255,121,23,.16), transparent 20%),
+    radial-gradient(circle at 8% 20%, rgba(255,121,23,.14), transparent 24%),
+    linear-gradient(180deg,#020202 0%,#100702 48%,#030302 100%);
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,205,94,.22), transparent 15%),
+    linear-gradient(90deg, rgba(0,0,0,.82), transparent 20%, transparent 78%, rgba(0,0,0,.88)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
+  mix-blend-mode:screen;
+  opacity:.28;
+  z-index:0;
+}
+.wrap{position:relative;z-index:1;max-width:1920px;padding:14px 14px 10px;}
+.topbar{
+  min-height:315px;
+  padding:18px 22px 0 22px;
+  margin-bottom:10px;
+  border-radius:0;
+  border:0;
+  background:
+    radial-gradient(circle at 53% 70%, rgba(255,207,92,.48), transparent 12%),
+    linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.92)),
+    linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(34,14,4,.62) 36%, rgba(11,10,9,.78) 100%);
+  box-shadow:none;
+  overflow:visible;
+}
+.topbar::before{
+  background:
+    linear-gradient(110deg, transparent 0%, rgba(255,190,73,.16) 44%, transparent 62%),
+    radial-gradient(circle at 48% 58%, rgba(255,110,21,.24), transparent 25%),
+    repeating-linear-gradient(158deg, transparent 0 34px, rgba(255,113,21,.11) 35px 37px, transparent 38px 74px);
+  opacity:.9;
+}
+.topbar::after{
+  content:"LIVE TABUĽKA  ·  RYBÁRSKE PRETEKY";
+  position:absolute;
+  top:105px;
+  left:410px;
+  right:160px;
+  text-align:center;
+  font-family:var(--font-head);
+  font-size:24px;
+  letter-spacing:8px;
+  color:rgba(255,255,255,.80);
+  text-shadow:0 0 16px rgba(255,210,122,.28);
+}
+.brand{
+  position:static;
+  display:block;
+  width:100%;
+  min-height:292px;
+}
+.logo{
+  position:absolute;
+  left:18px;
+  top:-6px;
+  width:350px;
+  height:350px;
+  object-fit:contain;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:0 0 70px rgba(255,166,42,.28);
+  z-index:4;
+}
+.titleBox{
+  position:absolute;
+  left:390px;
+  right:140px;
+  top:22px;
+  z-index:3;
+  text-align:center;
+}
+.titleBox h1{
+  font-family:var(--font-head);
+  font-size:68px;
+  line-height:.95;
+  font-weight:700;
+  letter-spacing:2.5px;
+  margin:0;
+  color:transparent;
+  background:linear-gradient(180deg,#fff7d5 0%,#ffd878 25%,#d59727 62%,#7c410d 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-transform:uppercase;
+  transform:skewX(-7deg);
+  text-shadow:0 5px 0 rgba(0,0,0,.70), 0 0 34px rgba(255,184,60,.34);
+}
+.titleBox .sub{
+  margin-top:18px;
+  font-family:var(--font-head);
+  color:#efe1c6;
+  font-size:19px;
+  font-weight:600;
+  letter-spacing:7px;
+  text-transform:uppercase;
+  text-shadow:0 0 18px rgba(0,0,0,.9);
+}
+.actions{position:absolute;top:24px;right:24px;z-index:8;}
+button{
+  font-family:var(--font-head);
+  font-size:14px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  border-radius:8px;
+  padding:12px 18px;
+}
+.heroStats{
+  position:relative;
+  z-index:5;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+  padding-left:455px;
+  margin-top:-170px;
+  margin-bottom:18px;
+}
+.stat{
+  min-height:126px;
+  padding:18px 20px;
+  border-radius:2px;
+  background:linear-gradient(180deg, rgba(13,13,13,.78), rgba(7,7,7,.87)), linear-gradient(110deg, rgba(255,194,77,.18), transparent 55%);
+  border:1px solid rgba(255,184,58,.42);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 12px 40px rgba(0,0,0,.48);
+}
+.stat::after{border-radius:2px;}
+.statIcon{font-size:42px;filter:drop-shadow(0 0 12px rgba(255,190,73,.42));}
+.statLabel{font-family:var(--font-head);font-size:15px;letter-spacing:1.2px;color:#ffc857;}
+.statValue{font-family:var(--font-head);font-size:52px;line-height:1;color:#d8d8d8;text-shadow:0 4px 0 #111,0 0 18px rgba(255,255,255,.18);}
+.statSub{font-family:var(--font-ui);font-size:15px;color:#cfc7b8;font-weight:700;text-transform:uppercase;}
+.rccDashboard{display:grid;grid-template-columns:500px minmax(650px,1fr) 460px;gap:14px;align-items:start;}
+.rccLeft,.rccCenter,.rccRight{min-width:0;}
+.section,.lastCatch,.sidePanel,.bottomLiveTicker{
+  border-radius:4px;
+  background:linear-gradient(180deg, rgba(13,17,18,.92), rgba(6,8,8,.96));
+  border:1px solid rgba(207,111,23,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 12px 38px rgba(0,0,0,.52);
+}
+.sectionHead{padding:16px 18px 12px;background:linear-gradient(90deg, rgba(207,111,23,.16), rgba(255,190,73,.05), transparent);}
+.sectionHead h2,.sideTitle,.bottomTickerTitle{
+  font-family:var(--font-head);
+  font-size:26px;
+  line-height:1;
+  letter-spacing:2px;
+  color:#f4c76d;
+  text-transform:uppercase;
+  text-shadow:0 0 16px rgba(255,190,73,.24);
+}
+.sectionSub{font-family:var(--font-head);font-size:13px;letter-spacing:1.6px;color:#cda15d;text-transform:uppercase;}
+.lastCatch{padding:16px 16px 18px;min-height:240px;margin-bottom:14px;}
+.lastCatchHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.lastCatchTitle{font-family:var(--font-head);font-size:24px;letter-spacing:1.5px;color:#f4c76d;}
+.livePill{background:#9b1f12;color:#fff2dc;border-radius:999px;padding:4px 11px;font-family:var(--font-head);font-size:12px;letter-spacing:1px;}
+.lastCatchRow{display:block;}
+.lastCatchText{width:100%;}
+.lastCatchMain{font-family:var(--font-head);font-size:22px;color:#fff2cc;margin-bottom:10px;}
+.lastCatchSub{margin:0;}
+.recentCards{display:grid!important;grid-template-columns:repeat(5,1fr);gap:0;}
+.recentCard{border-right:1px solid rgba(255,255,255,.09);padding:6px 8px 10px;text-align:center;min-width:0;}
+.recentPhoto{width:54px;height:54px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,194,77,.55);}
+.recentTeam{font-family:var(--font-head);font-size:12px;color:#fff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:7px;}
+.recentWeight{font-family:var(--font-head);font-size:17px;color:#ffce74;margin-top:4px;}
+.recentPlace,.recentTime{font-size:12px;color:#c9a76b;}
+.bigFishList{padding:0 8px 10px;}
+.bigFishRow{display:grid;grid-template-columns:48px 86px 54px 1fr 80px;gap:10px;align-items:center;min-height:54px;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.06);}
+.bigFishRow:nth-child(1){background:linear-gradient(90deg,rgba(255,190,73,.26),transparent);}
+.bigFishRank{font-family:var(--font-head);font-size:26px;color:#ffd071;text-align:center;}
+.bigFishWeight{font-family:var(--font-head);font-size:26px;color:#e8e8e8;}
+.bigFishTeam{font-family:var(--font-head);font-size:15px;color:#fff;text-transform:uppercase;}
+.bigFishMeta{font-size:12px;color:#c7a96a;text-align:right;}
+.tableWrap{overflow:hidden;}
+table{font-family:var(--font-ui);min-width:0;}
+th{font-family:var(--font-head);font-size:14px;letter-spacing:1px;color:#e9bd68;background:rgba(255,190,73,.08);}
+td{font-size:16px;color:#e8e3d7;}
+.teamName{font-family:var(--font-head);letter-spacing:.4px;text-transform:uppercase;color:#fff;}
+.badge{font-family:var(--font-head);font-size:13px;background:#080706;border-color:rgba(255,190,73,.42);}
+.teamPhoto{width:48px;height:48px;}
+#top5Section table th,#top5Section table td{padding:10px 12px;}
+#mainLeaderboardSection table th,#mainLeaderboardSection table td{padding:11px 12px;}
+tr.rank-top-1{box-shadow:inset 4px 0 0 #ffd071;background:linear-gradient(90deg, rgba(255,177,45,.31), rgba(255,177,45,.05))!important;}
+tr.rank-top-2{background:linear-gradient(90deg, rgba(210,210,210,.20), rgba(210,210,210,.05))!important;}
+tr.rank-top-3{background:linear-gradient(90deg, rgba(190,90,28,.24), rgba(190,90,28,.05))!important;}
+.sidePanel{padding:18px;}
+.sectorDonutWrap{grid-template-columns:170px 1fr;gap:20px;}
+.sectorDonut{width:170px;height:170px;filter:drop-shadow(0 0 18px rgba(255,190,73,.18));}
+.promoBox{min-height:310px;background:radial-gradient(circle at 70% 55%,rgba(255,190,73,.24),transparent 32%),linear-gradient(135deg,#141414,#040404);position:relative;overflow:hidden;}
+.promoBox::before{content:"";position:absolute;inset:0;background:linear-gradient(130deg,transparent,rgba(255,114,25,.19),transparent);}
+.promoBig{font-family:var(--font-head);font-size:72px;transform:skewX(-8deg);letter-spacing:2px;}
+.promoSmall{font-family:var(--font-head);font-size:26px;}
+.promoHash{font-family:var(--font-head);font-size:18px;color:#e19637;margin-top:18px;}
+.bottomLiveTicker{margin-top:12px;padding:16px;}
+.bottomTickerTitle{font-size:18px;margin-bottom:12px;}
+.bottomTickerWindow{height:84px;}
+.bottomTickerItem{min-width:180px;font-family:var(--font-head);}
+.bottomTickerItem img{width:62px;height:62px;border:1px solid rgba(255,190,73,.52);}
+.detailPage{padding-top:8px;}
+@media (max-width:1500px){
+  .logo{width:280px;height:280px}.titleBox{left:310px}.titleBox h1{font-size:54px}.topbar::after{left:330px}.heroStats{padding-left:320px;margin-top:-128px}.rccDashboard{grid-template-columns:1fr 1.7fr;}.rccRight{grid-column:1 / 3;display:grid;grid-template-columns:1fr 1fr;gap:14px}.promoBox{min-height:210px}
+}
+@media (max-width:1050px){
+  .topbar{min-height:auto;border-radius:18px;padding:14px}.brand{display:flex;min-height:auto;gap:14px;align-items:center}.logo{position:static;width:96px;height:96px;border-radius:16px}.titleBox{position:static;text-align:left;flex:1}.titleBox h1{font-size:34px;transform:none}.titleBox .sub{font-size:14px;letter-spacing:2px}.topbar::after{display:none}.actions{position:static;width:100%;justify-content:flex-start}.heroStats{padding-left:0;margin-top:0;grid-template-columns:repeat(2,1fr)}.rccDashboard{grid-template-columns:1fr}.rccRight{grid-column:auto;display:grid;grid-template-columns:1fr}.recentCards{grid-template-columns:repeat(3,1fr)}.tableWrap{overflow:auto}.bottomTickerWindow{height:76px}
+}
+@media (max-width:620px){
+  .wrap{padding:8px}body{background:#120905}.topbar{display:block}.brand{display:grid;grid-template-columns:92px 1fr;gap:12px}.logo{width:92px;height:92px}.titleBox h1{font-size:27px;line-height:1.02;max-width:100%;overflow:hidden}.titleBox .sub{font-size:13px;margin-top:8px}.actions{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions button{font-size:14px;padding:12px 10px}.heroStats{grid-template-columns:1fr;gap:10px}.stat{min-height:132px}.statValue{font-size:40px}.rccDashboard{gap:10px}.sectionHead h2,.sideTitle{font-size:26px}.lastCatch{min-height:auto}.recentCards{grid-template-columns:repeat(2,1fr)}.recentCard{padding:8px}.recentPhoto{width:58px;height:58px}.lastCatchSub .catchTicker{display:block}.catchTickerTrack{animation:catchTickerMove 32s linear infinite}.catchTickerItem{font-size:17px}.section{border-radius:18px}.tableWrap{overflow:auto}#top5Section table{min-width:720px}#mainLbTable{min-width:0}#mainLbTable th.col-sector,#mainLbTable td.col-sector,#mainLbTable th.col-peg,#mainLbTable td.col-peg,#mainLbTable th.col-photo,#mainLbTable td.col-photo{display:none}#mainLbTable th,#mainLbTable td{font-size:16px;padding:14px 10px}.mobileTeamPhotoWrap{display:block}.mobileSub{display:block}.col-rank{width:72px}.col-total{text-align:right}.sidePanel{display:none}.bottomLiveTicker{display:none}.detailStats{grid-template-columns:1fr}.detailTopLeft{display:block}.detailTeamPhotoWrap{margin-bottom:14px}.bigFishRow{grid-template-columns:38px 78px 46px 1fr}.bigFishMeta{grid-column:4;text-align:left}.promoBox{display:none!important}}
+@media print{.topbar,.section,.stat,.lastCatch,.sidePanel{box-shadow:none!important}}
+
 </style>
 </head>
 <body>
@@ -417,13 +1081,15 @@ tr.rank-top-3{
     <div class="heroStats">
       <div class="stat">
         <div class="statIcon">🐟</div>
-        <div class="statLabel">Celková váha rýb</div>
+        <div class="statLabel">Ulovené spolu</div>
         <div class="statValue" id="totalWeight">0.00 kg</div>
+        <div class="statSub">celková váha</div>
       </div>
       <div class="stat">
         <div class="statIcon">🎣</div>
-        <div class="statLabel">Počet ulovených rýb</div>
+        <div class="statLabel">Počet rýb</div>
         <div class="statValue" id="totalFish">0</div>
+        <div class="statSub">ulovených rýb</div>
       </div>
       <div class="stat clickableStat" id="topFishCard" onclick="openTopFishModal()">
         <div class="statIcon">🏆</div>
@@ -435,32 +1101,45 @@ tr.rank-top-3{
         <div class="statIcon">👥</div>
         <div class="statLabel">Počet tímov</div>
         <div class="statValue" id="totalTeamsCount">0</div>
-        <div class="statSub">registrovaných tímov</div>
+        <div class="statSub">zaregistrovaných tímov</div>
       </div>
     </div>
 
-    <div class="lastCatch" id="lastCatchBox">
-      <div class="lastCatchTitle">Posledných 10 úlovkov</div>
-      <div class="lastCatchRow">
-        <div id="lastCatchPhotoWrap"></div>
-        <div class="lastCatchText">
-          <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
-          <div class="lastCatchSub" id="lastCatchSub"></div>
-          <div class="lastCatchHint" id="lastCatchHint"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="infoRow">
+    <div class="infoRow desktopInfo">
       <div class="infoLine" id="infoLine"></div>
       <div class="updated" id="updatedAt"></div>
     </div>
 
-    <div class="proLiveGrid">
-      <div class="proMain">
+    <div class="rccDashboard">
+      <aside class="rccLeft">
+        <div class="lastCatch" id="lastCatchBox">
+          <div class="lastCatchHead">
+            <div class="lastCatchTitle">Posledné úlovky</div>
+            <div class="livePill">● LIVE</div>
+          </div>
+          <div class="lastCatchRow">
+            <div id="lastCatchPhotoWrap"></div>
+            <div class="lastCatchText">
+              <div class="lastCatchMain" id="lastCatchMain">Zatiaľ bez úlovku</div>
+              <div class="lastCatchSub" id="lastCatchSub"></div>
+              <div class="lastCatchHint" id="lastCatchHint"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section bigFishPanel">
+          <div class="sectionHead">
+            <h2>TOP 5 najväčších rýb</h2>
+            <div class="sectionSub">Najväčšie ryby podľa tímov</div>
+          </div>
+          <div id="bigFishPanelBody" class="bigFishList"></div>
+        </div>
+      </aside>
+
+      <main class="rccCenter">
         <div class="section" id="top5Section">
           <div class="sectionHead">
-            <h2 id="top5Title">TOP 5 rýb tímov</h2>
+            <h2 id="top5Title">Celkové poradie tímov</h2>
             <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
           </div>
           <div class="tableWrap">
@@ -486,7 +1165,7 @@ tr.rank-top-3{
 
         <div class="section" id="mainLeaderboardSection">
           <div class="sectionHead">
-            <h2 id="mainLeaderboardTitle">Celkové poradie tímov</h2>
+            <h2 id="mainLeaderboardTitle">Poradie tímov</h2>
             <div class="sectionSub" id="mainLeaderboardSub">Prepínaj medzi celkovým poradím a jednotlivými sektormi.</div>
             <div class="tabs" id="sectorTabs"></div>
           </div>
@@ -508,20 +1187,29 @@ tr.rank-top-3{
           </div>
           <div id="lbEmpty" class="empty" style="display:none;">Zatiaľ nie sú dostupné live dáta.</div>
         </div>
-      </div>
+      </main>
 
-      <div class="proSide">
-        <div class="sidePanel">
+      <aside class="rccRight">
+        <div class="sidePanel sectorProPanel">
           <div class="sideTitle">Rozloženie podľa sektorov</div>
-          <div id="sectorSummaryBody"></div>
+          <div class="sectorDonutWrap">
+            <div class="sectorDonut" id="sectorDonut"><span></span></div>
+            <div id="sectorSummaryBody" class="sectorLegend"></div>
+          </div>
         </div>
         <div class="sidePanel promoBox">
           <div>
             <div class="promoBig">Bojuj</div>
             <div class="promoSmall">o každý záber<br>o každé kilo</div>
+            <div class="promoHash">#RCC2026</div>
           </div>
         </div>
-      </div>
+      </aside>
+    </div>
+
+    <div class="bottomLiveTicker">
+      <div class="bottomTickerTitle">🔥 Živé dáta • automatická aktualizácia</div>
+      <div class="bottomTickerWindow"><div class="bottomTickerTrack" id="bottomTickerTrack"></div></div>
     </div>
   </div>
 
@@ -749,6 +1437,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   renderTop3(top5teams);
   renderSectorTabs(lb);
   renderSectorSummary(lbByTotal);
+  renderTopFishPanel(top5teams);
   renderLeaderboard(getFilteredRows(lb));
 
   if (selectedTeamId !== null) {
@@ -811,6 +1500,7 @@ function renderRecentCatches(items) {
   const lastCatchMain = document.getElementById("lastCatchMain");
   const lastCatchSub = document.getElementById("lastCatchSub");
   const lastCatchHint = document.getElementById("lastCatchHint");
+  const bottomTickerTrack = document.getElementById("bottomTickerTrack");
 
   if (!lastCatchBox || !lastCatchPhotoWrap || !lastCatchMain || !lastCatchSub || !lastCatchHint) return;
 
@@ -822,41 +1512,96 @@ function renderRecentCatches(items) {
     lastCatchMain.textContent = "Zatiaľ bez úlovku";
     lastCatchSub.textContent = "";
     lastCatchHint.textContent = "";
+    if (bottomTickerTrack) bottomTickerTrack.innerHTML = "";
     return;
   }
 
+  const visible = catches.slice(0, 5);
   const tickerItems = [...catches, ...catches];
 
   lastCatchPhotoWrap.innerHTML = "";
-  lastCatchMain.textContent = "Posledné úlovky";
+  lastCatchMain.textContent = "";
   lastCatchSub.innerHTML = `
-    <div class="catchTicker">
-      <div class="catchTickerTrack">
-        ${tickerItems.map(item => {
-          const teamName = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
-          const sector = escapeHtml(item.sector || "-");
-          const peg = escapeHtml(item.peg || "-");
-          const weight = formatKg(Number(item.weight || 0));
-          const time = escapeHtml(formatDateTime(item.time));
-          const photo = item.photo ? escapeAttr(item.photo) : "";
-
-          return `
-  <span class="catchTickerItem" ${photo ? `onclick="openImageModal('${escapeJs(photo)}','${escapeJs(teamName)} • ${escapeJs(weight)} • ${escapeJs(time)}')"` : ""}>
-    ${
-      photo
-        ? `<img src="${photo}" class="catchTickerPhoto" alt="Úlovok">`
-        : `<span class="catchTickerNoPhoto">🎣</span>`
-    }
-    <b>${teamName}</b> • ${weight} • Sektor ${sector} / Stanovište ${peg} • ${time}
-  </span>
-`;
-        }).join("")}
-      </div>
+    <div class="recentCards">
+      ${visible.map(item => {
+        const teamName = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
+        const sector = escapeHtml(item.sector || "-");
+        const peg = escapeHtml(item.peg || "-");
+        const weight = formatKg(Number(item.weight || 0));
+        const time = escapeHtml(formatDateTime(item.time));
+        const photo = item.photo ? escapeAttr(item.photo) : "";
+        return `
+          <div class="recentCard" ${photo ? `onclick="openImageModal('${escapeJs(photo)}','${escapeJs(teamName)} • ${escapeJs(weight)} • ${escapeJs(time)}')"` : ""}>
+            ${photo ? `<img src="${photo}" alt="Úlovok">` : `<div class="recentNoPhoto">🎣</div>`}
+            <div class="recentTeam">${teamName}</div>
+            <div class="recentWeight">${weight}</div>
+            <div class="recentPlace">Sektor ${sector} / ${peg}</div>
+            <div class="recentTime">${time}</div>
+          </div>
+        `;
+      }).join("")}
     </div>
   `;
-
   lastCatchHint.textContent = "Posledných 10 úlovkov v pohybe";
-}function renderTop3(rows) {
+
+  if (bottomTickerTrack) {
+    bottomTickerTrack.innerHTML = tickerItems.map(item => {
+      const teamName = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
+      const sector = escapeHtml(item.sector || "-");
+      const peg = escapeHtml(item.peg || "-");
+      const weight = formatKg(Number(item.weight || 0));
+      const time = escapeHtml(formatDateTime(item.time));
+      const photo = item.photo ? escapeAttr(item.photo) : "";
+      return `
+        <span class="bottomTickerItem">
+          ${photo ? `<img src="${photo}" alt="Úlovok">` : `<span class="tickerFish">🎣</span>`}
+          <b>${teamName}</b><em>${weight}</em><small>${sector}/${peg} · ${time}</small>
+        </span>
+      `;
+    }).join("");
+  }
+}
+
+function renderTopFishPanel(rows) {
+  const body = document.getElementById("bigFishPanelBody");
+  if (!body) return;
+
+  const list = (Array.isArray(rows) ? rows : [])
+    .map(team => {
+      const top5 = Array.isArray(team.top5) ? team.top5 : [];
+      const weight = Number(top5[0] || team.biggest || 0);
+      return {
+        team,
+        weight,
+        teamId: getTeamId(team)
+      };
+    })
+    .filter(item => item.weight > 0)
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 5);
+
+  if (!list.length) {
+    body.innerHTML = `<div class="empty smallEmpty">Zatiaľ bez úlovkov.</div>`;
+    return;
+  }
+
+  body.innerHTML = list.map((item, index) => {
+    const team = item.team;
+    const photo = getTeamPhoto(team);
+    const medal = index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : String(index + 1);
+    return `
+      <div class="bigFishRow" onclick="openTeamDetail(${Number(item.teamId)})">
+        <div class="bigFishMedal">${medal}</div>
+        <div class="bigFishKg">${formatKg(item.weight)}</div>
+        <div class="bigFishAvatar">${photo ? `<img src="${escapeAttr(photo)}" alt="foto tímu">` : `<span>bez</span>`}</div>
+        <div class="bigFishTeam">${escapeHtml(getTeamName(team, item.teamId))}</div>
+        <div class="bigFishMeta">Sektor ${escapeHtml(team.sectorCode || team.sector || "-")} / ${escapeHtml(String(team.peg || "-"))}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
   if (!body || !empty) return;
