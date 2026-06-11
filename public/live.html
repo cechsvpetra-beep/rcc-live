@@ -511,7 +511,34 @@ tr.rank-fall{ animation:rowFall .9s ease; }
   display:block;
   transition:transform .15s ease;
 }
+.catchTicker{
+  width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  margin-top:6px;
+}
 
+.catchTickerTrack{
+  display:inline-block;
+  white-space:nowrap;
+  animation:catchTickerMove 38s linear infinite;
+}
+
+.catchTickerItem{
+  display:inline-block;
+  margin-right:44px;
+  font-size:18px;
+  color:#e8fff0;
+}
+
+@keyframes catchTickerMove{
+  from{
+    transform:translateX(0);
+  }
+  to{
+    transform:translateX(-50%);
+  }
+}
 .catchPhoto:hover{
   transform:scale(1.02);
 }
@@ -1242,61 +1269,51 @@ function renderRecentCatches(items) {
     : (currentLastCatch ? [currentLastCatch] : []);
 
   const lastCatchBox = document.getElementById("lastCatchBox");
+  const lastCatchPhotoWrap = document.getElementById("lastCatchPhotoWrap");
   const lastCatchMain = document.getElementById("lastCatchMain");
   const lastCatchSub = document.getElementById("lastCatchSub");
   const lastCatchHint = document.getElementById("lastCatchHint");
-  const lastCatchPhotoWrap = document.getElementById("lastCatchPhotoWrap");
 
-  if (!lastCatchBox || !lastCatchMain || !lastCatchSub || !lastCatchHint || !lastCatchPhotoWrap) {
-    return;
-  }
+  if (!lastCatchBox || !lastCatchPhotoWrap || !lastCatchMain || !lastCatchSub || !lastCatchHint) return;
+
+  lastCatchBox.classList.remove("clickable");
+  lastCatchBox.onclick = null;
 
   if (!catches.length) {
+    lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
     lastCatchMain.textContent = "Zatiaľ bez úlovku";
     lastCatchSub.textContent = "";
     lastCatchHint.textContent = "";
-    lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
-    lastCatchBox.classList.remove("clickable");
-    lastCatchBox.onclick = null;
     return;
   }
 
-  if (recentCatchIndex >= catches.length) {
-  recentCatchIndex = 0;
-}
+  const tickerItems = [...catches, ...catches];
 
-const item = catches[recentCatchIndex];
-const nowIndex = recentCatchIndex;
+  lastCatchPhotoWrap.innerHTML = "";
+  lastCatchMain.textContent = "Posledné úlovky";
+  lastCatchSub.innerHTML = `
+    <div class="catchTicker">
+      <div class="catchTickerTrack">
+        ${tickerItems.map(item => {
+          const teamName = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
+          const sector = escapeHtml(item.sector || "-");
+          const peg = escapeHtml(item.peg || "-");
+          const weight = formatKg(Number(item.weight || 0));
+          const time = escapeHtml(formatDateTime(item.time));
+          const photo = item.photo ? escapeAttr(item.photo) : "";
 
-  const teamName = safeText(item.teamName || item.team || ("Tím " + (item.teamId || "")));
-  const sector = safeText(item.sector || "-");
-  const peg = safeText(item.peg || "-");
-  const time = formatDateTime(item.time);
+          return `
+            <span class="catchTickerItem" ${photo ? `onclick="openImageModal('${escapeJs(photo)}','${escapeJs(teamName)} • ${escapeJs(weight)} • ${escapeJs(time)}')"` : ""}>
+              🎣 <b>${teamName}</b> • ${weight} • Sektor ${sector} / Stanovište ${peg} • ${time}
+            </span>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
 
-  lastCatchMain.textContent = `${teamName} • ${formatKg(Number(item.weight || 0))}`;
-  lastCatchSub.textContent =
-    `Sektor ${sector} • Stanovište ${peg} • ${time} • ${nowIndex + 1}/${catches.length}`;
-
-  if (item.photo) {
-    lastCatchPhotoWrap.innerHTML =
-      `<img src="${escapeAttr(item.photo)}" class="lastCatchThumb" alt="Úlovok">`;
-
-    lastCatchHint.textContent = "Klikni pre zväčšenie fotky";
-    lastCatchBox.classList.add("clickable");
-    lastCatchBox.onclick = () =>
-      openImageModal(
-        item.photo,
-        `${teamName} • ${formatKg(Number(item.weight || 0))} • ${time}`
-      );
-  } else {
-    lastCatchPhotoWrap.innerHTML = `<div class="lastCatchNoThumb">bez fotky</div>`;
-    lastCatchHint.textContent = "Posledných 10 úlovkov";
-    lastCatchBox.classList.remove("clickable");
-    lastCatchBox.onclick = null;
-  }
-}
-
-function renderTop3(rows) {
+  lastCatchHint.textContent = "Posledných 10 úlovkov v pohybe";
+}function renderTop3(rows) {
   const body = document.getElementById("top3Body");
   const empty = document.getElementById("top3Empty");
   if (!body || !empty) return;
@@ -1734,17 +1751,6 @@ function connectSocket() {
       infoLine.textContent = "Realtime odpojené, beží fallback režim";
       infoLine.className = "infoLine error";
       startFallbackRefresh();
-      setInterval(() => {
-  if (currentRecentCatches.length > 1) {
-    recentCatchIndex = recentCatchIndex + 1;
-
-    if (recentCatchIndex >= currentRecentCatches.length) {
-      recentCatchIndex = 0;
-    }
-  }
-
-  renderRecentCatches(currentRecentCatches);
-}, 5000);
     });
 
     socket.on("connect_error", (err) => {
