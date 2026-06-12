@@ -1124,6 +1124,116 @@ body{
   .titleBox h1{font-size:25px !important;}
 }
 
+
+
+/* =========================
+   RCC SPONSOR SLIDER + FINAL PRO TUNING
+   ========================= */
+.sponsorPanel{
+  min-height:136px;
+  padding:16px 18px;
+  background:
+    linear-gradient(180deg, rgba(255,184,64,.085), rgba(0,0,0,.28)),
+    linear-gradient(180deg,#071018 0%,#030507 100%) !important;
+}
+.sponsorPanel .sideTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.sponsorPanel .sideTitle::after{
+  content:"LIVE";
+  font-size:10px;
+  letter-spacing:1.4px;
+  padding:3px 8px;
+  border-radius:999px;
+  color:#fff1c4;
+  background:rgba(255,184,64,.13);
+  border:1px solid rgba(255,184,64,.28);
+}
+.sponsorSliderWindow{
+  overflow:hidden;
+  width:100%;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(0,0,0,.22);
+  padding:14px 0;
+}
+.sponsorSliderTrack{
+  display:inline-flex;
+  align-items:center;
+  gap:34px;
+  white-space:nowrap;
+  animation:sponsorSlide 42s linear infinite;
+  padding-left:18px;
+}
+.sponsorSliderWindow:hover .sponsorSliderTrack{
+  animation-play-state:paused;
+}
+.sponsorLogoItem{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:132px;
+  height:58px;
+  padding:8px 16px;
+  border-radius:10px;
+  border:1px solid rgba(255,190,73,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+  color:#f7d79a;
+  text-decoration:none;
+  font-family:var(--font-head);
+  font-size:17px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  filter:drop-shadow(0 0 10px rgba(255,190,73,.14));
+  transition:transform .18s ease, border-color .18s ease, filter .18s ease;
+}
+.sponsorLogoItem:hover{
+  transform:translateY(-2px) scale(1.03);
+  border-color:rgba(255,190,73,.38);
+  filter:drop-shadow(0 0 18px rgba(255,190,73,.32));
+}
+.sponsorLogoItem img{
+  display:block;
+  height:42px;
+  max-width:150px;
+  width:auto;
+  object-fit:contain;
+}
+.sponsorPlaceholder{
+  color:#c7a96a;
+  font-size:13px;
+  padding:14px;
+  text-align:center;
+  border:1px dashed rgba(255,190,73,.18);
+  border-radius:12px;
+  background:rgba(0,0,0,.16);
+}
+.liveSignal{
+  display:inline-flex;
+  width:18px;
+  height:18px;
+  margin-right:7px;
+  vertical-align:-3px;
+}
+.liveSignal svg{width:18px;height:18px;fill:none;stroke:#f4b84e;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+@keyframes sponsorSlide{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+@media (max-width:1050px){
+  .sponsorPanel{min-height:auto;}
+  .sponsorSliderTrack{animation-duration:50s;}
+}
+@media (max-width:620px){
+  .sidePanel.sponsorPanel{display:block!important;}
+  .sponsorLogoItem{min-width:118px;height:54px;}
+  .sponsorLogoItem img{height:36px;max-width:130px;}
+}
+
 </style>
 </head>
 <body>
@@ -1264,6 +1374,13 @@ body{
             <div id="sectorSummaryBody" class="sectorLegend"></div>
           </div>
         </div>
+        <div class="sidePanel sponsorPanel" id="sponsorPanel">
+          <div class="sideTitle">Partneri preteku</div>
+          <div class="sponsorSliderWindow">
+            <div class="sponsorSliderTrack" id="sponsorSliderTrack"></div>
+          </div>
+        </div>
+
         <div class="sidePanel promoBox">
           <div>
             <div class="promoBig">Bojuj</div>
@@ -1275,7 +1392,7 @@ body{
     </div>
 
     <div class="bottomLiveTicker">
-      <div class="bottomTickerTitle">🔥 Živé dáta • automatická aktualizácia</div>
+      <div class="bottomTickerTitle"><span class="liveSignal"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M25 38a10 10 0 1 1 14-14"/><path d="M15 48a24 24 0 0 1 0-34"/><path d="M49 14a24 24 0 0 1 0 34"/><circle cx="32" cy="32" r="4"/></svg></span>Živé dáta • automatická aktualizácia</div>
       <div class="bottomTickerWindow"><div class="bottomTickerTrack" id="bottomTickerTrack"></div></div>
     </div>
   </div>
@@ -1504,6 +1621,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   renderTop3(top5teams);
   renderSectorTabs(lb);
   renderSectorSummary(lbByTotal);
+  renderSponsors(data);
   renderTopFishPanel(top5teams);
   renderLeaderboard(getFilteredRows(lb));
 
@@ -1627,6 +1745,75 @@ function renderRecentCatches(items) {
       `;
     }).join("");
   }
+}
+
+
+function normalizeSponsor(item, index) {
+  if (typeof item === "string") {
+    return {
+      name: "Partner " + (index + 1),
+      logo: item,
+      url: "",
+      active: true,
+      order: index + 1
+    };
+  }
+
+  const sponsor = item || {};
+  const active = sponsor.active !== false && sponsor.enabled !== false && sponsor.hidden !== true;
+  return {
+    name: sponsor.name || sponsor.title || sponsor.label || ("Partner " + (index + 1)),
+    logo: sponsor.logo || sponsor.image || sponsor.photo || sponsor.src || sponsor.url || "",
+    url: sponsor.link || sponsor.href || sponsor.website || "",
+    active,
+    order: Number(sponsor.order || sponsor.position || index + 1)
+  };
+}
+
+function getSponsorsFromState(data) {
+  const sources = [
+    data?.sponsors,
+    data?.partners,
+    data?.meta?.sponsors,
+    data?.meta?.partners,
+    data?.eventSponsors
+  ];
+
+  const source = sources.find(Array.isArray) || [];
+
+  return source
+    .map(normalizeSponsor)
+    .filter(s => s.active && (s.logo || s.name))
+    .sort((a, b) => a.order - b.order);
+}
+
+function renderSponsors(data) {
+  const track = document.getElementById("sponsorSliderTrack");
+  if (!track) return;
+
+  const sponsors = getSponsorsFromState(data);
+
+  if (!sponsors.length) {
+    track.style.animation = "none";
+    track.innerHTML = `<div class="sponsorPlaceholder">Logá partnerov pridáš v adminovi do poľa sponsors / partners.</div>`;
+    return;
+  }
+
+  track.style.animation = "";
+  const doubled = sponsors.length > 1 ? [...sponsors, ...sponsors] : sponsors;
+
+  track.innerHTML = doubled.map(s => {
+    const logo = escapeAttr(s.logo || "");
+    const name = escapeHtml(s.name || "Partner");
+    const url = escapeAttr(s.url || "");
+    const inner = logo
+      ? `<img src="${logo}" alt="${name}" loading="lazy" onerror="this.replaceWith(document.createTextNode('${escapeJs(s.name || "Partner")}'))">`
+      : `<span>${name}</span>`;
+
+    return url
+      ? `<a class="sponsorLogoItem" href="${url}" target="_blank" rel="noopener">${inner}</a>`
+      : `<span class="sponsorLogoItem">${inner}</span>`;
+  }).join("");
 }
 
 function renderTopFishPanel(rows) {
