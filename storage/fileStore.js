@@ -39,11 +39,12 @@ function buildDefaultTeams() {
 
 function defaultData() {
   return {
-    sectors: defaultSectors(),
-    teams: buildDefaultTeams(),
-    catches: [],
-    judges: [],
-    meta: {
+  sectors: defaultSectors(),
+  teams: buildDefaultTeams(),
+  catches: [],
+  judges: [],
+  sponsors: [],
+  meta: {
       nextTeamId: DEFAULT_TEAM_COUNT + 1,
       nextJudgeId: 1,
       judges: [],
@@ -249,7 +250,9 @@ function loadData() {
     const catches = Array.isArray(parsed.catches)
       ? parsed.catches.map(normalizeCatch).filter(Boolean)
       : [];
-
+const sponsors = Array.isArray(parsed.sponsors)
+  ? parsed.sponsors
+  : [];
     const rawJudges = Array.isArray(parsed.judges)
       ? parsed.judges
       : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : []);
@@ -292,7 +295,14 @@ function loadData() {
     parsed?.meta?.leaderboardMode || "TOTAL"
 };
 
-    return { sectors, teams, catches, judges, meta };
+    return {
+  sectors,
+  teams,
+  catches,
+  judges,
+  sponsors,
+  meta
+};
   } catch (e) {
     console.error("Chyba pri loadData, obnovujem defaultData:", e);
     const data = defaultData();
@@ -333,12 +343,15 @@ function saveData(data, options = {}) {
 
   const maxTeamId = safeTeams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
   const maxJudgeId = safeJudges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0);
-
+const safeSponsors = Array.isArray(data?.sponsors)
+  ? data.sponsors
+  : current.sponsors || [];
   const safeData = {
     sectors: normalizeSectors(data?.sectors, current.sectors || defaultSectors()),
     teams: safeTeams,
     catches: safeCatches,
     judges: safeJudges,
+sponsors: safeSponsors,
     meta: {
       nextTeamId: Math.max(
         Number(data?.meta?.nextTeamId || 0),

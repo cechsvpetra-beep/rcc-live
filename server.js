@@ -477,6 +477,7 @@ app.get("/api/admin/setup", requireAdmin, (req, res) => {
     teams: data.teams || [],
     catches: data.catches || [],
     judges,
+sponsors: data.sponsors || [],
     meta: {
       ...meta,
       judges,
@@ -491,7 +492,9 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
     const current = loadData();
     const currentMeta = ensureMeta(current);
     const incoming = req.body || {};
-
+const sponsors = Array.isArray(incoming.sponsors)
+  ? incoming.sponsors
+  : [];
     const sectors = normalizeSectors(incoming.sectors, current.sectors);
 
     const currentTeams = Array.isArray(current.teams) ? current.teams : [];
@@ -559,7 +562,9 @@ app.post("/api/admin/setup", requireAdmin, (req, res) => {
       teams,
       catches: current.catches || [],
       judges,
-      meta: {
+sponsors,
+
+meta:{
         ...currentMeta,
         judges,
         nextJudgeId,
