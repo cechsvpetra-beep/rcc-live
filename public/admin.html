@@ -131,6 +131,41 @@ button.danger:hover{
   background:#111826;
   align-items:center;
 }
+
+.rowSponsor{
+  display:grid;
+  grid-template-columns:70px 1.2fr 1.4fr 180px 120px 90px 120px;
+  gap:10px;
+  margin-bottom:10px;
+  padding:10px;
+  border:1px solid #2a3340;
+  border-radius:10px;
+  background:#111826;
+  align-items:center;
+}
+.sponsorThumb{
+  width:64px;
+  height:44px;
+  object-fit:contain;
+  border:1px solid #263446;
+  border-radius:10px;
+  background:#0f1725;
+  padding:5px;
+}
+.sponsorPlaceholder{
+  width:64px;
+  height:44px;
+  border-radius:10px;
+  border:1px dashed #314256;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ea0b3;
+  font-size:10px;
+  background:#0f1725;
+  text-align:center;
+}
+
 .rowJudge{
   display:grid;
   grid-template-columns:70px 1.2fr 1fr 130px 120px;
@@ -313,50 +348,6 @@ label.inline{
   font-size:13px;
   line-height:1.5;
 }
-
-.rowSponsor{
-  display:grid;
-  grid-template-columns:70px 1.2fr 1.2fr 120px 110px 220px 130px;
-  gap:10px;
-  margin-bottom:10px;
-  padding:10px;
-  border:1px solid #2a3340;
-  border-radius:10px;
-  background:#111826;
-  align-items:center;
-}
-.sponsorLogoBox{
-  display:flex;
-  justify-content:center;
-}
-.sponsorThumb{
-  width:74px;
-  height:48px;
-  object-fit:contain;
-  border-radius:10px;
-  border:1px solid #263446;
-  background:#0f1725;
-  padding:6px;
-}
-.sponsorPlaceholder{
-  width:74px;
-  height:48px;
-  border-radius:10px;
-  border:1px dashed #314256;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#8ea0b3;
-  font-size:11px;
-  background:#0f1725;
-}
-.sponsorPreviewRow{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
 @media (max-width:1200px){
   .rowTeam{
     grid-template-columns:60px 1fr 90px 90px 110px 1fr 120px;
@@ -374,8 +365,8 @@ label.inline{
     grid-column:1 / -1;
   }
   .rowTeam,
-  .rowJudge,
   .rowSponsor,
+  .rowJudge,
   .catchCard,
   .catchTools,
   .footerActions,
@@ -408,10 +399,6 @@ label.inline{
 <div id="status"></div>
 
 <div class="section">
-  <h2>Nastavenia preteku</h2>
-  <div class="sectionSub">Tu zmeníš názov a podnázov preteku. Zobrazí sa to v LIVE tabuľke.</div>
-
-  <div class="section">
   <h2>Nastavenia preteku</h2>
   <div class="sectionSub">Tu zmeníš názov, podnázov a režim LIVE tabuľky.</div>
 
@@ -452,7 +439,7 @@ label.inline{
 
 <div class="section">
   <h2>Sponzori / partneri preteku</h2>
-  <div class="sectionSub">Tu pridáš logá sponzorov. Zobrazia sa na LIVE stránke v paneli Partneri preteku.</div>
+  <div class="sectionSub">Tu pridávaš logá sponzorov. Zobrazia sa na LIVE stránke v paneli Partneri preteku.</div>
 
   <div id="sponsors"></div>
 
@@ -461,7 +448,7 @@ label.inline{
   </div>
 
   <div class="infoBox">
-    Logo sa uloží priamo do dát. Odporúčam použiť menší PNG/JPG/WebP obrázok, ideálne do 300 kB.
+    Odporúčam použiť menší PNG/JPG/WebP obrázok, ideálne do 300 kB. Logo sa uloží priamo do dát.
   </div>
 </div>
 
@@ -576,19 +563,6 @@ function ensureMeta() {
   if (!Number.isFinite(Number(adminData.meta.nextJudgeId))) {
     adminData.meta.nextJudgeId = 1;
   }
-
-  if (!Array.isArray(adminData.meta.sponsors)) {
-    adminData.meta.sponsors = Array.isArray(adminData.sponsors) ? adminData.sponsors : [];
-  }
-
-  if (!Array.isArray(adminData.sponsors)) {
-    adminData.sponsors = adminData.meta.sponsors;
-  }
-
-  if (!Number.isFinite(Number(adminData.meta.nextSponsorId))) {
-    adminData.meta.nextSponsorId = 1;
-  }
-
 
   adminData.meta.eventName = normalizeEventName(adminData.meta.eventName);
   adminData.meta.eventSub = normalizeEventSub(adminData.meta.eventSub);
@@ -705,6 +679,27 @@ function normalizeData() {
     .filter(Boolean)
     .sort((a, b) => a.id - b.id);
 
+  const sponsorSource = Array.isArray(adminData.sponsors)
+    ? adminData.sponsors
+    : (Array.isArray(adminData.meta?.sponsors) ? adminData.meta.sponsors : []);
+
+  adminData.sponsors = sponsorSource
+    .map((s, index) => ({
+      id: Number(s?.id || Date.now() + index),
+      name: typeof s?.name === "string" ? s.name.trim() : "",
+      logo: s?.logo || null,
+      url: typeof s?.url === "string" ? s.url.trim() : "",
+      order: Number.isFinite(Number(s?.order)) ? Number(s.order) : index + 1,
+      active: s?.active !== undefined ? Boolean(s.active) : true
+    }))
+    .filter(s => s.name || s.logo)
+    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+  if (!adminData.meta || typeof adminData.meta !== "object") {
+    adminData.meta = {};
+  }
+  adminData.meta.sponsors = adminData.sponsors;
+
   ensureMeta();
 
   const sourceJudges = Array.isArray(adminData.judges) && adminData.judges.length
@@ -734,39 +729,6 @@ function normalizeData() {
     Number(adminData.meta.nextJudgeId || 1),
     adminData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1
   );
-
-  const sourceSponsors = Array.isArray(adminData.sponsors) && adminData.sponsors.length
-    ? adminData.sponsors
-    : adminData.meta.sponsors;
-
-  const sponsorSeenIds = new Set();
-  adminData.meta.sponsors = sourceSponsors
-    .map((sponsor, index) => {
-      const id = Number(sponsor?.id || 0) || (index + 1);
-      if (sponsorSeenIds.has(id)) return null;
-      sponsorSeenIds.add(id);
-
-      return {
-        id,
-        name: typeof sponsor?.name === "string" && sponsor.name.trim() !== ""
-          ? sponsor.name.trim()
-          : ("Sponzor " + id),
-        logo: sponsor?.logo || sponsor?.photo || sponsor?.image || "",
-        url: typeof sponsor?.url === "string" ? sponsor.url.trim() : "",
-        order: Number.isFinite(Number(sponsor?.order)) ? Number(sponsor.order) : id,
-        active: sponsor?.active !== undefined ? Boolean(sponsor.active) : true
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
-
-  adminData.sponsors = adminData.meta.sponsors;
-
-  adminData.meta.nextSponsorId = Math.max(
-    Number(adminData.meta.nextSponsorId || 1),
-    adminData.meta.sponsors.reduce((max, sponsor) => Math.max(max, Number(sponsor.id) || 0), 0) + 1
-  );
-
 }
 
 function renderEventSettings() {
@@ -872,7 +834,78 @@ function renderTeams() {
   });
 }
 
-\nfunction renderSponsors() {\n  const wrap = document.getElementById("sponsors");\n  if (!wrap) return;\n\n  ensureMeta();\n  wrap.innerHTML = "";\n\n  if (!adminData.meta.sponsors.length) {\n    wrap.innerHTML = `<div class="empty">Zatiaľ nie sú pridaní žiadni sponzori.</div>`;\n    return;\n  }\n\n  adminData.meta.sponsors\n    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))\n    .forEach(sponsor => {\n      wrap.innerHTML += `\n        <div class="rowSponsor">\n          <div>#${sponsor.id}</div>\n\n          <div class="inlineCol">\n            <div class="small">Názov sponzora</div>\n            <input\n              value="${escapeHtml(sponsor.name)}"\n              onchange="changeSponsorName(${sponsor.id},this.value)"\n              placeholder="napr. FOX / Delphin / Nikl">\n          </div>\n\n          <div class="inlineCol">\n            <div class="small">Web / odkaz (voliteľné)</div>\n            <input\n              value="${escapeHtml(sponsor.url || "")}"\n              onchange="changeSponsorUrl(${sponsor.id},this.value)"\n              placeholder="https://...">\n          </div>\n\n          <div class="inlineCol">\n            <div class="small">Poradie</div>\n            <input\n              type="number"\n              value="${escapeHtml(String(sponsor.order || sponsor.id))}"\n              onchange="changeSponsorOrder(${sponsor.id},this.value)">\n          </div>\n\n          <label class="inline">\n            <input\n              type="checkbox"\n              ${sponsor.active ? "checked" : ""}\n              onchange="changeSponsorActive(${sponsor.id},this.checked)">\n            aktívny\n          </label>\n\n          <div class="inlineCol">\n            <div class="small">Logo sponzora</div>\n            <input\n              type="file"\n              accept="image/*"\n              onchange="uploadSponsorLogo(${sponsor.id}, this)">\n            <div class="small">odporúčané PNG/JPG/WebP</div>\n          </div>\n\n          <div class="sponsorPreviewRow">\n            <div class="sponsorLogoBox">\n              ${sponsor.logo ? `<img src="${escapeAttr(sponsor.logo)}" alt="logo sponzora" class="sponsorThumb">` : `<div class="sponsorPlaceholder">logo</div>`}\n            </div>\n            <button class="danger" onclick="deleteSponsor(${sponsor.id})">Zmazať</button>\n          </div>\n        </div>\n      `;\n    });\n}\n\nfunction renderJudges() {
+
+function renderSponsorThumb(logo) {
+  if (logo) {
+    return `<img src="${logo}" alt="logo sponzora" class="sponsorThumb">`;
+  }
+  return `<div class="sponsorPlaceholder">bez loga</div>`;
+}
+
+function renderSponsors() {
+  const wrap = document.getElementById("sponsors");
+  if (!wrap) return;
+
+  if (!Array.isArray(adminData.sponsors)) {
+    adminData.sponsors = [];
+  }
+
+  wrap.innerHTML = "";
+
+  if (!adminData.sponsors.length) {
+    wrap.innerHTML = `<div class="empty">Zatiaľ nie sú pridaní žiadni sponzori.</div>`;
+    return;
+  }
+
+  adminData.sponsors.forEach(s => {
+    wrap.innerHTML += `
+      <div class="rowSponsor">
+        <div>#${escapeHtml(String(s.order || ""))}</div>
+
+        <div class="inlineCol">
+          <div class="small">Názov sponzora</div>
+          <input
+            value="${escapeHtml(s.name)}"
+            onchange="changeSponsorName(${s.id},this.value)"
+            placeholder="napr. FOX">
+        </div>
+
+        <div class="inlineCol">
+          <div class="small">Web / odkaz (nepovinné)</div>
+          <input
+            value="${escapeHtml(s.url || "")}"
+            onchange="changeSponsorUrl(${s.id},this.value)"
+            placeholder="https://...">
+        </div>
+
+        <div class="inlineCol">
+          <div class="small">Logo</div>
+          <input type="file" accept="image/*" onchange="uploadSponsorLogo(${s.id}, this)">
+        </div>
+
+        <div class="inlineCol">
+          <div class="small">Poradie</div>
+          <input type="number" min="1" value="${escapeHtml(String(s.order || 1))}" onchange="changeSponsorOrder(${s.id},this.value)">
+        </div>
+
+        <label class="inline">
+          <input
+            type="checkbox"
+            ${s.active ? "checked" : ""}
+            onchange="changeSponsorActive(${s.id},this.checked)">
+          aktívny
+        </label>
+
+        <div class="inlineButtons">
+          ${renderSponsorThumb(s.logo)}
+          <button class="danger" onclick="deleteSponsor(${s.id})">Zmazať</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderJudges() {
   const wrap = document.getElementById("judges");
   if (!wrap) return;
 
@@ -1159,7 +1192,7 @@ function deleteJudge(id) {
   renderJudges();
 }
 
-\nfunction getSponsor(id) {\n  ensureMeta();\n  return adminData.meta.sponsors.find(sponsor => Number(sponsor.id) === Number(id));\n}\n\nfunction addSponsor() {\n  ensureMeta();\n\n  const newId = Number(adminData.meta.nextSponsorId || 1);\n\n  adminData.meta.sponsors.push({\n    id: newId,\n    name: "Nový sponzor",\n    logo: "",\n    url: "",\n    order: newId,\n    active: true\n  });\n\n  adminData.sponsors = adminData.meta.sponsors;\n  adminData.meta.nextSponsorId = newId + 1;\n  renderSponsors();\n}\n\nfunction changeSponsorName(id, value) {\n  const sponsor = getSponsor(id);\n  if (!sponsor) return;\n  sponsor.name = String(value || "").trim() || ("Sponzor " + id);\n  adminData.sponsors = adminData.meta.sponsors;\n}\n\nfunction changeSponsorUrl(id, value) {\n  const sponsor = getSponsor(id);\n  if (!sponsor) return;\n  sponsor.url = String(value || "").trim();\n  adminData.sponsors = adminData.meta.sponsors;\n}\n\nfunction changeSponsorOrder(id, value) {\n  const sponsor = getSponsor(id);\n  if (!sponsor) return;\n  sponsor.order = Number(value || id);\n  adminData.sponsors = adminData.meta.sponsors;\n  renderSponsors();\n}\n\nfunction changeSponsorActive(id, value) {\n  const sponsor = getSponsor(id);\n  if (!sponsor) return;\n  sponsor.active = Boolean(value);\n  adminData.sponsors = adminData.meta.sponsors;\n}\n\nfunction deleteSponsor(id) {\n  const ok = confirm(`Naozaj chceš zmazať sponzora #${id}?`);\n  if (!ok) return;\n\n  ensureMeta();\n  adminData.meta.sponsors = adminData.meta.sponsors.filter(sponsor => Number(sponsor.id) !== Number(id));\n  adminData.sponsors = adminData.meta.sponsors;\n  renderSponsors();\n}\n\nfunction uploadSponsorLogo(id, input) {\n  const file = input.files && input.files[0];\n  if (!file) return;\n\n  if (file.size > 900 * 1024) {\n    setStatus("Logo sponzora je príliš veľké. Skús obrázok do 900 kB.", true);\n    input.value = "";\n    return;\n  }\n\n  const reader = new FileReader();\n\n  reader.onload = () => {\n    const sponsor = getSponsor(id);\n    if (!sponsor) return;\n\n    sponsor.logo = String(reader.result || "");\n    adminData.sponsors = adminData.meta.sponsors;\n    renderSponsors();\n    setStatus(`Logo sponzora #${id} pripravené. Nezabudni kliknúť ULOŽIŤ VŠETKO.`);\n  };\n\n  reader.onerror = () => {\n    setStatus("Logo sponzora sa nepodarilo načítať", true);\n  };\n\n  reader.readAsDataURL(file);\n  input.value = "";\n}\n\nasync function uploadTeamPhoto(teamId, input) {
+async function uploadTeamPhoto(teamId, input) {
   const file = input.files && input.files[0];
   if (!file) return;
 
@@ -1193,6 +1226,111 @@ function deleteJudge(id) {
   } finally {
     input.value = "";
   }
+}
+
+
+function ensureSponsors() {
+  if (!Array.isArray(adminData.sponsors)) {
+    adminData.sponsors = [];
+  }
+  ensureMeta();
+  adminData.meta.sponsors = adminData.sponsors;
+}
+
+function getSponsor(id) {
+  ensureSponsors();
+  return adminData.sponsors.find(s => Number(s.id) === Number(id));
+}
+
+function addSponsor() {
+  ensureSponsors();
+
+  const maxId = adminData.sponsors.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0);
+  const maxOrder = adminData.sponsors.reduce((max, s) => Math.max(max, Number(s.order) || 0), 0);
+
+  adminData.sponsors.push({
+    id: maxId + 1 || Date.now(),
+    name: "",
+    logo: null,
+    url: "",
+    order: maxOrder + 1,
+    active: true
+  });
+
+  adminData.meta.sponsors = adminData.sponsors;
+  renderSponsors();
+}
+
+function changeSponsorName(id, value) {
+  const s = getSponsor(id);
+  if (!s) return;
+  s.name = String(value || "").trim();
+  adminData.meta.sponsors = adminData.sponsors;
+}
+
+function changeSponsorUrl(id, value) {
+  const s = getSponsor(id);
+  if (!s) return;
+  s.url = String(value || "").trim();
+  adminData.meta.sponsors = adminData.sponsors;
+}
+
+function changeSponsorOrder(id, value) {
+  const s = getSponsor(id);
+  if (!s) return;
+  s.order = Math.max(1, Number(value || 1));
+  adminData.sponsors.sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+  adminData.meta.sponsors = adminData.sponsors;
+  renderSponsors();
+}
+
+function changeSponsorActive(id, value) {
+  const s = getSponsor(id);
+  if (!s) return;
+  s.active = Boolean(value);
+  adminData.meta.sponsors = adminData.sponsors;
+}
+
+function uploadSponsorLogo(id, input) {
+  const s = getSponsor(id);
+  const file = input.files && input.files[0];
+  if (!s || !file) return;
+
+  if (!file.type.startsWith("image/")) {
+    setStatus("Vyber obrázok loga", true);
+    input.value = "";
+    return;
+  }
+
+  if (file.size > 600 * 1024) {
+    setStatus("Logo je príliš veľké. Skús obrázok do 600 kB.", true);
+    input.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    s.logo = String(reader.result || "");
+    if (!s.name) {
+      s.name = file.name.replace(/\.[^.]+$/, "");
+    }
+    adminData.meta.sponsors = adminData.sponsors;
+    renderSponsors();
+    setStatus(`Logo sponzora ${s.name || "#" + id} pripravené. Nezabudni kliknúť ULOŽIŤ VŠETKO.`);
+  };
+  reader.onerror = () => setStatus("Logo sa nepodarilo načítať", true);
+  reader.readAsDataURL(file);
+  input.value = "";
+}
+
+function deleteSponsor(id) {
+  const ok = confirm(`Naozaj chceš zmazať sponzora #${id}?`);
+  if (!ok) return;
+
+  ensureSponsors();
+  adminData.sponsors = adminData.sponsors.filter(s => Number(s.id) !== Number(id));
+  adminData.meta.sponsors = adminData.sponsors;
+  renderSponsors();
 }
 
 function validateJudgesBeforeSave() {
@@ -1243,17 +1381,6 @@ async function saveAdmin() {
       active: Boolean(j.active)
     }));
 
-    const sponsorsPayload = (adminData.meta.sponsors || [])
-      .map(sponsor => ({
-        id: Number(sponsor.id),
-        name: String(sponsor.name || "").trim(),
-        logo: sponsor.logo || "",
-        url: String(sponsor.url || "").trim(),
-        order: Number(sponsor.order || sponsor.id || 0),
-        active: Boolean(sponsor.active)
-      }))
-      .filter(sponsor => sponsor.name || sponsor.logo);
-
     const payload = {
       sectors: adminData.sectors,
       teams: adminData.teams.map(t => ({
@@ -1264,15 +1391,28 @@ async function saveAdmin() {
         active: Boolean(t.active),
         photo: t.photo || null
       })),
+      sponsors: (adminData.sponsors || []).map(s => ({
+        id: Number(s.id),
+        name: String(s.name || "").trim(),
+        logo: s.logo || null,
+        url: String(s.url || "").trim(),
+        order: Number(s.order || 1),
+        active: Boolean(s.active)
+      })),
       judges: judgesPayload,
-      sponsors: sponsorsPayload,
       meta: {
   judges: judgesPayload,
+  sponsors: (adminData.sponsors || []).map(s => ({
+    id: Number(s.id),
+    name: String(s.name || "").trim(),
+    logo: s.logo || null,
+    url: String(s.url || "").trim(),
+    order: Number(s.order || 1),
+    active: Boolean(s.active)
+  })),
   eventName: normalizeEventName(adminData.meta.eventName),
   eventSub: normalizeEventSub(adminData.meta.eventSub),
-  leaderboardMode: adminData.meta.leaderboardMode || "TOTAL",
-  sponsors: sponsorsPayload,
-  nextSponsorId: Number(adminData.meta.nextSponsorId || 1)
+  leaderboardMode: adminData.meta.leaderboardMode || "TOTAL"
 }
     };
 
@@ -1602,10 +1742,6 @@ function formatDateTime(iso) {
   } catch {
     return iso || "";
   }
-}
-
-function escapeAttr(text) {
-  return escapeHtml(text).replaceAll("`", "&#96;");
 }
 
 function escapeHtml(text) {
