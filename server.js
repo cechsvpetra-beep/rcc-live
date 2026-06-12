@@ -84,7 +84,10 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 function buildAndBroadcastLiveState() {
   try {
     const data = loadData();
-    const publicState = stateService.buildPublicState(data);
+    const publicState = {
+  ...stateService.buildPublicState(data),
+  sponsors: data.sponsors || []
+};
     io.emit("state:update", publicState);
     console.log("WebSocket broadcast: state:update");
   } catch (e) {
@@ -97,7 +100,10 @@ io.on("connection", (socket) => {
 
   try {
     const data = loadData();
-    const publicState = stateService.buildPublicState(data);
+    const publicState = {
+  ...stateService.buildPublicState(data),
+  sponsors: data.sponsors || []
+};
     socket.emit("state:update", publicState);
   } catch (e) {
     console.error("Initial socket state chyba:", e);
@@ -898,10 +904,11 @@ app.get("/api/state", (req, res) => {
     const publicState = stateService.buildPublicState(data);
 
     return res.json({
-      ...publicState,
-      eventName: data?.meta?.eventName || "RCC Live tabuľka",
-      eventSub: data?.meta?.eventSub || "Ružín Carp Classic"
-    });
+  ...publicState,
+  sponsors: data.sponsors || [],
+  eventName: data?.meta?.eventName || "RCC Live tabuľka",
+  eventSub: data?.meta?.eventSub || "Ružín Carp Classic"
+});
   } catch (e) {
     console.error("API /api/state chyba:", e);
     return res.status(500).json({
