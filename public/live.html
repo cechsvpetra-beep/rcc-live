@@ -1607,6 +1607,69 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
 }
 </style>
 
+
+<style id="v7-catches-pro">
+/* V7 – profesionálna obrazovka ÚLOVKY; iba vizuál tejto sekcie */
+.v7LatestCatch{
+  display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.72fr);
+  min-height:430px;margin-bottom:16px;overflow:hidden;
+  border:1px solid rgba(230,171,57,.36);border-radius:12px;
+  background:
+    radial-gradient(circle at 82% 20%,rgba(224,162,47,.14),transparent 28%),
+    linear-gradient(135deg,rgba(13,18,18,.99),rgba(3,6,7,.99));
+  box-shadow:0 22px 55px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05)
+}
+.v7LatestMedia{position:relative;min-height:430px;overflow:hidden;background:#050808}
+.v7LatestMedia::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 55%,rgba(5,8,8,.92) 100%),linear-gradient(0deg,rgba(0,0,0,.52),transparent 42%)}
+.v7LatestMedia img{width:100%;height:100%;min-height:430px;display:block;object-fit:cover;cursor:pointer;transition:transform .35s ease}
+.v7LatestMedia:hover img{transform:scale(1.015)}
+.v7LatestNoPhoto{height:100%;min-height:430px;display:grid;place-items:center;align-content:center;gap:12px;color:#756f62;background:radial-gradient(circle,rgba(218,164,58,.08),transparent 45%),#050808}
+.v7LatestNoPhoto span{font-size:64px;filter:grayscale(1);opacity:.5}
+.v7LatestNoPhoto b{font-family:var(--font-head);letter-spacing:2px}
+.v7LatestLive{position:absolute;z-index:3;left:20px;top:20px;padding:8px 13px;border-radius:999px;background:#a52b1e;border:1px solid #e25b49;color:#fff;font-family:var(--font-head);font-size:12px;font-weight:900;letter-spacing:1px;box-shadow:0 0 22px rgba(210,52,36,.26)}
+.v7LatestInfo{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:34px 34px 32px 26px}
+.v7LatestEyebrow{font-family:var(--font-head);font-size:12px;letter-spacing:2.4px;color:#a88c57}
+.v7LatestWeight{margin-top:8px;font-family:var(--font-head);font-size:72px;line-height:.95;font-weight:900;color:#f4c258;text-shadow:0 0 26px rgba(232,169,48,.22)}
+.v7LatestTeam{margin-top:14px;font-family:var(--font-head);font-size:27px;font-weight:900;text-transform:uppercase;color:#f2f0e9;letter-spacing:.5px}
+.v7LatestRule{height:1px;margin:22px 0;background:linear-gradient(90deg,rgba(232,177,67,.55),transparent)}
+.v7LatestMeta{display:grid;grid-template-columns:1fr 1fr;gap:17px 22px}
+.v7LatestMeta div:last-child{grid-column:1/-1}
+.v7LatestMeta small{display:block;margin-bottom:5px;font-family:var(--font-head);font-size:10px;letter-spacing:1.4px;color:#8f8d84}
+.v7LatestMeta strong{font-size:16px;color:#e9e5da}
+.v7CatchSectionTitle{display:flex;align-items:center;justify-content:space-between;margin:22px 2px 12px;padding-bottom:10px;border-bottom:1px solid rgba(226,171,61,.20)}
+.v7CatchSectionTitle div{display:flex;align-items:baseline;gap:12px}
+.v7CatchSectionTitle span{font-family:var(--font-head);font-size:20px;font-weight:900;letter-spacing:1px;color:#efbb50}
+.v7CatchSectionTitle small{color:#85877f}
+.v7CatchSectionTitle>b{padding:5px 9px;border:1px solid rgba(226,171,61,.28);border-radius:999px;color:#d9aa4e;font-size:10px;letter-spacing:1px}
+.v7CatchGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.v7CatchCard{overflow:hidden;border:1px solid rgba(226,171,61,.22);border-radius:10px;background:linear-gradient(180deg,#0d1212,#050808);box-shadow:0 12px 30px rgba(0,0,0,.28);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.v7CatchCard:hover{transform:translateY(-2px);border-color:rgba(239,186,80,.48);box-shadow:0 18px 38px rgba(0,0,0,.36)}
+.v7CatchPhotoBox{position:relative;height:210px;overflow:hidden;background:#070a0a}
+.v7CatchPhotoBox img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:transform .3s ease}
+.v7CatchCard:hover .v7CatchPhotoBox img{transform:scale(1.025)}
+.v7CatchPhotoBox::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,.72),transparent 45%)}
+.v7CatchNoPhoto{height:100%;display:grid;place-items:center;align-content:center;gap:8px;color:#686a64;background:radial-gradient(circle,rgba(226,171,61,.06),transparent 45%)}
+.v7CatchNoPhoto span{font-size:40px;filter:grayscale(1);opacity:.45}.v7CatchNoPhoto b{font-size:10px;letter-spacing:1.4px}
+.v7CatchNumber{position:absolute;z-index:2;left:11px;top:11px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:rgba(5,8,8,.82);border:1px solid rgba(232,178,69,.44);color:#e8b84f;font-weight:900;font-size:11px}
+.v7CatchKg{position:absolute;z-index:2;right:12px;bottom:10px;font-family:var(--font-head);font-size:27px;font-weight:900;color:#ffd36d;text-shadow:0 2px 10px #000}
+.v7CatchBody{padding:13px 14px 14px}
+.v7CatchTeam{font-family:var(--font-head);font-size:15px;font-weight:900;text-transform:uppercase;color:#eeeae0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v7CatchDetails{display:grid;grid-template-columns:auto auto 1fr;gap:8px 12px;align-items:center;margin-top:8px;color:#989b94;font-size:10px}
+.v7CatchDetails b{color:#c9a65e;font-weight:900}.v7CatchTime{text-align:right;white-space:nowrap}
+@media(max-width:1300px){.v7CatchGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.v7LatestWeight{font-size:60px}}
+@media(max-width:900px){
+  .v7LatestCatch{grid-template-columns:1fr;min-height:0}.v7LatestMedia,.v7LatestMedia img,.v7LatestNoPhoto{min-height:300px;height:300px}
+  .v7LatestMedia::after{background:linear-gradient(0deg,rgba(5,8,8,.95),transparent 45%)}
+  .v7LatestInfo{padding:22px}.v7LatestWeight{font-size:54px}.v7LatestTeam{font-size:22px}
+  .v7CatchGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.v7CatchPhotoBox{height:190px}
+}
+@media(max-width:560px){
+  .v7CatchGrid{grid-template-columns:1fr}.v7CatchPhotoBox{height:235px}
+  .v7LatestMedia,.v7LatestMedia img,.v7LatestNoPhoto{min-height:245px;height:245px}
+  .v7LatestWeight{font-size:48px}.v7LatestMeta{grid-template-columns:1fr 1fr}.v7CatchSectionTitle small{display:none}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -1865,7 +1928,7 @@ function proAllCatches(){
   Object.entries(currentTeamCatches||{}).forEach(([teamId,arr])=>{
     if(!Array.isArray(arr)) return;
     const team=findRenderedTeam(teamId)||{};
-    arr.forEach((c,i)=>out.push({...c,_teamId:teamId,_teamName:getTeamName(team,teamId),_teamPhoto:getTeamPhoto(team),_idx:i}));
+    arr.forEach((c,i)=>out.push({...c,_teamId:teamId,_teamName:getTeamName(team,teamId),_teamPhoto:getTeamPhoto(team),_teamSector:String(team.sectorCode||team.sector||'-'),_teamPeg:String(team.peg||'-'),_idx:i}));
   });
   return out.sort((a,b)=>new Date(b.time||b.catchTime||b.createdAt||b.timestamp||0)-new Date(a.time||a.catchTime||a.createdAt||a.timestamp||0));
 }
@@ -1916,7 +1979,57 @@ function renderProView(view){
  }
  const catches=proAllCatches();
  if(view==='catches'){
-   page.innerHTML=proHead('Úlovky','Všetky zaevidované úlovky zoradené od najnovšieho.')+(catches.length?`<div class="proCatchGrid">${catches.map(c=>{const ph=getCatchPhoto(c);const tm=c.time||c.catchTime||c.createdAt||c.timestamp||'';return `<div class="proCatchCard">${ph?`<img src="${escapeAttr(ph)}" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName)} • ${formatKg(Number(c.weight||c.kg||0))}')">`:`<div class="proCatchNoImg">BEZ FOTKY</div>`}<div class="proCatchBody"><div class="proCatchWeight">${formatKg(Number(c.weight||c.kg||0))}</div><div class="proCatchTeam">${escapeHtml(c._teamName)}</div><div class="proCatchMeta">${escapeHtml(formatDateTime(tm)||'-')}</div></div></div>`}).join('')}</div>`:`<div class="proPanel proEmpty">Zatiaľ bez úlovkov.</div>`); return;
+   if(!catches.length){
+     page.innerHTML=proHead('Úlovky','Všetky zaevidované úlovky zoradené od najnovšieho.')+`<div class="proPanel proEmpty">Zatiaľ bez úlovkov.</div>`;
+     return;
+   }
+   const latest=catches[0];
+   const latestPhoto=getCatchPhoto(latest);
+   const latestTime=latest.time||latest.catchTime||latest.createdAt||latest.timestamp||'';
+   const latestWeight=Number(latest.weight||latest.kg||0);
+   const rest=catches.slice(1);
+   const catchCard=(c,index)=>{
+     const ph=getCatchPhoto(c);
+     const tm=c.time||c.catchTime||c.createdAt||c.timestamp||'';
+     const w=Number(c.weight||c.kg||0);
+     const caption=`${c._teamName} • ${formatKg(w)}`;
+     return `<article class="v7CatchCard">
+       <div class="v7CatchPhotoBox">
+         ${ph?`<img src="${escapeAttr(ph)}" alt="Úlovok ${escapeAttr(c._teamName)}" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(caption)}')">`:`<div class="v7CatchNoPhoto"><span>🐟</span><b>BEZ FOTKY</b></div>`}
+         <span class="v7CatchNumber">#${index+2}</span>
+         <span class="v7CatchKg">${formatKg(w)}</span>
+       </div>
+       <div class="v7CatchBody">
+         <div class="v7CatchTeam">${escapeHtml(c._teamName)}</div>
+         <div class="v7CatchDetails">
+           <span><b>Sektor</b> ${escapeHtml(c._teamSector||'-')}</span>
+           <span><b>Stan.</b> ${escapeHtml(c._teamPeg||'-')}</span>
+           <span class="v7CatchTime">${escapeHtml(formatDateTime(tm)||'-')}</span>
+         </div>
+       </div>
+     </article>`;
+   };
+   page.innerHTML=proHead('Úlovky','Všetky zaevidované úlovky zoradené od najnovšieho.')+
+   `<section class="v7LatestCatch">
+      <div class="v7LatestMedia">
+        ${latestPhoto?`<img src="${escapeAttr(latestPhoto)}" alt="Najnovší úlovok" onclick="openImageModal('${escapeJs(latestPhoto)}','${escapeJs(`${latest._teamName} • ${formatKg(latestWeight)}`)}')">`:`<div class="v7LatestNoPhoto"><span>🐟</span><b>BEZ FOTKY</b></div>`}
+        <div class="v7LatestLive">● NAJNOVŠÍ ÚLOVOK</div>
+      </div>
+      <div class="v7LatestInfo">
+        <div class="v7LatestEyebrow">PRÁVE ZAEVIDOVANÉ</div>
+        <div class="v7LatestWeight">${formatKg(latestWeight)}</div>
+        <div class="v7LatestTeam">${escapeHtml(latest._teamName)}</div>
+        <div class="v7LatestRule"></div>
+        <div class="v7LatestMeta">
+          <div><small>SEKTOR</small><strong>${escapeHtml(latest._teamSector||'-')}</strong></div>
+          <div><small>STANOVIŠTE</small><strong>${escapeHtml(latest._teamPeg||'-')}</strong></div>
+          <div><small>ČAS</small><strong>${escapeHtml(formatDateTime(latestTime)||'-')}</strong></div>
+        </div>
+      </div>
+    </section>
+    <div class="v7CatchSectionTitle"><div><span>VŠETKY ÚLOVKY</span><small>${catches.length} ${catches.length===1?'úlovok':'úlovkov'}</small></div><b>LIVE</b></div>
+    ${rest.length?`<div class="v7CatchGrid">${rest.map(catchCard).join('')}</div>`:`<div class="proPanel proEmpty">Toto je zatiaľ jediný zaevidovaný úlovok.</div>`}`;
+   return;
  }
  if(view==='top5'){
    const fish=[...catches].sort((a,b)=>Number(b.weight||b.kg||0)-Number(a.weight||a.kg||0)).slice(0,5);
