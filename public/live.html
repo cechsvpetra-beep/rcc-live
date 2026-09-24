@@ -2359,6 +2359,208 @@ td:last-child .badge{font-weight:900!important}
 }
 </style>
 
+
+<style id="lk-premium-v4">
+/* PREMIUM V4 — detailné doladenie podľa referencie.
+   Iba CSS. JavaScript, výpočty a TOP5/TOTAL/BOTH zostávajú bez zmeny. */
+
+/* 1. Horná časť — menej prázdneho priestoru, viac broadcast charakteru */
+@media (min-width:901px){
+  .topbar{
+    min-height:180px!important;
+    background:
+      linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.86)),
+      radial-gradient(ellipse at 61% 2%,rgba(242,162,48,.42),transparent 34%),
+      radial-gradient(ellipse at 78% 82%,rgba(27,91,60,.28),transparent 31%),
+      linear-gradient(105deg,#07100d 0%,#171108 52%,#050807 100%)!important;
+  }
+  .brand{min-height:135px!important}
+  .logo{width:154px!important;height:154px!important;left:28px!important;top:4px!important}
+  .titleBox{left:200px!important;top:25px!important}
+  .titleBox h1{font-size:52px!important;line-height:.95!important}
+  .titleBox .sub{margin-top:8px!important}
+  .topbar::after{top:110px!important;left:202px!important}
+  .actions{top:15px!important}
+}
+
+/* 2. Navigácia ako pevný profesionálny pás */
+.proNav{
+  background:linear-gradient(180deg,rgba(9,14,13,.98),rgba(4,8,7,.98))!important;
+}
+.proNav button{
+  font-weight:800!important;
+  letter-spacing:1.2px!important;
+}
+.proNav button.active{
+  background:linear-gradient(180deg,#ffd66a,#e6a52d)!important;
+  box-shadow:inset 0 -4px #9a5d13,0 0 20px rgba(235,172,48,.12)!important;
+}
+
+/* 3. KPI — výraznejšia hierarchia */
+.heroStats{align-items:stretch!important}
+.stat{
+  min-height:118px!important;
+  background:
+    radial-gradient(circle at 7% 50%,rgba(232,172,54,.10),transparent 20%),
+    linear-gradient(180deg,rgba(16,27,24,.98),rgba(6,13,11,.99))!important;
+}
+.stat:nth-child(2){
+  background:
+    radial-gradient(circle at 7% 50%,rgba(42,208,111,.10),transparent 20%),
+    linear-gradient(180deg,rgba(14,27,23,.98),rgba(6,13,11,.99))!important;
+}
+.stat:nth-child(3){
+  background:
+    radial-gradient(circle at 8% 50%,rgba(255,78,69,.16),transparent 22%),
+    linear-gradient(105deg,rgba(92,23,20,.90),rgba(29,12,11,.98))!important;
+}
+.statValue{font-size:45px!important}
+.statLabel{font-weight:900!important}
+
+/* 4. TOP 3 — viac ako skutočné podium */
+.podiumCards{padding:11px!important}
+.podiumCard{
+  grid-template-columns:48px 66px minmax(0,1fr)!important;
+  min-height:98px!important;
+}
+.podiumCard:nth-child(1){transform:scale(1.012);transform-origin:center}
+.podiumName{
+  font-size:16px!important;
+  white-space:normal!important;
+  line-height:1.08!important;
+}
+.podiumWeight{
+  display:inline-block!important;
+  margin-top:7px!important;
+  padding:3px 7px!important;
+  border-radius:4px!important;
+  background:rgba(229,164,43,.10)!important;
+  border:1px solid rgba(229,164,43,.20)!important;
+}
+
+/* 5. Sekčné hlavičky — čistejšie, bez zbytočne dlhých podčiarknutí */
+.sectionHead{
+  background:
+    linear-gradient(90deg,rgba(224,161,45,.14),transparent 55%),
+    linear-gradient(180deg,#111a18,#0b1211)!important;
+}
+.sectionHead h2::after,.sideTitle::after{
+  width:30px!important;
+  height:3px!important;
+  border-radius:3px!important;
+}
+
+/* 6. Tabuľky — hlavný vizuálny fokus */
+thead th{
+  background:#0a1210!important;
+  color:#aeb8b3!important;
+  border-bottom:1px solid rgba(237,178,57,.36)!important;
+}
+tbody tr{
+  background:linear-gradient(90deg,rgba(255,255,255,.010),rgba(255,255,255,.002))!important;
+}
+tbody tr:nth-child(even){
+  background:linear-gradient(90deg,rgba(255,255,255,.026),rgba(255,255,255,.008))!important;
+}
+tbody tr:hover{
+  background:linear-gradient(90deg,rgba(237,178,57,.11),rgba(237,178,57,.025))!important;
+}
+tr.rank-top-1{
+  background:linear-gradient(90deg,rgba(120,84,20,.38),rgba(15,21,18,.82) 62%)!important;
+}
+tr.rank-top-2{
+  background:linear-gradient(90deg,rgba(113,126,127,.16),rgba(15,21,18,.82) 62%)!important;
+}
+tr.rank-top-3{
+  background:linear-gradient(90deg,rgba(132,72,37,.20),rgba(15,21,18,.82) 62%)!important;
+}
+td{border-bottom-color:rgba(255,255,255,.045)!important}
+.teamPhoto{width:45px!important;height:45px!important}
+.badge{
+  background:#111a17!important;
+  border-color:rgba(233,174,54,.34)!important;
+  color:#f4c34e!important;
+}
+
+/* 7. Posledné úlovky — z kartičiek spravíme silnejší LIVE blok */
+.lastCatch{
+  background:linear-gradient(180deg,rgba(5,67,38,.82),rgba(4,18,13,.98))!important;
+  border-color:rgba(34,218,113,.50)!important;
+}
+.lastCatchTitle{
+  background:linear-gradient(90deg,#087b43 0%,#07522f 55%,rgba(5,37,23,.35) 100%)!important;
+  border-bottom:1px solid rgba(75,239,143,.24)!important;
+}
+.catchTickerPhoto{
+  width:90px!important;
+  height:68px!important;
+  object-fit:cover!important;
+}
+.livePill{
+  box-shadow:0 0 15px rgba(219,57,48,.22)!important;
+}
+
+/* 8. Sektory — väčší graf, legendy lepšie čitateľné */
+.sectorDonut{width:178px!important;height:178px!important}
+.sectorDonut::after{inset:42px!important}
+.sectorRowTop{font-weight:900!important}
+.sectorRowTop span{font-size:13px!important}
+.sectorRowSub{line-height:1.25!important}
+
+/* 9. Partneri ustúpia výsledkom */
+.partnerCard,.partnerItem{
+  opacity:.62!important;
+  filter:grayscale(.25) saturate(.55)!important;
+}
+.partnerCard:hover,.partnerItem:hover{
+  opacity:.92!important;
+  filter:none!important;
+}
+
+/* 10. Motivačný panel — viac ako predloha */
+.promoBig,.motivationCard{
+  background:
+    radial-gradient(ellipse at 50% 10%,rgba(235,171,52,.11),transparent 42%),
+    linear-gradient(180deg,#101817,#080d0c)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+}
+.promoBig strong,.motivationCard strong{
+  color:#f1bd49!important;
+  text-shadow:0 0 18px rgba(239,184,65,.12)!important;
+}
+
+/* 11. BOTH režim — druhá tabuľka jasne oddelená, ale bez zmeny logiky */
+.rccCenter .section + .section{
+  margin-top:16px!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.03)!important;
+}
+
+/* 12. Veľký desktop — ešte lepšie vyplnenie obrazovky */
+@media(min-width:1900px){
+  .wrap{width:calc(100% - 16px)!important;padding-left:8px!important;padding-right:8px!important}
+  .rccDashboard{
+    grid-template-columns:minmax(365px,.80fr) minmax(850px,1.82fr) minmax(365px,.82fr)!important;
+    gap:14px!important;
+  }
+  .heroStats{gap:12px!important}
+}
+
+/* 13. Menší desktop — nič nesmie pretekať */
+@media(min-width:1351px) and (max-width:1650px){
+  .statValue{font-size:38px!important}
+  .podiumName{font-size:14px!important}
+  .sectorDonut{width:145px!important;height:145px!important}
+  .sectorDonut::after{inset:35px!important}
+}
+
+/* Mobil ostáva použiteľný */
+@media(max-width:900px){
+  .statValue{font-size:30px!important}
+  .podiumCard:nth-child(1){transform:none!important}
+  .catchTickerPhoto{width:66px!important;height:52px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
