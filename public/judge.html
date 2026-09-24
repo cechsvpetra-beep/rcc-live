@@ -312,7 +312,7 @@ button:disabled{
   </div>
 
   <div class="note">
-    Offline režim teraz ukladá čakajúce úlovky s údajmi tím + váha + čas ulovenia. Fotka sa do offline fronty v tomto kroku ešte neukladá.
+    Offline režim ukladá tím, váhu, čas ulovenia aj fotografiu do telefónu. Po návrate internetu sa čakajúce úlovky automaticky synchronizujú.
   </div>
 </div>
 
@@ -325,14 +325,98 @@ const CACHE_KEYS = {
   cachedState: "rcc_judge_cached_state",
   cachedAt: "rcc_judge_cached_at",
   cachedUser: "rcc_judge_cached_user",
-  pendingCatches: "rcc_judge_pending_catches_v2"
+  pendingCatches: "rcc_judge_pending_catches_v3"
 };
+
+const PHOTO_DB = {
+  name: "rcc_judge_offline_v3",
+  version: 1,
+  store: "photos"
+};
+
+function openPhotoDb() {
+  return new Promise((resolve, reject) => {
+    if (!("indexedDB" in window)) {
+      reject(new Error("IndexedDB nie je podporované"));
+      return;
+    }
+
+    const request = indexedDB.open(PHOTO_DB.name, PHOTO_DB.version);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(PHOTO_DB.store)) {
+        db.createObjectStore(PHOTO_DB.store, { keyPath: "localId" });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("IndexedDB sa nepodarilo otvoriť"));
+  });
+}
+
+async function saveOfflinePhoto(localId, file) {
+  if (!file) return false;
+  const db = await openPhotoDb();
+
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_DB.store, "readwrite");
+      tx.objectStore(PHOTO_DB.store).put({
+        localId,
+        blob: file,
+        name: file.name || "catch.jpg",
+        type: file.type || "image/jpeg",
+        lastModified: Number(file.lastModified || Date.now())
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error || new Error("Fotku sa nepodarilo uložiť"));
+      tx.onabort = () => reject(tx.error || new Error("Ukladanie fotky bolo prerušené"));
+    });
+    return true;
+  } finally {
+    db.close();
+  }
+}
+
+async function getOfflinePhoto(localId) {
+  const db = await openPhotoDb();
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_DB.store, "readonly");
+      const request = tx.objectStore(PHOTO_DB.store).get(localId);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("Fotku sa nepodarilo načítať"));
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function deleteOfflinePhoto(localId) {
+  try {
+    const db = await openPhotoDb();
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(PHOTO_DB.store, "readwrite");
+        tx.objectStore(PHOTO_DB.store).delete(localId);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error("Fotku sa nepodarilo vymazať"));
+      });
+    } finally {
+      db.close();
+    }
+  } catch (e) {
+    console.error("Vymazanie offline fotky zlyhalo:", e);
+  }
+}
 
 async function registerJudgeServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   try {
-    await navigator.serviceWorker.register("/sw-judge.js?v=2");
+    await navigator.serviceWorker.register("/sw-judge.js?v=3");
     console.log("Judge service worker registrovaný");
   } catch (e) {
     console.error("Service worker registrácia zlyhala:", e);
@@ -414,19 +498,26 @@ function getCachedAtText() {
 
 function migrateOldPendingCatchesIfNeeded() {
   try {
-    const oldRaw = localStorage.getItem("rcc_judge_pending_catches_v1");
     const newRaw = localStorage.getItem(CACHE_KEYS.pendingCatches);
+    if (newRaw) return;
 
-    if (!oldRaw || newRaw) return;
+    const sourceRaw =
+      localStorage.getItem("rcc_judge_pending_catches_v2") ||
+      localStorage.getItem("rcc_judge_pending_catches_v1");
 
-    const oldList = JSON.parse(oldRaw);
+    if (!sourceRaw) return;
+
+    const oldList = JSON.parse(sourceRaw);
     if (!Array.isArray(oldList)) return;
 
     const migrated = oldList.map(item => ({
       ...item,
       clientSubmissionId: item.clientSubmissionId || generateClientSubmissionId(),
       catchTime: normalizeCatchTime(item.catchTime),
-      status: item.status || "pending",
+      // Staré V1/V2 fronty fotografiu fyzicky neukladali.
+      hasPhoto: false,
+      photoStored: false,
+      status: item.status === "syncing" ? "pending" : (item.status || "pending"),
       error: item.error || ""
     }));
 
@@ -465,6 +556,7 @@ function createPendingCatch(data) {
     weight: Number(data.weight || 0),
     catchTime: normalizeCatchTime(data.catchTime),
     hasPhoto: !!data.hasPhoto,
+    photoStored: !!data.photoStored,
     status: "pending",
     error: ""
   };
@@ -540,7 +632,7 @@ function renderPendingList() {
         <div>Váha: ${escapeHtml(String(item.weight))} kg</div>
         <div>Čas ulovenia: ${escapeHtml(item.catchTime || "-")}</div>
         <div>Zapísané offline: ${escapeHtml(formatDate(item.createdAt))}</div>
-        <div>Fotka: ${item.hasPhoto ? "áno (zat. sa neuloží offline)" : "nie"}</div>
+        <div>Fotka: ${item.photoStored ? "áno – uložená v mobile" : (item.hasPhoto ? "neuložená" : "nie")}</div>
         ${item.error ? `<div style="margin-top:4px;color:#ff6b6b;">${escapeHtml(item.error)}</div>` : ""}
       </div>
     `)
@@ -769,18 +861,30 @@ async function saveCatch() {
       teamLabel: getSelectedTeamLabel(),
       weight,
       catchTime,
-      hasPhoto: !!file
+      hasPhoto: !!file,
+      photoStored: false
     });
+
+    if (file) {
+      try {
+        await saveOfflinePhoto(pendingItem.localId, file);
+        pendingItem.photoStored = true;
+      } catch (e) {
+        console.error("Offline uloženie fotografie zlyhalo:", e);
+        setStatus("Fotku sa nepodarilo bezpečne uložiť offline. Úlovok nebol uložený – skús znova.", true, "error");
+        return;
+      }
+    }
 
     addPendingCatch(pendingItem);
     clearForm();
-
-    if (file) {
-      setStatus("Offline uložené do fronty. Poznámka: fotka sa v tomto kroku ešte neukladá offline.", false, "warn");
-    } else {
-      setStatus("Offline uložené do čakajúcej fronty ✔", false, "success");
-    }
-
+    setStatus(
+      file
+        ? "Offline uložené ✔ Údaje aj fotka čakajú na synchronizáciu."
+        : "Offline uložené do čakajúcej fronty ✔",
+      false,
+      "success"
+    );
     return;
   }
 
@@ -867,6 +971,36 @@ async function syncPendingCatches() {
       form.append("catchTime", String(normalizeCatchTime(item.catchTime)));
       form.append("clientSubmissionId", String(item.clientSubmissionId || generateClientSubmissionId()));
 
+      if (item.photoStored) {
+        try {
+          const storedPhoto = await getOfflinePhoto(item.localId);
+          if (!storedPhoto || !storedPhoto.blob) {
+            updatePendingCatch(item.localId, {
+              status: "error",
+              error: "Offline fotografia sa v telefóne nenašla"
+            });
+            continue;
+          }
+
+          const uploadFile = new File(
+            [storedPhoto.blob],
+            storedPhoto.name || "catch.jpg",
+            {
+              type: storedPhoto.type || storedPhoto.blob.type || "image/jpeg",
+              lastModified: storedPhoto.lastModified || Date.now()
+            }
+          );
+          form.append("photo", uploadFile);
+        } catch (e) {
+          console.error("Načítanie offline fotografie zlyhalo:", e);
+          updatePendingCatch(item.localId, {
+            status: "error",
+            error: "Offline fotografiu sa nepodarilo načítať"
+          });
+          continue;
+        }
+      }
+
       try {
         const res = await fetch("/api/catch", {
           method: "POST",
@@ -895,6 +1029,7 @@ async function syncPendingCatches() {
         }
 
         if (out.ok) {
+          await deleteOfflinePhoto(item.localId);
           removePendingCatch(item.localId);
           successCount += 1;
         } else {

@@ -1,4 +1,5 @@
-const CACHE_NAME = "rcc-judge-v2";
+const CACHE_NAME = "rcc-judge-v3";
+
 const JUDGE_URLS = [
   "/judge.html"
 ];
@@ -7,6 +8,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(JUDGE_URLS))
   );
+
   self.skipWaiting();
 });
 
@@ -22,6 +24,7 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
+
   self.clients.claim();
 });
 
@@ -42,11 +45,14 @@ self.addEventListener("fetch", (event) => {
       fetch(req)
         .then((response) => {
           const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("/judge.html", cloned));
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put("/judge.html", cloned);
+          });
+
           return response;
         })
         .catch(() => caches.match("/judge.html"))
     );
-    return;
   }
 });
