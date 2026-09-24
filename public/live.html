@@ -3126,6 +3126,768 @@ tbody tr.rank-top-3 td{border-bottom-color:rgba(255,255,255,.075)!important}
 }
 </style>
 
+
+<style id="lk-premium-v9">
+/* V9 — opravy podľa reálneho screenshotu */
+
+/* 1) RCC2026 bolo ešte generované starším ::after pseudo-elementom */
+.promoBox::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* 2) Sektorové pásy: staršia vrstva ich skrývala */
+.sectorLegend .sectorBar{
+  display:block!important;
+  width:100%!important;
+  height:9px!important;
+  margin:7px 0 5px!important;
+  border-radius:999px!important;
+  overflow:hidden!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.055)!important;
+}
+.sectorLegend .sectorBar span{
+  display:block!important;
+  height:100%!important;
+  min-width:2px;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,#b77719,#e9ad35,#ffd56d)!important;
+  box-shadow:0 0 12px rgba(232,172,52,.18)!important;
+}
+.sectorDonutWrap{
+  display:block!important;
+  padding:7px 0 3px!important;
+}
+.sectorLegend{
+  width:100%!important;
+  display:block!important;
+}
+.sectorRow{
+  width:100%!important;
+  padding:9px 0 10px!important;
+}
+.sectorRowTop{
+  display:flex!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  width:100%!important;
+}
+.sectorRowTop b{
+  margin-left:auto!important;
+  white-space:nowrap!important;
+}
+
+/* 3) V6 vytvorila druhú medailu cez pseudo-element.
+      Necháme pôvodnú dynamickú pozíciu iba raz. */
+.rccCenter tbody tr:nth-child(1) td:first-child::after,
+.rccCenter tbody tr:nth-child(2) td:first-child::after,
+.rccCenter tbody tr:nth-child(3) td:first-child::after{
+  content:none!important;
+  display:none!important;
+}
+.rccCenter tbody tr:nth-child(1) td:first-child,
+.rccCenter tbody tr:nth-child(2) td:first-child,
+.rccCenter tbody tr:nth-child(3) td:first-child{
+  font-size:inherit!important;
+}
+
+/* Jemne lepšia pozícia stĺpca poradia */
+.rccCenter td:first-child{
+  text-align:center!important;
+  min-width:44px!important;
+}
+
+/* 4) Pravý sektorový panel nech pôsobí ako výsledková štatistika */
+.sectorProPanel{
+  background:
+    radial-gradient(ellipse at 15% 0%,rgba(228,165,47,.08),transparent 35%),
+    linear-gradient(180deg,#0d1614,#07100e)!important;
+}
+.sectorProPanel .sideTitle{
+  margin-bottom:5px!important;
+}
+.sectorRowSub{
+  color:#7f8e87!important;
+}
+
+/* Rozlíšenie sektorov jemnými akcentmi bez zmeny dát */
+.sectorRow:nth-child(2) .sectorBar span{
+  background:linear-gradient(90deg,#397f61,#57bd83,#87d5a5)!important;
+}
+.sectorRow:nth-child(3) .sectorBar span{
+  background:linear-gradient(90deg,#237d8d,#42b7c6,#78d5dd)!important;
+}
+.sectorRow:nth-child(4) .sectorBar span{
+  background:linear-gradient(90deg,#9b6131,#d18a4a,#edb16e)!important;
+}
+.sectorRow:nth-child(5) .sectorBar span{
+  background:linear-gradient(90deg,#536d91,#7897c1,#9bb4d5)!important;
+}
+
+/* 5) BOJUJ panel po odstránení hashtagu vycentrujeme */
+.promoBox{
+  min-height:145px!important;
+}
+.promoBox>div{
+  width:100%!important;
+}
+.promoBig{
+  margin:0 0 12px!important;
+}
+.promoSmall{
+  margin:0!important;
+  line-height:1.45!important;
+}
+
+/* 6) Najväčšia ryba: foto nech má profesionálnejší pomer */
+.v8TopFishPhoto{
+  width:126px!important;
+  height:76px!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  background:#090d0c!important;
+}
+@media(max-width:1650px) and (min-width:901px){
+  .v8TopFishPhoto{width:96px!important;height:66px!important}
+}
+</style>
+
+
+<style id="lk-premium-v10">
+/* V10 — finálne proporcie hlavnej obrazovky, bez zmeny dát/logiky */
+
+/* Horné KPI nech siahajú cez celú šírku ako v referencii */
+.heroStats{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  width:100%!important;
+}
+.stat{width:100%!important}
+
+/* Dashboard: stred je hlavný, ale pravý panel už nepôsobí odtrhnuto */
+@media(min-width:1651px){
+  .rccDashboard{
+    grid-template-columns:minmax(350px,.78fr) minmax(820px,1.72fr) minmax(350px,.78fr)!important;
+    gap:14px!important;
+  }
+}
+
+/* TOP3 — 1. miesto o niečo dominantnejšie */
+.podiumCard:nth-child(1){
+  min-height:116px!important;
+  box-shadow:
+    inset 5px 0 #f1bd45,
+    0 8px 20px rgba(0,0,0,.20),
+    inset 0 0 28px rgba(224,164,45,.055)!important;
+}
+.podiumCard:nth-child(1) .podiumRank{
+  width:42px!important;height:42px!important;font-size:21px!important;
+}
+.podiumCard:nth-child(1) .podiumName{font-size:17px!important}
+.podiumCard:nth-child(1) .podiumWeight{font-size:17px!important}
+
+/* Hlavná tabuľka: názov tímu má väčšiu prioritu než technické stĺpce */
+.rccCenter .teamName{
+  font-size:14px!important;
+  font-weight:900!important;
+  color:#fffaf0!important;
+}
+.rccCenter th{
+  color:#a6b1ab!important;
+}
+.rccCenter td{
+  color:#d4dbd6!important;
+}
+.rccCenter td:nth-child(3){
+  color:#fffaf0!important;
+}
+
+/* Výsledkové riadky dostanú jemný broadcast hover */
+.rccCenter tbody tr{
+  transition:background .14s ease,transform .14s ease!important;
+}
+.rccCenter tbody tr:hover{
+  transform:translateX(2px)!important;
+}
+
+/* Sektory: pásy výraznejšie a percento lepšie čitateľné */
+.sectorBar{
+  height:11px!important;
+}
+.sectorRowTop span{font-size:13px!important}
+.sectorRowTop b{font-size:14px!important}
+.sectorRowSub{font-size:10px!important}
+.sectorRow{
+  padding-top:10px!important;
+  padding-bottom:11px!important;
+}
+
+/* Partneri kompaktnejší — viac vzduchu pre výsledky */
+.partnerStrip,.partnerGrid{
+  min-height:58px!important;
+}
+.partnerCard,.partnerItem{
+  max-height:48px!important;
+}
+
+/* BOJUJ — bez ďalších značiek, iba čistý slogan */
+.promoBox::before,
+.promoBox::after{
+  content:none!important;
+}
+.promoBox{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  text-align:center!important;
+}
+.promoBig{
+  font-size:37px!important;
+  line-height:1!important;
+  letter-spacing:1.5px!important;
+}
+.promoSmall{
+  font-size:15px!important;
+  color:#f0c25c!important;
+}
+
+/* Posledný úlovok: váha ešte dominantnejšia */
+.v8LatestWeight{
+  font-size:38px!important;
+  text-shadow:0 0 16px rgba(239,184,64,.12)!important;
+}
+.v8LatestTeam{font-size:16px!important}
+.v8LatestMeta{font-size:11px!important}
+
+/* Fotka top ryby viac zapadne do KPI karty */
+.v8TopFishPhoto{
+  border-radius:6px!important;
+  border:1px solid rgba(255,117,103,.25)!important;
+  box-shadow:
+    0 5px 15px rgba(0,0,0,.34),
+    inset 0 0 0 1px rgba(255,255,255,.025)!important;
+}
+
+/* Pohľady Poradie / Úlovky / TOP5 / Sektory / Podľa dní */
+.proViewPage .section{
+  background:linear-gradient(180deg,#0d1513,#07100e)!important;
+}
+.proViewPage tbody tr:hover{
+  background:rgba(226,164,46,.07)!important;
+}
+.proViewPage .sectionHead h2{
+  color:#efb944!important;
+}
+
+/* Na veľmi širokom monitore dashboard nepôsobí nízko */
+@media(min-width:1900px){
+  .rccDashboard{gap:16px!important}
+  .sectionHead{min-height:61px!important}
+  .rccCenter tbody td{height:61px!important}
+  .v8LatestHero{min-height:215px!important}
+  .v8LatestPhoto,.v8LatestNoPhoto{height:215px!important}
+}
+
+/* Stredný desktop */
+@media(min-width:1351px) and (max-width:1650px){
+  .promoBig{font-size:31px!important}
+  .v8LatestWeight{font-size:32px!important}
+}
+</style>
+
+
+<style id="lk-premium-v11">
+/* V11 — finálny broadcast polish hlavnej obrazovky */
+
+/* Header kompaktnejší, aby výsledky začínali vyššie */
+.headerInner{padding-top:12px!important;padding-bottom:10px!important}
+.titleBox h1{letter-spacing:1.2px!important}
+.nav{box-shadow:0 1px rgba(231,172,50,.18)!important}
+
+/* KPI — jasnejšie oddelenie troch hlavných údajov */
+.heroStats{gap:12px!important}
+.stat{
+  min-height:112px!important;
+  border-radius:7px!important;
+  background:
+    radial-gradient(circle at 12% 50%,rgba(223,163,46,.075),transparent 23%),
+    linear-gradient(180deg,#0d1714,#07100e)!important;
+}
+.stat:nth-child(2){
+  background:
+    radial-gradient(circle at 12% 50%,rgba(46,207,112,.07),transparent 23%),
+    linear-gradient(180deg,#0b1813,#07100e)!important;
+}
+.stat:nth-child(3){
+  background:
+    radial-gradient(circle at 12% 50%,rgba(255,74,66,.11),transparent 25%),
+    linear-gradient(100deg,#35100f,#180b0a)!important;
+}
+
+/* Panelové nadpisy jednotne */
+.sectionHead,.sideTitle{
+  position:relative!important;
+}
+.sectionHead::after,.sideTitle::after{
+  content:""!important;
+  position:absolute!important;
+  left:12px!important;
+  bottom:0!important;
+  width:58px!important;
+  height:2px!important;
+  background:linear-gradient(90deg,#efb63f,transparent)!important;
+}
+
+/* TOP3 — odstránenie zbytočného prázdneho pocitu */
+.podiumCards{padding:8px!important}
+.podiumCard{
+  border-radius:7px!important;
+  background:linear-gradient(90deg,rgba(255,255,255,.028),rgba(255,255,255,.008))!important;
+}
+.podiumCard:nth-child(1){
+  background:
+    linear-gradient(90deg,rgba(217,158,38,.15),rgba(255,255,255,.01))!important;
+}
+
+/* Tabuľka: ešte čistejší športový výsledkový vzhľad */
+.rccCenter thead{
+  background:#0b1311!important;
+}
+.rccCenter thead th{
+  border-bottom:1px solid rgba(232,172,52,.22)!important;
+}
+.rccCenter tbody tr:nth-child(even){
+  background:rgba(255,255,255,.012)!important;
+}
+.rccCenter tbody tr:hover{
+  background:rgba(226,164,46,.075)!important;
+}
+.rccCenter .badge{
+  background:#111b17!important;
+  border-color:rgba(228,170,49,.22)!important;
+  color:#f2bd49!important;
+}
+
+/* Prvé tri riadky len jemný ľavý medailový akcent */
+.rccCenter tbody tr:nth-child(1){box-shadow:inset 3px 0 #e9b63d!important}
+.rccCenter tbody tr:nth-child(2){box-shadow:inset 3px 0 #bfc7c8!important}
+.rccCenter tbody tr:nth-child(3){box-shadow:inset 3px 0 #bd7547!important}
+
+/* Posledný úlovok — viac ako TV LIVE karta */
+.v8LatestHero{
+  border:1px solid rgba(39,213,112,.14)!important;
+  box-shadow:inset 0 0 28px rgba(12,115,62,.07)!important;
+}
+.v8LatestLabel::before{
+  content:"●"!important;
+  color:#28d46d!important;
+  margin-right:6px!important;
+  text-shadow:0 0 8px rgba(40,212,109,.65)!important;
+}
+.v8RecentMini{
+  background:linear-gradient(180deg,#09130f,#050b09)!important;
+}
+
+/* Sektorové pásy — číslo + percento čitateľnejšie */
+.sectorRowSub{
+  display:flex!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+}
+.sectorBar{box-shadow:inset 0 2px 4px rgba(0,0,0,.42)!important}
+
+/* Partneri menej dominantní */
+.partnerStrip,.partnerGrid{opacity:.82!important}
+.partnerStrip:hover,.partnerGrid:hover{opacity:1!important}
+
+/* BOJUJ ako čistý podpis stránky */
+.promoBox{
+  background:
+    radial-gradient(circle at 50% 28%,rgba(226,164,46,.10),transparent 34%),
+    linear-gradient(180deg,#0d1513,#07100e)!important;
+}
+.promoBig{
+  background:linear-gradient(180deg,#ffe2a0,#e8aa39)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
+}
+
+/* Jemné scrollbar doladenie */
+*{scrollbar-color:#b87d20 #07100d}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#07100d}
+::-webkit-scrollbar-thumb{
+  background:#6f4b17;
+  border:2px solid #07100d;
+  border-radius:10px;
+}
+
+/* Desktop Full HD */
+@media(min-width:1651px){
+  .wrap{padding-left:18px!important;padding-right:18px!important}
+  .rccDashboard{align-items:start!important}
+}
+
+/* Mobil — efekty zjednodušené */
+@media(max-width:900px){
+  .sectionHead::after,.sideTitle::after{width:38px!important}
+  .stat{min-height:88px!important}
+}
+</style>
+
+
+<style id="lk-premium-v12">
+/* V12 — prémiové vnútorné sekcie: PORADIE / ÚLOVKY / TOP 5 / SEKTORY / PODĽA DNÍ */
+
+/* Spoločný rám vnútorných stránok */
+.proViewPage{
+  padding-top:10px!important;
+}
+.proViewPage>.section,
+.proViewPage .section{
+  border:1px solid rgba(221,163,47,.20)!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(ellipse at 30% 0%,rgba(219,159,42,.045),transparent 35%),
+    linear-gradient(180deg,#0c1512,#06100d)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.26)!important;
+}
+.proViewPage .sectionHead{
+  min-height:62px!important;
+  padding:12px 16px!important;
+  background:
+    linear-gradient(90deg,rgba(221,160,43,.12),transparent 48%),
+    linear-gradient(180deg,#111a17,#09110f)!important;
+  border-bottom:1px solid rgba(225,166,48,.18)!important;
+}
+.proViewPage .sectionHead h2{
+  font-size:22px!important;
+  letter-spacing:.55px!important;
+  color:#f2bd48!important;
+}
+.proViewPage .sectionHead small,
+.proViewPage .sectionHead p{
+  color:#7f8c86!important;
+  letter-spacing:.55px!important;
+}
+
+/* Tabs a filtre */
+.proViewPage .tabs,
+.proViewPage .filters,
+.proViewPage .viewTabs{
+  gap:6px!important;
+  padding:10px 12px!important;
+  background:#08100e!important;
+  border-bottom:1px solid rgba(255,255,255,.05)!important;
+}
+.proViewPage .tabBtn,
+.proViewPage button[class*="tab"]{
+  min-height:34px!important;
+  border-radius:5px!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  background:#111a17!important;
+  color:#b7c0bb!important;
+  font-weight:900!important;
+  letter-spacing:.45px!important;
+}
+.proViewPage .tabBtn.active{
+  border-color:#e0a42e!important;
+  background:linear-gradient(180deg,#ffd263,#dea02e)!important;
+  color:#191005!important;
+}
+
+/* PORADIE — športová výsledková tabuľka */
+.proViewPage table{
+  width:100%!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  font-variant-numeric:tabular-nums!important;
+}
+.proViewPage thead{
+  background:#09110f!important;
+}
+.proViewPage thead th{
+  height:43px!important;
+  padding:8px 12px!important;
+  color:#909d97!important;
+  font-size:10px!important;
+  letter-spacing:1.05px!important;
+  border-bottom:1px solid rgba(226,166,49,.22)!important;
+}
+.proViewPage tbody td{
+  min-height:56px!important;
+  padding:11px 12px!important;
+  color:#d9dfdb!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+}
+.proViewPage tbody tr:nth-child(even){
+  background:rgba(255,255,255,.012)!important;
+}
+.proViewPage tbody tr:hover{
+  background:rgba(222,160,42,.075)!important;
+}
+.proViewPage tbody tr:nth-child(1){
+  background:linear-gradient(90deg,rgba(226,169,51,.13),rgba(226,169,51,.015))!important;
+  box-shadow:inset 4px 0 #e8b43e!important;
+}
+.proViewPage tbody tr:nth-child(2){box-shadow:inset 4px 0 #b9c2c2!important}
+.proViewPage tbody tr:nth-child(3){box-shadow:inset 4px 0 #bc7447!important}
+
+/* ÚLOVKY — fotografie sú dominantné */
+.proViewPage .catchCard,
+.proViewPage [class*="catch-card"],
+.proViewPage [class*="catchCard"]{
+  border:1px solid rgba(255,255,255,.065)!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,#0d1713,#07100d)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.20)!important;
+}
+.proViewPage .catchCard img,
+.proViewPage [class*="catch-card"] img,
+.proViewPage [class*="catchCard"] img{
+  object-fit:cover!important;
+}
+.proViewPage .catchWeight,
+.proViewPage [class*="weight"]{
+  color:#f0ba45!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* TOP 5 — rebríčkové karty */
+.proViewPage .top5Card,
+.proViewPage [class*="top5-card"],
+.proViewPage [class*="topCard"]{
+  border-radius:8px!important;
+  border:1px solid rgba(229,169,50,.14)!important;
+  background:linear-gradient(90deg,rgba(225,164,46,.06),rgba(255,255,255,.01))!important;
+}
+.proViewPage .top5Card:first-child,
+.proViewPage [class*="top5-card"]:first-child{
+  border-color:rgba(236,184,63,.36)!important;
+  box-shadow:inset 4px 0 #ecb83f!important;
+}
+
+/* SEKTORY — každý sektor ako samostatný výsledkový panel */
+.proViewPage .sectorCard,
+.proViewPage [class*="sector-card"],
+.proViewPage [class*="sectorCard"]{
+  border-radius:8px!important;
+  border:1px solid rgba(226,166,49,.17)!important;
+  background:
+    linear-gradient(135deg,rgba(224,163,45,.065),transparent 42%),
+    #08120f!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.19)!important;
+}
+.proViewPage .sectorCard h3,
+.proViewPage [class*="sector-card"] h3,
+.proViewPage [class*="sectorCard"] h3{
+  color:#efb943!important;
+}
+
+/* PODĽA DNÍ — deň musí byť okamžite rozpoznateľný */
+.proViewPage .dayBlock,
+.proViewPage .dayCard,
+.dayBlock,.dayCard{
+  margin-bottom:14px!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(228,168,50,.24)!important;
+  background:#07100e!important;
+}
+.proViewPage .dayHeader,
+.dayBlock .dayHeader,
+.dayCard .dayHeader{
+  min-height:68px!important;
+  padding:12px 16px!important;
+  background:
+    linear-gradient(90deg,rgba(117,78,15,.40),rgba(14,22,19,.96) 58%)!important;
+  border-bottom:1px solid rgba(232,173,53,.22)!important;
+}
+.proViewPage .dayHeader h3,
+.dayBlock .dayHeader h3,
+.dayCard .dayHeader h3{
+  color:#ffd064!important;
+  font-size:21px!important;
+}
+.proViewPage .dayStats,
+.dayBlock .dayStats,
+.dayCard .dayStats{
+  background:#0b1411!important;
+  border-bottom:1px solid rgba(255,255,255,.05)!important;
+}
+.proViewPage .dayStats strong,
+.dayBlock .dayStats strong,
+.dayCard .dayStats strong{
+  color:#f0bb47!important;
+}
+
+/* Fotky/logá tímov */
+.proViewPage .teamPhoto,
+.proViewPage .teamLogo{
+  border-radius:50%!important;
+  border:1px solid rgba(230,173,55,.18)!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.28)!important;
+}
+
+/* Badge váhy */
+.proViewPage .badge{
+  border-radius:5px!important;
+  background:#111a16!important;
+  border:1px solid rgba(226,165,47,.24)!important;
+  color:#f1bd48!important;
+  font-weight:900!important;
+}
+
+/* Full HD */
+@media(min-width:1651px){
+  .proViewPage .sectionHead h2{font-size:24px!important}
+  .proViewPage tbody td{height:58px!important}
+}
+
+/* Mobil */
+@media(max-width:900px){
+  .proViewPage .sectionHead{min-height:54px!important;padding:10px 12px!important}
+  .proViewPage .sectionHead h2{font-size:18px!important}
+  .proViewPage thead th{padding:7px 8px!important}
+  .proViewPage tbody td{padding:9px 8px!important}
+}
+</style>
+
+
+<style id="lk-premium-v13">
+/* V13 — detailný polish PORADIE + ÚLOVKY */
+
+/* PORADIE: prvý stĺpec a názov tímu */
+.proViewPage table td:first-child,
+.proViewPage table th:first-child{
+  text-align:center!important;
+}
+.proViewPage tbody td:nth-child(3){
+  font-weight:900!important;
+  color:#fff9ec!important;
+}
+
+/* Prvé tri pozície – decentné medailové pozadie */
+.proViewPage tbody tr:nth-child(1){
+  background:
+    linear-gradient(90deg,rgba(224,164,45,.17),rgba(224,164,45,.025) 46%,transparent)!important;
+}
+.proViewPage tbody tr:nth-child(2){
+  background:
+    linear-gradient(90deg,rgba(190,201,201,.09),transparent 42%)!important;
+}
+.proViewPage tbody tr:nth-child(3){
+  background:
+    linear-gradient(90deg,rgba(189,113,67,.11),transparent 42%)!important;
+}
+
+/* Hodnoty kg sa čítajú rýchlejšie */
+.proViewPage td{
+  font-variant-numeric:tabular-nums!important;
+}
+.proViewPage td .badge,
+.proViewPage td[class*="weight"]{
+  white-space:nowrap!important;
+}
+
+/* ÚLOVKY: mriežka profesionálnejšia */
+.proViewPage .catchesGrid,
+.proViewPage [class*="catchGrid"],
+.proViewPage [class*="catches-grid"]{
+  gap:12px!important;
+  padding:12px!important;
+}
+.proViewPage .catchCard,
+.proViewPage [class*="catch-card"],
+.proViewPage [class*="catchCard"]{
+  position:relative!important;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease!important;
+}
+.proViewPage .catchCard:hover,
+.proViewPage [class*="catch-card"]:hover,
+.proViewPage [class*="catchCard"]:hover{
+  transform:translateY(-2px)!important;
+  border-color:rgba(230,171,53,.30)!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.31)!important;
+}
+
+/* Fotky úlovkov — jednotný pomer */
+.proViewPage .catchCard img,
+.proViewPage [class*="catch-card"] img,
+.proViewPage [class*="catchCard"] img{
+  width:100%!important;
+  aspect-ratio:16/10!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
+
+/* Váha úlovku ako hlavná informácia */
+.proViewPage .catchWeight,
+.proViewPage [class*="catchWeight"]{
+  font-family:var(--font-head)!important;
+  font-size:24px!important;
+  line-height:1!important;
+  color:#f3be49!important;
+  text-shadow:0 0 12px rgba(235,177,54,.10)!important;
+}
+
+/* Čas / sektor / stanovisko sekundárne */
+.proViewPage .catchMeta,
+.proViewPage [class*="catchMeta"]{
+  color:#89958f!important;
+  font-size:10px!important;
+  letter-spacing:.3px!important;
+}
+
+/* TOP5: prvá ryba / prvý tím ešte jasnejší */
+.proViewPage .top5Card:first-child,
+.proViewPage [class*="top5-card"]:first-child,
+.proViewPage [class*="topCard"]:first-child{
+  background:
+    radial-gradient(circle at 10% 50%,rgba(238,184,61,.15),transparent 26%),
+    linear-gradient(90deg,rgba(225,165,47,.10),rgba(255,255,255,.01))!important;
+}
+
+/* SEKTORY: hlavička sektora */
+.proViewPage .sectorCard h3,
+.proViewPage [class*="sector-card"] h3,
+.proViewPage [class*="sectorCard"] h3{
+  padding-bottom:8px!important;
+  border-bottom:1px solid rgba(228,169,51,.14)!important;
+}
+
+/* PODĽA DNÍ: časový stĺpec */
+.dayBlock table td:first-child,
+.dayCard table td:first-child{
+  color:#f0bd4a!important;
+  font-weight:900!important;
+}
+
+/* Stav LIVE v navigácii trochu uhladenejší */
+.livePill,.liveBadge,[class*="live-pill"]{
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 14px rgba(223,53,45,.10)!important;
+}
+
+/* Full HD */
+@media(min-width:1651px){
+  .proViewPage .catchWeight,
+  .proViewPage [class*="catchWeight"]{font-size:26px!important}
+}
+
+/* mobil */
+@media(max-width:900px){
+  .proViewPage .catchesGrid,
+  .proViewPage [class*="catchGrid"],
+  .proViewPage [class*="catches-grid"]{
+    gap:8px!important;padding:8px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
