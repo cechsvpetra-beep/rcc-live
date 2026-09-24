@@ -2846,6 +2846,286 @@ tbody tr.rank-top-3 td{border-bottom-color:rgba(255,255,255,.075)!important}
 }
 </style>
 
+
+<style id="lk-premium-v7">
+/* V7 — odstránenie RCC textu + realistickejší sektorový graf */
+
+/* Odstráni hashtagy/text RCC2026 v spodnom motivačnom paneli */
+.promoBig .hashtags,
+.motivationCard .hashtags,
+.promoBig .hash,
+.motivationCard .hash,
+.promoBig [class*="hash"],
+.motivationCard [class*="hash"]{
+  display:none!important;
+}
+
+/* Sektorový donut: čistejší a realistickejší */
+.sectorDonut{
+  width:168px!important;
+  height:168px!important;
+  border-radius:50%!important;
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.38))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    inset 0 0 18px rgba(0,0,0,.18)!important;
+}
+.sectorDonut::after{
+  inset:52px!important;
+  background:
+    radial-gradient(circle at 45% 38%,#17201c 0%,#0c1210 58%,#050807 100%)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:
+    0 0 0 5px rgba(0,0,0,.16),
+    inset 0 2px 7px rgba(255,255,255,.035),
+    0 4px 12px rgba(0,0,0,.48)!important;
+}
+
+/* Graf a legenda dostanú viac priestoru */
+.rccRight .sidePanel:first-child{
+  padding:15px 17px 17px!important;
+}
+.sectorChartWrap,
+.sectorBody,
+.sectorContent{
+  gap:20px!important;
+  align-items:center!important;
+}
+.sectorRow{
+  min-height:39px!important;
+  padding:5px 0!important;
+}
+.sectorRowTop{
+  font-size:13px!important;
+  line-height:1.1!important;
+}
+.sectorRowSub{
+  margin-top:3px!important;
+  font-size:10px!important;
+  opacity:.78!important;
+}
+
+/* Na veľkom monitore ešte o trochu väčší */
+@media(min-width:1900px){
+  .sectorDonut{width:182px!important;height:182px!important}
+  .sectorDonut::after{inset:57px!important}
+}
+
+/* Mobil */
+@media(max-width:900px){
+  .sectorDonut{width:142px!important;height:142px!important}
+  .sectorDonut::after{inset:44px!important}
+}
+</style>
+
+
+<style id="lk-premium-v8">
+/* V8 — posledný úlovok ako LIVE hero + sektorové pásy + foto najväčšej ryby */
+
+/* SEKTORY: donut preč, zostávajú presné dátové pásy */
+.sectorDonutWrap{
+  display:block!important;
+  padding:8px 2px 2px!important;
+}
+.sectorDonut{display:none!important}
+.sectorLegend{width:100%!important}
+.sectorRow{
+  padding:10px 2px 11px!important;
+  border-bottom:1px solid rgba(255,255,255,.06)!important;
+}
+.sectorRowTop{
+  font-size:13px!important;
+  align-items:center!important;
+}
+.sectorRowTop span{
+  color:#f2bd49!important;
+  font-weight:900!important;
+}
+.sectorRowTop b{
+  color:#f4f1e8!important;
+  font-size:13px!important;
+}
+.sectorBar{
+  height:10px!important;
+  margin:8px 0 6px!important;
+  background:#151d1a!important;
+  border:1px solid rgba(255,255,255,.055)!important;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.38)!important;
+}
+.sectorBar span{
+  background:linear-gradient(90deg,#e3a32f,#f5c85a)!important;
+  box-shadow:0 0 10px rgba(237,180,61,.14)!important;
+}
+.sectorRowSub{
+  color:#89958f!important;
+  font-size:10px!important;
+}
+
+/* POSLEDNÉ ÚLOVKY: jeden dominantný LIVE úlovok + 4 menšie */
+.lastCatchText{padding:0!important}
+.v8LatestHero{
+  position:relative;
+  min-height:190px;
+  display:grid;
+  grid-template-columns:44% 56%;
+  overflow:hidden;
+  background:#06110d;
+  border-bottom:1px solid rgba(42,221,119,.18);
+}
+.v8LatestPhoto{
+  width:100%;
+  height:190px;
+  object-fit:cover;
+  display:block;
+}
+.v8LatestNoPhoto{
+  height:190px;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(circle at 50% 45%,rgba(41,193,105,.14),transparent 45%),#07100d;
+  color:#769083;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.v8LatestInfo{
+  min-width:0;
+  padding:17px 15px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:linear-gradient(110deg,rgba(5,48,28,.82),rgba(4,13,10,.98));
+}
+.v8LatestLabel{
+  color:#52dc91;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.v8LatestWeight{
+  color:#f4c14d;
+  font-family:var(--font-head);
+  font-size:34px;
+  line-height:1;
+  margin:5px 0 7px;
+}
+.v8LatestTeam{
+  color:#fff;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.15;
+}
+.v8LatestMeta{
+  margin-top:8px;
+  color:#a9b5af;
+  font-size:11px;
+  line-height:1.45;
+}
+.v8LatestTime{
+  margin-top:7px;
+  color:#e9efe9;
+  font-weight:800;
+  font-size:12px;
+}
+.v8RecentStrip{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  padding:8px;
+  background:#04100b;
+}
+.v8RecentMini{
+  min-width:0;
+  display:grid;
+  grid-template-columns:50px minmax(0,1fr);
+  gap:8px;
+  align-items:center;
+  padding:7px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:7px;
+  background:#07120e;
+  cursor:pointer;
+}
+.v8RecentMini:hover{border-color:rgba(46,213,117,.25)}
+.v8RecentMini img,.v8RecentMiniNoPhoto{
+  width:50px;height:45px;border-radius:5px;object-fit:cover;
+}
+.v8RecentMiniNoPhoto{
+  display:grid;place-items:center;background:#111915;color:#6d7d75;font-size:9px;
+}
+.v8RecentMiniTeam{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:#f1f4f1;font-size:10px;font-weight:900;
+}
+.v8RecentMiniBottom{
+  margin-top:3px;display:flex;justify-content:space-between;gap:5px;
+  color:#87948e;font-size:9px;
+}
+.v8RecentMiniBottom b{color:#f1bd48;font-size:11px}
+.lastCatchHint{
+  padding:0 10px 8px!important;
+  margin:0!important;
+  color:#6f8479!important;
+  font-size:9px!important;
+}
+
+/* NAJVÄČŠIA RYBA: foto priamo v červenej KPI karte */
+#topFishCard{
+  grid-template-columns:58px minmax(0,1fr) 118px!important;
+}
+.v8TopFishPhoto{
+  grid-column:3;
+  grid-row:1 / span 3;
+  width:118px;
+  height:82px;
+  align-self:center;
+  justify-self:end;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid rgba(255,103,89,.34);
+  box-shadow:0 6px 18px rgba(0,0,0,.34);
+}
+.v8TopFishNoPhoto{
+  grid-column:3;
+  grid-row:1 / span 3;
+  width:118px;height:82px;
+  align-self:center;justify-self:end;
+  display:grid;place-items:center;
+  border-radius:8px;
+  border:1px dashed rgba(255,103,89,.24);
+  color:#9c625c;
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+/* BOJUJ: bez RCC hashtagov, centrované */
+.promoBox{min-height:155px!important}
+.promoHash{display:none!important}
+.promoBig{margin-bottom:8px!important}
+.promoSmall{margin-top:0!important}
+
+/* Desktop proporcie */
+@media(min-width:1900px){
+  .v8LatestHero{min-height:205px}
+  .v8LatestPhoto,.v8LatestNoPhoto{height:205px}
+  .v8LatestWeight{font-size:38px}
+}
+@media(max-width:1650px) and (min-width:901px){
+  #topFishCard{grid-template-columns:50px minmax(0,1fr) 92px!important}
+  .v8TopFishPhoto,.v8TopFishNoPhoto{width:92px;height:70px}
+  .v8LatestHero{grid-template-columns:40% 60%}
+}
+@media(max-width:900px){
+  #topFishCard{grid-template-columns:50px 1fr!important}
+  .v8TopFishPhoto,.v8TopFishNoPhoto{display:none!important}
+  .v8LatestHero{grid-template-columns:40% 60%;min-height:155px}
+  .v8LatestPhoto,.v8LatestNoPhoto{height:155px}
+  .v8LatestWeight{font-size:28px}
+  .v8RecentStrip{grid-template-columns:1fr 1fr}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -3015,7 +3295,7 @@ tbody tr.rank-top-3 td{border-bottom-color:rgba(255,255,255,.075)!important}
           <div>
             <div class="promoBig">Bojuj</div>
             <div class="promoSmall">o každý záber<br>o každé kilo</div>
-            <div class="promoHash">#RCC2026</div>
+            
           </div>
         </div>
       </aside>
@@ -4289,5 +4569,120 @@ loadState();
 connectSocket();
 startFallbackRefresh();
 </script>
+
+<script id="lk-premium-v8-js">
+(function(){
+  const originalRenderLiveV8 = renderLive;
+
+  renderLive = function(data){
+    originalRenderLiveV8(data);
+
+    const card = document.getElementById("topFishCard");
+    if (!card) return;
+
+    const old = card.querySelector(".v8TopFishPhoto,.v8TopFishNoPhoto");
+    if (old) old.remove();
+
+    const fish = data && data.topFish ? data.topFish : null;
+    if (fish && fish.photo) {
+      const img = document.createElement("img");
+      img.className = "v8TopFishPhoto";
+      img.src = fish.photo;
+      img.alt = "Najväčšia ryba";
+      card.appendChild(img);
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "v8TopFishNoPhoto";
+      empty.textContent = "bez fotky";
+      card.appendChild(empty);
+    }
+  };
+
+  renderRecentCatches = function(items){
+    const catches = Array.isArray(items) && items.length
+      ? items
+      : (currentLastCatch ? [currentLastCatch] : []);
+
+    const box = document.getElementById("lastCatchBox");
+    const photoWrap = document.getElementById("lastCatchPhotoWrap");
+    const main = document.getElementById("lastCatchMain");
+    const sub = document.getElementById("lastCatchSub");
+    const hint = document.getElementById("lastCatchHint");
+    const ticker = document.getElementById("bottomTickerTrack");
+
+    if (!box || !photoWrap || !main || !sub || !hint) return;
+
+    photoWrap.innerHTML = "";
+    main.textContent = "";
+    box.classList.remove("clickable");
+    box.onclick = null;
+
+    if (!catches.length) {
+      sub.innerHTML = '<div class="v8LatestNoPhoto">Zatiaľ bez úlovku</div>';
+      hint.textContent = "";
+      if (ticker) ticker.innerHTML = "";
+      return;
+    }
+
+    const latest = catches[0];
+    const teamName = escapeHtml(latest.teamName || latest.team || ("Tím " + (latest.teamId || "")));
+    const sector = escapeHtml(latest.sector || "-");
+    const peg = escapeHtml(latest.peg || "-");
+    const weight = formatKg(Number(latest.weight || 0));
+    const time = escapeHtml(formatDateTime(latest.time));
+    const photo = latest.photo ? escapeAttr(latest.photo) : "";
+
+    const minis = catches.slice(1,5).map(item => {
+      const t = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
+      const w = formatKg(Number(item.weight || 0));
+      const tm = escapeHtml(formatDateTime(item.time));
+      const p = item.photo ? escapeAttr(item.photo) : "";
+      return `
+        <div class="v8RecentMini" ${p ? `onclick="openImageModal('${escapeJs(p)}','${escapeJs(t)} • ${escapeJs(w)} • ${escapeJs(tm)}')"` : ""}>
+          ${p ? `<img src="${p}" alt="Úlovok">` : `<div class="v8RecentMiniNoPhoto">bez foto</div>`}
+          <div>
+            <div class="v8RecentMiniTeam">${t}</div>
+            <div class="v8RecentMiniBottom"><b>${w}</b><span>${tm}</span></div>
+          </div>
+        </div>`;
+    }).join("");
+
+    sub.innerHTML = `
+      <div class="v8LatestHero" ${photo ? `onclick="openImageModal('${escapeJs(photo)}','${escapeJs(teamName)} • ${escapeJs(weight)} • ${escapeJs(time)}')"` : ""}>
+        <div>
+          ${photo ? `<img class="v8LatestPhoto" src="${photo}" alt="Posledný úlovok">`
+                  : `<div class="v8LatestNoPhoto">bez fotky</div>`}
+        </div>
+        <div class="v8LatestInfo">
+          <div class="v8LatestLabel">Posledný úlovok • LIVE</div>
+          <div class="v8LatestWeight">${weight}</div>
+          <div class="v8LatestTeam">${teamName}</div>
+          <div class="v8LatestMeta">Sektor ${sector} • Stanovište ${peg}</div>
+          <div class="v8LatestTime">${time}</div>
+        </div>
+      </div>
+      ${minis ? `<div class="v8RecentStrip">${minis}</div>` : ""}
+    `;
+    hint.textContent = catches.length > 1 ? "Ďalšie posledné úlovky" : "";
+
+    if (ticker) {
+      const tickerItems = [...catches, ...catches];
+      ticker.innerHTML = tickerItems.map(item => {
+        const t = escapeHtml(item.teamName || item.team || ("Tím " + (item.teamId || "")));
+        const s = escapeHtml(item.sector || "-");
+        const p = escapeHtml(item.peg || "-");
+        const w = formatKg(Number(item.weight || 0));
+        const tm = escapeHtml(formatDateTime(item.time));
+        const ph = item.photo ? escapeAttr(item.photo) : "";
+        return `<span class="bottomTickerItem">
+          ${ph ? `<img src="${ph}" alt="Úlovok">` : `<span class="tickerFish">●</span>`}
+          <b>${t}</b><em>${w}</em><small>${s}/${p} · ${tm}</small>
+        </span>`;
+      }).join("");
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
