@@ -1344,6 +1344,108 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   .wrap{max-width:1740px!important;}
   .rccDashboard{grid-template-columns:320px minmax(760px,1fr) 350px!important;}
 }
+
+
+/* ===== RCC HEADER FIX V3 2026-09-24 =====
+   Oprava prekryvania loga, hlavneho nazvu a LIVE podnadpisu.
+   Iba vizualna vrstva — API / Socket.IO / tabulky ostavaju bez zmeny.
+   ========================================================= */
+@media (min-width:1051px){
+  .topbar{
+    min-height:178px!important;
+    height:178px!important;
+    padding:0 28px!important;
+    overflow:hidden!important;
+  }
+  .topbar::after{display:none!important;content:none!important;}
+  .brand{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:172px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:28px!important;
+    min-height:178px!important;
+    height:178px!important;
+    width:100%!important;
+    padding:0!important;
+  }
+  .brand::after{display:none!important;content:none!important;}
+  .logo{
+    position:static!important;
+    display:block!important;
+    width:158px!important;
+    height:158px!important;
+    margin:0!important;
+    align-self:center!important;
+    justify-self:center!important;
+  }
+  .titleBox{
+    position:static!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    align-items:flex-start!important;
+    min-width:0!important;
+    max-width:none!important;
+    padding:2px 250px 0 0!important;
+    text-align:left!important;
+  }
+  .titleBox h1{
+    margin:0!important;
+    max-width:100%!important;
+    font-size:clamp(46px,3.7vw,66px)!important;
+    line-height:.94!important;
+    letter-spacing:1.4px!important;
+    white-space:nowrap!important;
+    transform:none!important;
+  }
+  .titleBox .sub{
+    order:2!important;
+    margin:9px 0 0!important;
+    font-size:13px!important;
+    line-height:1!important;
+    letter-spacing:4.5px!important;
+    color:#d7ae5d!important;
+    white-space:nowrap!important;
+  }
+  .titleBox::after{
+    content:"LIVE TABUĽKA  •  RYBÁRSKE PRETEKY"!important;
+    order:3!important;
+    display:block!important;
+    position:static!important;
+    margin-top:10px!important;
+    color:#f3eee4!important;
+    font-size:12px!important;
+    font-weight:800!important;
+    line-height:1!important;
+    letter-spacing:5px!important;
+    text-transform:uppercase!important;
+    white-space:nowrap!important;
+    opacity:.9!important;
+  }
+  .actions{top:20px!important;right:26px!important;}
+}
+@media (min-width:1051px) and (max-width:1280px){
+  .brand{grid-template-columns:150px minmax(0,1fr)!important;gap:22px!important;}
+  .logo{width:140px!important;height:140px!important;}
+  .titleBox{padding-right:210px!important;}
+  .titleBox h1{font-size:44px!important;}
+  .titleBox::after{font-size:10px!important;letter-spacing:3.5px!important;}
+}
+@media (max-width:1050px){
+  .topbar::after{display:none!important;content:none!important;}
+  .brand::after{display:none!important;content:none!important;}
+  .titleBox::after{
+    content:"LIVE TABUĽKA • RYBÁRSKE PRETEKY";
+    display:block;
+    margin-top:7px;
+    color:#eee7da;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+}
 </style>
 </head>
 <body>
