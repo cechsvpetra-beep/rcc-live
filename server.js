@@ -81,13 +81,23 @@ app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static(PUBLIC_DIR));
 app.use("/uploads", express.static(UPLOADS_DIR));
 
+function getPublicLiveData(data) {
+  return {
+    ...data,
+    catches: (Array.isArray(data.catches) ? data.catches : [])
+      .filter(c => !c?.liveHidden)
+  };
+}
+
 function buildAndBroadcastLiveState() {
   try {
     const data = loadData();
+
     const publicState = {
-  ...stateService.buildPublicState(data),
-  sponsors: data.sponsors || []
-};
+      ...stateService.buildPublicState(getPublicLiveData(data)),
+      sponsors: data.sponsors || []
+    };
+
     io.emit("state:update", publicState);
     console.log("WebSocket broadcast: state:update");
   } catch (e) {
@@ -100,10 +110,12 @@ io.on("connection", (socket) => {
 
   try {
     const data = loadData();
+
     const publicState = {
-  ...stateService.buildPublicState(data),
-  sponsors: data.sponsors || []
-};
+      ...stateService.buildPublicState(getPublicLiveData(data)),
+      sponsors: data.sponsors || []
+    };
+
     socket.emit("state:update", publicState);
   } catch (e) {
     console.error("Initial socket state chyba:", e);
@@ -123,7 +135,11 @@ function deletePhysicalFileFromPublic(publicPath) {
     if (!publicPath || typeof publicPath !== "string") return;
     if (!publicPath.startsWith("/uploads/")) return;
 
-    const fullPath = path.join(UPLOADS_DIR, path.basename(publicPath));
+    const fullPath = path.join(
+      UPLOADS_DIR,
+      path.basename(publicPath)
+    );
+
     if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
     }
@@ -149,7 +165,10 @@ function requireLogin(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (req.session.user && req.session.user.role === "admin") {
+  if (
+    req.session.user &&
+    req.session.user.role === "admin"
+  ) {
     return next();
   }
 
@@ -174,47 +193,90 @@ function ensureMeta(data) {
   }
 
   if (!Array.isArray(data.meta.judges)) {
-    data.meta.judges = Array.isArray(data.judges) ? data.judges : [];
+    data.meta.judges = Array.isArray(data.judges)
+      ? data.judges
+      : [];
   }
 
   if (!Number.isFinite(Number(data.meta.nextJudgeId))) {
-    const maxJudgeId = (Array.isArray(data.judges) ? data.judges : [])
-      .reduce((max, j) => Math.max(max, Number(j?.id) || 0), 0);
+    const maxJudgeId = (
+      Array.isArray(data.judges)
+        ? data.judges
+        : []
+    ).reduce(
+      (max, j) =>
+        Math.max(max, Number(j?.id) || 0),
+      0
+    );
+
     data.meta.nextJudgeId = maxJudgeId + 1;
   }
 
-  if (typeof data.meta.eventName !== "string" || !data.meta.eventName.trim()) {
+  if (
+    typeof data.meta.eventName !== "string" ||
+    !data.meta.eventName.trim()
+  ) {
     data.meta.eventName = "RCC Live tabuľka";
   }
 
-  if (typeof data.meta.eventSub !== "string" || !data.meta.eventSub.trim()) {
+  if (
+    typeof data.meta.eventSub !== "string" ||
+    !data.meta.eventSub.trim()
+  ) {
     data.meta.eventSub = "Ružín Carp Classic";
+  }
+
+  if (
+    typeof data.meta.livePublishingPaused !== "boolean"
+  ) {
+    data.meta.livePublishingPaused = false;
   }
 
   return data.meta;
 }
 
-function cleanupProcessedSubmissionIds(data, maxItems = 5000) {
+function cleanupProcessedSubmissionIds(
+  data,
+  maxItems = 5000
+) {
   const meta = ensureMeta(data);
 
   if (meta.processedSubmissionIds.length > maxItems) {
-    meta.processedSubmissionIds = meta.processedSubmissionIds.slice(-maxItems);
+    meta.processedSubmissionIds =
+      meta.processedSubmissionIds.slice(-maxItems);
   }
 }
 
-function hasProcessedSubmissionId(data, clientSubmissionId) {
+function hasProcessedSubmissionId(
+  data,
+  clientSubmissionId
+) {
   if (!clientSubmissionId) return false;
+
   const meta = ensureMeta(data);
-  return meta.processedSubmissionIds.includes(clientSubmissionId);
+
+  return meta.processedSubmissionIds.includes(
+    clientSubmissionId
+  );
 }
 
-function markProcessedSubmissionId(data, clientSubmissionId) {
+function markProcessedSubmissionId(
+  data,
+  clientSubmissionId
+) {
   if (!clientSubmissionId) return;
 
   const meta = ensureMeta(data);
 
-  if (!meta.processedSubmissionIds.includes(clientSubmissionId)) {
-    meta.processedSubmissionIds.push(clientSubmissionId);
+  if (
+    !meta.processedSubmissionIds.includes(
+      clientSubmissionId
+    )
+  ) {
+    meta.processedSubmissionIds.push(
+      clientSubmissionId
+    );
+
     cleanupProcessedSubmissionIds(data);
   }
 }
@@ -224,7 +286,10 @@ function normalizeCatchTime(value) {
 
   if (!raw) return null;
 
-  const match = raw.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  const match = raw.match(
+    /^([01]\d|2[0-3]):([0-5]\d)$/
+  );
+
   if (!match) return null;
 
   return `${match[1]}:${match[2]}`;
@@ -243,9 +308,15 @@ function normalizeEventSub(value) {
 function getJudgesFromData(data) {
   const meta = ensureMeta(data);
 
-  const rawJudges = Array.isArray(data?.judges) && data.judges.length
-    ? data.judges
-    : (Array.isArray(meta.judges) ? meta.judges : []);
+  const rawJudges =
+    Array.isArray(data?.judges) &&
+    data.judges.length
+      ? data.judges
+      : (
+          Array.isArray(meta.judges)
+            ? meta.judges
+            : []
+        );
 
   return normalizeJudges(rawJudges);
 }
@@ -270,18 +341,29 @@ function findJudgeUser(username, password) {
 
 app.post("/api/login", (req, res) => {
   try {
-    const username = String(req.body?.username || "").trim();
-    const password = String(req.body?.password || "");
+    const username = String(
+      req.body?.username || ""
+    ).trim();
+
+    const password = String(
+      req.body?.password || ""
+    );
 
     let user = null;
 
-    if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+    if (
+      username === ADMIN_USER.username &&
+      password === ADMIN_USER.password
+    ) {
       user = {
         username: ADMIN_USER.username,
         role: ADMIN_USER.role
       };
     } else {
-      user = findJudgeUser(username, password);
+      user = findJudgeUser(
+        username,
+        password
+      );
     }
 
     if (!user) {
@@ -290,8 +372,15 @@ app.post("/api/login", (req, res) => {
 
     req.session.regenerate((err) => {
       if (err) {
-        console.error("Session regenerate chyba:", err);
-        return res.status(500).json({ ok: false, error: "Login zlyhal" });
+        console.error(
+          "Session regenerate chyba:",
+          err
+        );
+
+        return res.status(500).json({
+          ok: false,
+          error: "Login zlyhal"
+        });
       }
 
       req.session.user = {
@@ -301,16 +390,33 @@ app.post("/api/login", (req, res) => {
 
       req.session.save((saveErr) => {
         if (saveErr) {
-          console.error("Session save chyba:", saveErr);
-          return res.status(500).json({ ok: false, error: "Login zlyhal" });
+          console.error(
+            "Session save chyba:",
+            saveErr
+          );
+
+          return res.status(500).json({
+            ok: false,
+            error: "Login zlyhal"
+          });
         }
 
-        return res.json({ ok: true, role: user.role });
+        return res.json({
+          ok: true,
+          role: user.role
+        });
       });
     });
   } catch (e) {
-    console.error("API /api/login chyba:", e);
-    return res.status(500).json({ ok: false, error: "Login zlyhal" });
+    console.error(
+      "API /api/login chyba:",
+      e
+    );
+
+    return res.status(500).json({
+      ok: false,
+      error: "Login zlyhal"
+    });
   }
 });
 
@@ -318,22 +424,26 @@ app.get("/api/me", (req, res) => {
   res.json(req.session.user || null);
 });
 
-app.get("/api/session-status", (req, res) => {
-  if (!req.session.user) {
+app.get(
+  "/api/session-status",
+  (req, res) => {
+    if (!req.session.user) {
+      return res.json({
+        ok: true,
+        loggedIn: false,
+        user: null
+      });
+    }
+
     return res.json({
       ok: true,
-      loggedIn: false,
-      user: null
+      loggedIn: true,
+      user: req.session.user,
+      expiresAt:
+        req.session.cookie?.expires || null
     });
   }
-
-  return res.json({
-    ok: true,
-    loggedIn: true,
-    user: req.session.user,
-    expiresAt: req.session.cookie?.expires || null
-  });
-});
+);
 
 app.post("/api/logout", (req, res) => {
   req.session.destroy(() => {
@@ -342,261 +452,716 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-app.get("/admin.html", requireAdmin, (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "admin.html"));
-});
+app.get(
+  "/admin.html",
+  requireAdmin,
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        PUBLIC_DIR,
+        "admin.html"
+      )
+    );
+  }
+);
 
-app.get("/judge.html", requireLogin, (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "judge.html"));
-});
+app.get(
+  "/judge.html",
+  requireLogin,
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        PUBLIC_DIR,
+        "judge.html"
+      )
+    );
+  }
+);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, UPLOADS_DIR);
   },
+
   filename: (req, file, cb) => {
-    const safeName = String(file.originalname || "file").replace(/[^\w.\-]+/g, "_");
-    cb(null, `${Date.now()}_${safeName}`);
+    const safeName = String(
+      file.originalname || "file"
+    ).replace(/[^\w.\-]+/g, "_");
+
+    cb(
+      null,
+      `${Date.now()}_${safeName}`
+    );
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage
+});
 
 const uploadJson = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }
-});
-
-app.post("/api/team-photo/:id", requireAdmin, upload.single("photo"), (req, res) => {
-  try {
-    const teamId = Number(req.params.id);
-    const data = loadData();
-    const team = getTeamById(data, teamId);
-
-    if (!team) {
-      return res.json({ ok: false, error: "Tím neexistuje" });
-    }
-
-    if (!req.file) {
-      return res.json({ ok: false, error: "Chýba súbor" });
-    }
-
-    const oldPhoto = team.photo || null;
-    const newPhoto = "/uploads/" + req.file.filename;
-
-    team.photo = newPhoto;
-
-    saveData(data, {
-      onAfterSave: (savedData) => {
-        backupService.createBackupFromData(savedData, "data");
-        buildAndBroadcastLiveState();
-      }
-    });
-
-    if (oldPhoto && oldPhoto !== newPhoto) {
-      deletePhysicalFileFromPublic(oldPhoto);
-    }
-
-    return res.json({
-      ok: true,
-      path: team.photo
-    });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, error: "Upload fotky zlyhal" });
+  limits: {
+    fileSize: 10 * 1024 * 1024
   }
 });
 
-app.post("/api/catch", requireLogin, upload.single("photo"), (req, res) => {
-  try {
-    const data = loadData();
+app.post(
+  "/api/team-photo/:id",
+  requireAdmin,
+  upload.single("photo"),
+  (req, res) => {
+    try {
+      const teamId =
+        Number(req.params.id);
 
-    const teamId = Number(req.body.teamId || 0);
-    const weight = Number(req.body.weight || 0);
-    const clientSubmissionId = String(req.body.clientSubmissionId || "").trim();
-    const catchTime = normalizeCatchTime(req.body.catchTime);
+      const data = loadData();
 
-    if (clientSubmissionId && hasProcessedSubmissionId(data, clientSubmissionId)) {
-      return res.json({
-        ok: true,
-        duplicate: true,
-        message: "Úlovok už bol spracovaný",
-        clientSubmissionId
-      });
-    }
+      const team =
+        getTeamById(data, teamId);
 
-    const result = catchService.addCatch(data, {
-      teamId,
-      weight,
-      photo: req.file ? "/uploads/" + req.file.filename : null
-    });
-
-    if (result.error) {
-      return res.json({ ok: false, error: result.error });
-    }
-
-    const newCatch = result.newCatch;
-    newCatch.catchTime = catchTime;
-
-    if (clientSubmissionId) {
-      markProcessedSubmissionId(data, clientSubmissionId);
-    }
-
-    const saved = saveData(data, {
-      onAfterSave: (savedData) => {
-        backupService.createBackupFromData(savedData, "data");
-        buildAndBroadcastLiveState();
-      }
-    });
-
-    console.log("Úlovok uložený:", {
-      catchId: newCatch.id,
-      teamId,
-      weight,
-      catchTime,
-      totalCatches: saved.catches.length,
-      clientSubmissionId: clientSubmissionId || null
-    });
-
-    return res.json({
-      ok: true,
-      catchId: newCatch.id,
-      totalCatches: saved.catches.length,
-      clientSubmissionId: clientSubmissionId || null
-    });
-  } catch (e) {
-    console.error("API /api/catch chyba:", e);
-    return res.status(500).json({
-      ok: false,
-      error: "Ukladanie úlovku zlyhalo"
-    });
-  }
-});
-
-app.get("/api/admin/setup", requireAdmin, (req, res) => {
-  const data = loadData();
-  const meta = ensureMeta(data);
-  const judges = getJudgesFromData(data);
-
-  res.json({
-    sectors: data.sectors || {},
-    teams: data.teams || [],
-    catches: data.catches || [],
-    judges,
-sponsors: data.sponsors || [],
-    meta: {
-      ...meta,
-      judges,
-      eventName: normalizeEventName(meta.eventName),
-      eventSub: normalizeEventSub(meta.eventSub)
-    }
-  });
-});
-
-app.post("/api/admin/setup", requireAdmin, (req, res) => {
-  try {
-    const current = loadData();
-    const currentMeta = ensureMeta(current);
-    const incoming = req.body || {};
-const sponsors = Array.isArray(incoming.sponsors)
-  ? incoming.sponsors
-  : [];
-    const sectors = normalizeSectors(incoming.sectors, current.sectors);
-
-    const currentTeams = Array.isArray(current.teams) ? current.teams : [];
-    const incomingTeams = Array.isArray(incoming.teams) ? incoming.teams : [];
-
-    const currentById = new Map(
-      currentTeams.map(team => [Number(team.id), { ...team }])
-    );
-
-    const mergedById = new Map(
-      currentTeams.map(team => [Number(team.id), { ...team }])
-    );
-
-    for (const rawTeam of incomingTeams) {
-      const id = Number(rawTeam?.id || 0);
-      if (!id) continue;
-
-      const existing = currentById.get(id);
-
-      if (existing) {
-        mergedById.set(id, normalizeTeam(rawTeam, existing));
-      } else {
-        mergedById.set(id, normalizeTeam(rawTeam, {
-          id,
-          name: `Tím ${id}`,
-          sector: "A",
-          peg: String(id),
-          active: false,
-          photo: null
-        }));
-      }
-    }
-
-    const teams = Array.from(mergedById.values())
-      .filter(t => Number(t.id) > 0)
-      .sort((a, b) => Number(a.id) - Number(b.id));
-
-    const incomingJudges = Array.isArray(incoming.judges)
-      ? incoming.judges
-      : (Array.isArray(incoming?.meta?.judges) ? incoming.meta.judges : []);
-
-    const judges = normalizeJudges(
-      incomingJudges
-        .map(j => normalizeJudge(j, j))
-        .filter(j => String(j.username || "").toLowerCase() !== ADMIN_USER.username.toLowerCase())
-    );
-
-    const usernameSet = new Set();
-    for (const judge of judges) {
-      const key = judge.username.toLowerCase();
-      if (usernameSet.has(key)) {
-        return res.status(400).json({
+      if (!team) {
+        return res.json({
           ok: false,
-          error: `Duplicitné meno rozhodcu: ${judge.username}`
+          error: "Tím neexistuje"
         });
       }
-      usernameSet.add(key);
-    }
 
-    const nextJudgeId = judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1;
-
-    const dataToSave = {
-      ...current,
-      sectors,
-      teams,
-      catches: current.catches || [],
-      judges,
-sponsors,
-
-meta:{
-        ...currentMeta,
-        judges,
-        nextJudgeId,
-        eventName: normalizeEventName(incoming?.meta?.eventName || currentMeta.eventName),
-eventSub: normalizeEventSub(incoming?.meta?.eventSub || currentMeta.eventSub),
-leaderboardMode:
-  incoming?.meta?.leaderboardMode === "TOP5" || incoming?.meta?.leaderboardMode === "BOTH"
-    ? incoming.meta.leaderboardMode
-    : "TOTAL"
+      if (!req.file) {
+        return res.json({
+          ok: false,
+          error: "Chýba súbor"
+        });
       }
-    };
 
-    saveData(dataToSave, {
-      onAfterSave: (savedData) => {
-        backupService.createBackupFromData(savedData, "data");
-        buildAndBroadcastLiveState();
+      const oldPhoto =
+        team.photo || null;
+
+      const newPhoto =
+        "/uploads/" +
+        req.file.filename;
+
+      team.photo = newPhoto;
+
+      saveData(data, {
+        onAfterSave: (savedData) => {
+          backupService
+            .createBackupFromData(
+              savedData,
+              "data"
+            );
+
+          buildAndBroadcastLiveState();
+        }
+      });
+
+      if (
+        oldPhoto &&
+        oldPhoto !== newPhoto
+      ) {
+        deletePhysicalFileFromPublic(
+          oldPhoto
+        );
+      }
+
+      return res.json({
+        ok: true,
+        path: team.photo
+      });
+    } catch (e) {
+      console.error(e);
+
+      return res.status(500).json({
+        ok: false,
+        error:
+          "Upload fotky zlyhal"
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/catch",
+  requireLogin,
+  upload.single("photo"),
+  (req, res) => {
+    try {
+      const data = loadData();
+      const meta = ensureMeta(data);
+
+      const teamId =
+        Number(req.body.teamId || 0);
+
+      const weight =
+        Number(req.body.weight || 0);
+
+      const clientSubmissionId =
+        String(
+          req.body.clientSubmissionId ||
+          ""
+        ).trim();
+
+      const catchTime =
+        normalizeCatchTime(
+          req.body.catchTime
+        );
+
+      if (
+        clientSubmissionId &&
+        hasProcessedSubmissionId(
+          data,
+          clientSubmissionId
+        )
+      ) {
+        return res.json({
+          ok: true,
+          duplicate: true,
+          message:
+            "Úlovok už bol spracovaný",
+          clientSubmissionId
+        });
+      }
+
+      const result =
+        catchService.addCatch(
+          data,
+          {
+            teamId,
+            weight,
+            photo: req.file
+              ? "/uploads/" +
+                req.file.filename
+              : null
+          }
+        );
+
+      if (result.error) {
+        return res.json({
+          ok: false,
+          error: result.error
+        });
+      }
+
+      const newCatch =
+        result.newCatch;
+
+      newCatch.catchTime =
+        catchTime;
+
+      // Ak je LIVE pozastavené,
+      // úlovok sa normálne uloží,
+      // ale verejná LIVE tabuľka
+      // ho zatiaľ neuvidí.
+      newCatch.liveHidden =
+        meta.livePublishingPaused === true;
+
+      if (clientSubmissionId) {
+        markProcessedSubmissionId(
+          data,
+          clientSubmissionId
+        );
+      }
+
+      const saved = saveData(data, {
+        onAfterSave: (savedData) => {
+          backupService
+            .createBackupFromData(
+              savedData,
+              "data"
+            );
+
+          buildAndBroadcastLiveState();
+        }
+      });
+
+      console.log(
+        "Úlovok uložený:",
+        {
+          catchId: newCatch.id,
+          teamId,
+          weight,
+          catchTime,
+          liveHidden:
+            newCatch.liveHidden,
+          totalCatches:
+            saved.catches.length,
+          clientSubmissionId:
+            clientSubmissionId ||
+            null
+        }
+      );
+
+      return res.json({
+        ok: true,
+        catchId: newCatch.id,
+        totalCatches:
+          saved.catches.length,
+        clientSubmissionId:
+          clientSubmissionId ||
+          null,
+        liveHidden:
+          newCatch.liveHidden === true
+      });
+    } catch (e) {
+      console.error(
+        "API /api/catch chyba:",
+        e
+      );
+
+      return res.status(500).json({
+        ok: false,
+        error:
+          "Ukladanie úlovku zlyhalo"
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/admin/setup",
+  requireAdmin,
+  (req, res) => {
+    const data = loadData();
+    const meta = ensureMeta(data);
+    const judges =
+      getJudgesFromData(data);
+
+    const hiddenCatchCount =
+      (data.catches || [])
+        .filter(
+          c => c?.liveHidden === true
+        ).length;
+
+    res.json({
+      sectors:
+        data.sectors || {},
+      teams:
+        data.teams || [],
+      catches:
+        data.catches || [],
+      judges,
+      sponsors:
+        data.sponsors || [],
+
+      meta: {
+        ...meta,
+        judges,
+        eventName:
+          normalizeEventName(
+            meta.eventName
+          ),
+        eventSub:
+          normalizeEventSub(
+            meta.eventSub
+          ),
+        livePublishingPaused:
+          meta.livePublishingPaused ===
+          true,
+        hiddenCatchCount
       }
     });
-
-    return res.json({ ok: true });
-  } catch (e) {
-    console.error("API /api/admin/setup chyba:", e);
-    return res.status(500).json({ ok: false, error: "Ukladanie admin dát zlyhalo" });
   }
-});
+);
 
+app.post(
+  "/api/admin/setup",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const current =
+        loadData();
+
+      const currentMeta =
+        ensureMeta(current);
+
+      const incoming =
+        req.body || {};
+
+      const sponsors =
+        Array.isArray(
+          incoming.sponsors
+        )
+          ? incoming.sponsors
+          : [];
+
+      const sectors =
+        normalizeSectors(
+          incoming.sectors,
+          current.sectors
+        );
+
+      const currentTeams =
+        Array.isArray(
+          current.teams
+        )
+          ? current.teams
+          : [];
+
+      const incomingTeams =
+        Array.isArray(
+          incoming.teams
+        )
+          ? incoming.teams
+          : [];
+
+      const currentById =
+        new Map(
+          currentTeams.map(
+            team => [
+              Number(team.id),
+              { ...team }
+            ]
+          )
+        );
+
+      const mergedById =
+        new Map(
+          currentTeams.map(
+            team => [
+              Number(team.id),
+              { ...team }
+            ]
+          )
+        );
+
+      for (
+        const rawTeam
+        of incomingTeams
+      ) {
+        const id =
+          Number(
+            rawTeam?.id || 0
+          );
+
+        if (!id) continue;
+
+        const existing =
+          currentById.get(id);
+
+        if (existing) {
+          mergedById.set(
+            id,
+            normalizeTeam(
+              rawTeam,
+              existing
+            )
+          );
+        } else {
+          mergedById.set(
+            id,
+            normalizeTeam(
+              rawTeam,
+              {
+                id,
+                name: `Tím ${id}`,
+                sector: "A",
+                peg: String(id),
+                active: false,
+                photo: null
+              }
+            )
+          );
+        }
+      }
+
+      const teams =
+        Array.from(
+          mergedById.values()
+        )
+          .filter(
+            t =>
+              Number(t.id) > 0
+          )
+          .sort(
+            (a, b) =>
+              Number(a.id) -
+              Number(b.id)
+          );
+
+      const incomingJudges =
+        Array.isArray(
+          incoming.judges
+        )
+          ? incoming.judges
+          : (
+              Array.isArray(
+                incoming?.meta
+                  ?.judges
+              )
+                ? incoming.meta
+                    .judges
+                : []
+            );
+
+      const judges =
+        normalizeJudges(
+          incomingJudges
+            .map(
+              j =>
+                normalizeJudge(
+                  j,
+                  j
+                )
+            )
+            .filter(
+              j =>
+                String(
+                  j.username || ""
+                ).toLowerCase() !==
+                ADMIN_USER.username
+                  .toLowerCase()
+            )
+        );
+
+      const usernameSet =
+        new Set();
+
+      for (
+        const judge
+        of judges
+      ) {
+        const key =
+          judge.username
+            .toLowerCase();
+
+        if (
+          usernameSet.has(key)
+        ) {
+          return res
+            .status(400)
+            .json({
+              ok: false,
+              error:
+                `Duplicitné meno rozhodcu: ${judge.username}`
+            });
+        }
+
+        usernameSet.add(key);
+      }
+
+      const nextJudgeId =
+        judges.reduce(
+          (max, j) =>
+            Math.max(
+              max,
+              Number(j.id) || 0
+            ),
+          0
+        ) + 1;
+
+      const dataToSave = {
+        ...current,
+        sectors,
+        teams,
+        catches:
+          current.catches || [],
+        judges,
+        sponsors,
+
+        meta: {
+          ...currentMeta,
+          judges,
+          nextJudgeId,
+
+          eventName:
+            normalizeEventName(
+              incoming?.meta
+                ?.eventName ||
+              currentMeta.eventName
+            ),
+
+          eventSub:
+            normalizeEventSub(
+              incoming?.meta
+                ?.eventSub ||
+              currentMeta.eventSub
+            ),
+
+          leaderboardMode:
+            incoming?.meta
+              ?.leaderboardMode ===
+                "TOP5" ||
+            incoming?.meta
+              ?.leaderboardMode ===
+                "BOTH"
+              ? incoming.meta
+                  .leaderboardMode
+              : "TOTAL",
+
+          // Tento stav sa nemení
+          // cez obyčajné ULOŽIŤ VŠETKO.
+          // Má vlastné bezpečné API.
+          livePublishingPaused:
+            currentMeta
+              .livePublishingPaused ===
+            true
+        }
+      };
+
+      saveData(
+        dataToSave,
+        {
+          onAfterSave:
+            (savedData) => {
+              backupService
+                .createBackupFromData(
+                  savedData,
+                  "data"
+                );
+
+              buildAndBroadcastLiveState();
+            }
+        }
+      );
+
+      return res.json({
+        ok: true
+      });
+    } catch (e) {
+      console.error(
+        "API /api/admin/setup chyba:",
+        e
+      );
+
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          error:
+            "Ukladanie admin dát zlyhalo"
+        });
+    }
+  }
+);
+
+// ==================================================
+// CENTRÁLNE OVLÁDANIE LIVE ZVEREJŇOVANIA
+// ==================================================
+
+app.post(
+  "/api/admin/live-publishing",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const paused =
+        req.body?.paused === true;
+
+      const data = loadData();
+      const meta =
+        ensureMeta(data);
+
+      meta.livePublishingPaused =
+        paused;
+
+      saveData(data, {
+        onAfterSave:
+          (savedData) => {
+            backupService
+              .createBackupFromData(
+                savedData,
+                "data"
+              );
+
+            buildAndBroadcastLiveState();
+          }
+      });
+
+      const hiddenCatchCount =
+        (data.catches || [])
+          .filter(
+            c =>
+              c?.liveHidden ===
+              true
+          ).length;
+
+      return res.json({
+        ok: true,
+        paused,
+        hiddenCatchCount
+      });
+    } catch (e) {
+      console.error(
+        "Live publishing toggle chyba:",
+        e
+      );
+
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          error:
+            "Zmena LIVE režimu zlyhala"
+        });
+    }
+  }
+);
+
+app.post(
+  "/api/admin/publish-hidden-catches",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const data =
+        loadData();
+
+      const meta =
+        ensureMeta(data);
+
+      let publishedCount = 0;
+
+      for (
+        const item
+        of (data.catches || [])
+      ) {
+        if (
+          item?.liveHidden ===
+          true
+        ) {
+          item.liveHidden = false;
+          publishedCount++;
+        }
+      }
+
+      // Po zverejnení zostane
+      // systém v normálnom LIVE režime.
+      meta.livePublishingPaused =
+        false;
+
+      saveData(data, {
+        onAfterSave:
+          (savedData) => {
+            backupService
+              .createBackupFromData(
+                savedData,
+                "data"
+              );
+
+            buildAndBroadcastLiveState();
+          }
+      });
+
+      return res.json({
+        ok: true,
+        publishedCount,
+        paused: false,
+        hiddenCatchCount: 0
+      });
+    } catch (e) {
+      console.error(
+        "Publish hidden catches chyba:",
+        e
+      );
+
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          error:
+            "Zverejnenie skrytých úlovkov zlyhalo"
+        });
+    }
+  }
+);
 app.post("/api/admin/reset-catches", requireAdmin, (req, res) => {
   try {
     const confirmText = String(req.body?.confirmText || "").trim();
@@ -636,6 +1201,7 @@ app.post("/api/admin/reset-catches", requireAdmin, (req, res) => {
     });
   } catch (e) {
     console.error("Reset catches chyba:", e);
+
     return res.status(500).json({
       ok: false,
       error: "Reset úlovkov zlyhal"
@@ -643,291 +1209,647 @@ app.post("/api/admin/reset-catches", requireAdmin, (req, res) => {
   }
 });
 
-app.post("/api/admin/restore-backup", requireAdmin, uploadJson.single("backup"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ ok: false, error: "Chýba JSON súbor" });
-    }
 
-    const rawText = req.file.buffer.toString("utf8");
-    let parsed;
-
+app.post(
+  "/api/admin/restore-backup",
+  requireAdmin,
+  uploadJson.single("backup"),
+  (req, res) => {
     try {
-      parsed = JSON.parse(rawText);
+      if (!req.file) {
+        return res.status(400).json({
+          ok: false,
+          error: "Chýba JSON súbor"
+        });
+      }
+
+      const rawText = req.file.buffer.toString("utf8");
+
+      let parsed;
+
+      try {
+        parsed = JSON.parse(rawText);
+      } catch (e) {
+        return res.status(400).json({
+          ok: false,
+          error: "Súbor nie je platný JSON"
+        });
+      }
+
+      if (!parsed || typeof parsed !== "object") {
+        return res.status(400).json({
+          ok: false,
+          error: "Neplatná štruktúra dát"
+        });
+      }
+
+      if (
+        !Array.isArray(parsed.teams) ||
+        !Array.isArray(parsed.catches)
+      ) {
+        return res.status(400).json({
+          ok: false,
+          error: "Záloha nemá platnú RCC štruktúru"
+        });
+      }
+
+      const safeData = {
+        sectors: normalizeSectors(
+          parsed.sectors,
+          defaultSectors()
+        ),
+
+        teams: parsed.teams
+          .map(t => normalizeTeam(t, t))
+          .filter(t => Number(t.id) > 0)
+          .sort((a, b) => Number(a.id) - Number(b.id)),
+
+        catches: parsed.catches
+          .map(normalizeCatch)
+          .filter(Boolean)
+          .map(c => ({
+            ...c,
+            catchTime: normalizeCatchTime(c.catchTime),
+            liveHidden: c.liveHidden === true
+          })),
+
+        judges: normalizeJudges(
+          Array.isArray(parsed.judges)
+            ? parsed.judges
+            : (
+                Array.isArray(parsed?.meta?.judges)
+                  ? parsed.meta.judges
+                  : []
+              )
+        ),
+
+        sponsors: Array.isArray(parsed.sponsors)
+          ? parsed.sponsors
+          : [],
+
+        meta: parsed.meta || {}
+      };
+
+      ensureMeta(safeData);
+
+      safeData.meta.judges = safeData.judges;
+
+      safeData.meta.nextJudgeId =
+        safeData.judges.reduce(
+          (max, j) =>
+            Math.max(max, Number(j.id) || 0),
+          0
+        ) + 1;
+
+      safeData.meta.eventName =
+        normalizeEventName(
+          safeData.meta.eventName
+        );
+
+      safeData.meta.eventSub =
+        normalizeEventSub(
+          safeData.meta.eventSub
+        );
+
+      safeData.meta.livePublishingPaused =
+        safeData.meta.livePublishingPaused === true;
+
+      if (!safeData.teams.length) {
+        return res.status(400).json({
+          ok: false,
+          error: "Záloha neobsahuje žiadne tímy"
+        });
+      }
+
+      const current = loadData();
+
+      if (
+        (current.catches?.length || 0) > 0 &&
+        (safeData.catches?.length || 0) === 0
+      ) {
+        return res.status(400).json({
+          ok: false,
+          error:
+            "Záloha neobsahuje úlovky – obnova zablokovaná (ochrana dát)"
+        });
+      }
+
+      const maxTeamId =
+        safeData.teams.reduce(
+          (max, t) =>
+            Math.max(max, Number(t.id) || 0),
+          0
+        );
+
+      safeData.meta.nextTeamId = Math.max(
+        Number(safeData.meta.nextTeamId || 0),
+        maxTeamId + 1,
+        DEFAULT_TEAM_COUNT + 1
+      );
+
+      cleanupProcessedSubmissionIds(safeData);
+
+      backupService.createBackupFromData(
+        current,
+        "pre-restore"
+      );
+
+      writeJsonAtomic(
+        DATA_FILE,
+        safeData
+      );
+
+      backupService.createBackupFromData(
+        safeData,
+        "data"
+      );
+
+      buildAndBroadcastLiveState();
+
+      return res.json({
+        ok: true,
+        message: "Dáta boli obnovené zo zálohy"
+      });
+
     } catch (e) {
-      return res.status(400).json({ ok: false, error: "Súbor nie je platný JSON" });
-    }
+      console.error(
+        "Restore backup chyba:",
+        e
+      );
 
-    if (!parsed || typeof parsed !== "object") {
-      return res.status(400).json({ ok: false, error: "Neplatná štruktúra dát" });
-    }
-
-    if (!Array.isArray(parsed.teams) || !Array.isArray(parsed.catches)) {
-      return res.status(400).json({ ok: false, error: "Záloha nemá platnú RCC štruktúru" });
-    }
-
-    const safeData = {
-      sectors: normalizeSectors(parsed.sectors, defaultSectors()),
-      teams: parsed.teams
-        .map(t => normalizeTeam(t, t))
-        .filter(t => Number(t.id) > 0)
-        .sort((a, b) => Number(a.id) - Number(b.id)),
-      catches: parsed.catches
-        .map(normalizeCatch)
-        .filter(Boolean)
-        .map(c => ({
-          ...c,
-          catchTime: normalizeCatchTime(c.catchTime)
-        })),
-      judges: normalizeJudges(
-        Array.isArray(parsed.judges)
-          ? parsed.judges
-          : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : [])
-      ),
-      meta: parsed.meta || {}
-    };
-
-    ensureMeta(safeData);
-
-    safeData.meta.judges = safeData.judges;
-    safeData.meta.nextJudgeId = safeData.judges.reduce(
-      (max, j) => Math.max(max, Number(j.id) || 0),
-      0
-    ) + 1;
-    safeData.meta.eventName = normalizeEventName(safeData.meta.eventName);
-    safeData.meta.eventSub = normalizeEventSub(safeData.meta.eventSub);
-
-    if (!safeData.teams.length) {
-      return res.status(400).json({ ok: false, error: "Záloha neobsahuje žiadne tímy" });
-    }
-
-    const current = loadData();
-
-    if ((current.catches?.length || 0) > 0 && (safeData.catches?.length || 0) === 0) {
-      return res.status(400).json({
+      return res.status(500).json({
         ok: false,
-        error: "Záloha neobsahuje úlovky – obnova zablokovaná (ochrana dát)"
+        error: "Obnova zo zálohy zlyhala"
       });
     }
-
-    const maxTeamId = safeData.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
-    safeData.meta.nextTeamId = Math.max(
-      Number(safeData.meta.nextTeamId || 0),
-      maxTeamId + 1,
-      DEFAULT_TEAM_COUNT + 1
-    );
-
-    cleanupProcessedSubmissionIds(safeData);
-
-    backupService.createBackupFromData(current, "pre-restore");
-    writeJsonAtomic(DATA_FILE, safeData);
-    backupService.createBackupFromData(safeData, "data");
-    buildAndBroadcastLiveState();
-
-    return res.json({
-      ok: true,
-      message: "Dáta boli obnovené zo zálohy"
-    });
-  } catch (e) {
-    console.error("Restore backup chyba:", e);
-    return res.status(500).json({ ok: false, error: "Obnova zo zálohy zlyhala" });
   }
-});
+);
 
-app.get("/api/admin/download-data", requireAdmin, (req, res) => {
-  try {
-    ensureDataFile();
 
-    const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const parsed = JSON.parse(raw || "{}");
-    const normalized = {
-      sectors: normalizeSectors(parsed.sectors, defaultSectors()),
-      teams: Array.isArray(parsed.teams)
-        ? parsed.teams
-            .map(t => normalizeTeam(t, t))
-            .filter(t => Number(t.id) > 0)
-            .sort((a, b) => Number(a.id) - Number(b.id))
-        : [],
-      catches: Array.isArray(parsed.catches)
-        ? parsed.catches
-            .map(normalizeCatch)
-            .filter(Boolean)
-            .map(c => ({
-              ...c,
-              catchTime: normalizeCatchTime(c.catchTime)
-            }))
-        : [],
-      judges: normalizeJudges(
-        Array.isArray(parsed.judges)
-          ? parsed.judges
-          : (Array.isArray(parsed?.meta?.judges) ? parsed.meta.judges : [])
-      ),
-      meta: parsed.meta || {}
-    };
+app.get(
+  "/api/admin/download-data",
+  requireAdmin,
+  (req, res) => {
+    try {
+      ensureDataFile();
 
-    ensureMeta(normalized);
-    normalized.meta.judges = normalized.judges;
-    normalized.meta.nextJudgeId = normalized.judges.reduce(
-      (max, j) => Math.max(max, Number(j.id) || 0),
-      0
-    ) + 1;
-    normalized.meta.eventName = normalizeEventName(normalized.meta.eventName);
-    normalized.meta.eventSub = normalizeEventSub(normalized.meta.eventSub);
+      const raw =
+        fs.readFileSync(
+          DATA_FILE,
+          "utf8"
+        );
 
-    const maxTeamId = normalized.teams.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0);
-    normalized.meta.nextTeamId = Math.max(
-      Number(normalized.meta.nextTeamId || 0),
-      maxTeamId + 1,
-      DEFAULT_TEAM_COUNT + 1
-    );
+      const parsed =
+        JSON.parse(raw || "{}");
 
-    cleanupProcessedSubmissionIds(normalized);
+      const normalized = {
+        sectors: normalizeSectors(
+          parsed.sectors,
+          defaultSectors()
+        ),
 
-    const filename = `rcc-data-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+        teams: Array.isArray(parsed.teams)
+          ? parsed.teams
+              .map(t => normalizeTeam(t, t))
+              .filter(t => Number(t.id) > 0)
+              .sort(
+                (a, b) =>
+                  Number(a.id) -
+                  Number(b.id)
+              )
+          : [],
 
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    return res.send(JSON.stringify(normalized, null, 2));
-  } catch (e) {
-    console.error("Download data chyba:", e);
-    return res.status(500).json({ ok: false, error: "Stiahnutie dát zlyhalo" });
+        catches: Array.isArray(parsed.catches)
+          ? parsed.catches
+              .map(normalizeCatch)
+              .filter(Boolean)
+              .map(c => ({
+                ...c,
+                catchTime:
+                  normalizeCatchTime(
+                    c.catchTime
+                  ),
+                liveHidden:
+                  c.liveHidden === true
+              }))
+          : [],
+
+        judges: normalizeJudges(
+          Array.isArray(parsed.judges)
+            ? parsed.judges
+            : (
+                Array.isArray(
+                  parsed?.meta?.judges
+                )
+                  ? parsed.meta.judges
+                  : []
+              )
+        ),
+
+        sponsors: Array.isArray(parsed.sponsors)
+          ? parsed.sponsors
+          : [],
+
+        meta: parsed.meta || {}
+      };
+
+      ensureMeta(normalized);
+
+      normalized.meta.judges =
+        normalized.judges;
+
+      normalized.meta.nextJudgeId =
+        normalized.judges.reduce(
+          (max, j) =>
+            Math.max(
+              max,
+              Number(j.id) || 0
+            ),
+          0
+        ) + 1;
+
+      normalized.meta.eventName =
+        normalizeEventName(
+          normalized.meta.eventName
+        );
+
+      normalized.meta.eventSub =
+        normalizeEventSub(
+          normalized.meta.eventSub
+        );
+
+      normalized.meta.livePublishingPaused =
+        normalized.meta.livePublishingPaused === true;
+
+      const maxTeamId =
+        normalized.teams.reduce(
+          (max, t) =>
+            Math.max(
+              max,
+              Number(t.id) || 0
+            ),
+          0
+        );
+
+      normalized.meta.nextTeamId =
+        Math.max(
+          Number(
+            normalized.meta.nextTeamId || 0
+          ),
+          maxTeamId + 1,
+          DEFAULT_TEAM_COUNT + 1
+        );
+
+      cleanupProcessedSubmissionIds(
+        normalized
+      );
+
+      const filename =
+        `rcc-data-${new Date()
+          .toISOString()
+          .replace(/[:.]/g, "-")}.json`;
+
+      res.setHeader(
+        "Content-Type",
+        "application/json; charset=utf-8"
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+
+      return res.send(
+        JSON.stringify(
+          normalized,
+          null,
+          2
+        )
+      );
+
+    } catch (e) {
+      console.error(
+        "Download data chyba:",
+        e
+      );
+
+      return res.status(500).json({
+        ok: false,
+        error: "Stiahnutie dát zlyhalo"
+      });
+    }
   }
-});
+);
 
-app.get("/api/admin/catches", requireAdmin, (req, res) => {
-  try {
-    const data = loadData();
 
-    const catches = [...(data.catches || [])]
-      .sort((a, b) => new Date(b.time) - new Date(a.time))
-      .map(c => {
-        const team = getTeamById(data, c.teamId);
+app.get(
+  "/api/admin/catches",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const data = loadData();
 
-        return {
-          id: c.id,
-          teamId: Number(c.teamId),
-          teamName: team?.name || `Tím ${c.teamId}`,
-          teamSector: team?.sector || "-",
-          teamPeg: team?.peg || "-",
-          weight: Number(c.weight || 0),
-          time: c.time,
-          catchTime: normalizeCatchTime(c.catchTime),
-          photo: c.photo || null
-        };
+      const catches =
+        [...(data.catches || [])]
+          .sort(
+            (a, b) =>
+              new Date(b.time) -
+              new Date(a.time)
+          )
+          .map(c => {
+            const team =
+              getTeamById(
+                data,
+                c.teamId
+              );
+
+            return {
+              id: c.id,
+
+              teamId:
+                Number(c.teamId),
+
+              teamName:
+                team?.name ||
+                `Tím ${c.teamId}`,
+
+              teamSector:
+                team?.sector || "-",
+
+              teamPeg:
+                team?.peg || "-",
+
+              weight:
+                Number(c.weight || 0),
+
+              time: c.time,
+
+              catchTime:
+                normalizeCatchTime(
+                  c.catchTime
+                ),
+
+              photo:
+                c.photo || null,
+
+              liveHidden:
+                c.liveHidden === true
+            };
+          });
+
+      return res.json({
+        ok: true,
+        catches
       });
 
-    return res.json({ ok: true, catches });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, catches: [], error: "Načítanie úlovkov zlyhalo" });
+    } catch (e) {
+      console.error(e);
+
+      return res.status(500).json({
+        ok: false,
+        catches: [],
+        error: "Načítanie úlovkov zlyhalo"
+      });
+    }
   }
-});
+);
 
-app.post("/api/admin/catch-update/:id", requireAdmin, (req, res) => {
-  try {
-    const catchId = Number(req.params.id);
-    const teamId = Number(req.body.teamId || 0);
-    const weight = Number(req.body.weight || 0);
-    const catchTime = normalizeCatchTime(req.body.catchTime);
 
-    const data = loadData();
+app.post(
+  "/api/admin/catch-update/:id",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const catchId =
+        Number(req.params.id);
 
-    const result = catchService.updateCatch(data, catchId, { teamId, weight });
+      const teamId =
+        Number(req.body.teamId || 0);
 
-    if (result.error) {
-      return res.json({ ok: false, error: result.error });
-    }
+      const weight =
+        Number(req.body.weight || 0);
 
-    const catchItem = (data.catches || []).find(c => Number(c.id) === catchId);
-    if (catchItem) {
-      catchItem.catchTime = catchTime;
-    }
+      const catchTime =
+        normalizeCatchTime(
+          req.body.catchTime
+        );
 
-    saveData(data, {
-      onAfterSave: (savedData) => {
-        backupService.createBackupFromData(savedData, "data");
-        buildAndBroadcastLiveState();
+      const data =
+        loadData();
+
+      const result =
+        catchService.updateCatch(
+          data,
+          catchId,
+          {
+            teamId,
+            weight
+          }
+        );
+
+      if (result.error) {
+        return res.json({
+          ok: false,
+          error: result.error
+        });
       }
-    });
 
-    return res.json({ ok: true });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, error: "Úprava úlovku zlyhala" });
-  }
-});
+      const catchItem =
+        (data.catches || [])
+          .find(
+            c =>
+              Number(c.id) ===
+              catchId
+          );
 
-app.post("/api/admin/catch-delete/:id", requireAdmin, (req, res) => {
-  try {
-    const catchId = Number(req.params.id);
-    const data = loadData();
-
-    const result = catchService.deleteCatch(data, catchId);
-
-    if (result.error) {
-      return res.json({ ok: false, error: result.error });
-    }
-
-    const catchItem = result.deleted;
-
-    if (catchItem.photo) {
-      deletePhysicalFileFromPublic(catchItem.photo);
-    }
-
-    saveData(data, {
-      allowEmptyCatches: true,
-      onAfterSave: (savedData) => {
-        backupService.createBackupFromData(savedData, "data");
-        buildAndBroadcastLiveState();
+      if (catchItem) {
+        catchItem.catchTime =
+          catchTime;
       }
-    });
 
-    return res.json({ ok: true });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, error: "Mazanie úlovku zlyhalo" });
+      saveData(data, {
+        onAfterSave:
+          (savedData) => {
+            backupService
+              .createBackupFromData(
+                savedData,
+                "data"
+              );
+
+            buildAndBroadcastLiveState();
+          }
+      });
+
+      return res.json({
+        ok: true
+      });
+
+    } catch (e) {
+      console.error(e);
+
+      return res.status(500).json({
+        ok: false,
+        error: "Úprava úlovku zlyhala"
+      });
+    }
   }
-});
+);
 
-app.get("/api/sectors", (req, res) => {
-  const data = loadData();
-  const sectors = Object.values(data.sectors || {})
-    .filter(s => s && s.visible)
-    .sort((a, b) => String(a.code).localeCompare(String(b.code)));
 
-  res.json(sectors);
-});
+app.post(
+  "/api/admin/catch-delete/:id",
+  requireAdmin,
+  (req, res) => {
+    try {
+      const catchId =
+        Number(req.params.id);
 
-app.get("/api/state", (req, res) => {
-  try {
-    const data = loadData();
-    const publicState = stateService.buildPublicState(data);
+      const data =
+        loadData();
 
-    return res.json({
-  ...publicState,
-  sponsors: data.sponsors || [],
-  eventName: data?.meta?.eventName || "RCC Live tabuľka",
-  eventSub: data?.meta?.eventSub || "Ružín Carp Classic"
-});
-  } catch (e) {
-    console.error("API /api/state chyba:", e);
-    return res.status(500).json({
-      lb: [],
-      totalWeight: 0,
-      totalFish: 0,
-      topFish: null,
-      lastCatch: null,
-      teamCatches: {},
-      top3teams: [],
-      eventName: "RCC Live tabuľka",
-      eventSub: "Ružín Carp Classic"
-    });
+      const result =
+        catchService.deleteCatch(
+          data,
+          catchId
+        );
+
+      if (result.error) {
+        return res.json({
+          ok: false,
+          error: result.error
+        });
+      }
+
+      const catchItem =
+        result.deleted;
+
+      if (catchItem.photo) {
+        deletePhysicalFileFromPublic(
+          catchItem.photo
+        );
+      }
+
+      saveData(data, {
+        allowEmptyCatches: true,
+
+        onAfterSave:
+          (savedData) => {
+            backupService
+              .createBackupFromData(
+                savedData,
+                "data"
+              );
+
+            buildAndBroadcastLiveState();
+          }
+      });
+
+      return res.json({
+        ok: true
+      });
+
+    } catch (e) {
+      console.error(e);
+
+      return res.status(500).json({
+        ok: false,
+        error: "Mazanie úlovku zlyhalo"
+      });
+    }
   }
-});
+);
+
+
+app.get(
+  "/api/sectors",
+  (req, res) => {
+    const data =
+      loadData();
+
+    const sectors =
+      Object.values(
+        data.sectors || {}
+      )
+        .filter(
+          s =>
+            s &&
+            s.visible
+        )
+        .sort(
+          (a, b) =>
+            String(a.code)
+              .localeCompare(
+                String(b.code)
+              )
+        );
+
+    res.json(sectors);
+  }
+);
+
+
+app.get(
+  "/api/state",
+  (req, res) => {
+    try {
+      const data =
+        loadData();
+
+      // Verejný endpoint dostane
+      // iba úlovky, ktoré nie sú
+      // označené ako skryté.
+      const publicData =
+        getPublicLiveData(data);
+
+      const publicState =
+        stateService
+          .buildPublicState(
+            publicData
+          );
+
+      return res.json({
+        ...publicState,
+
+        sponsors:
+          data.sponsors || [],
+
+        eventName:
+          data?.meta?.eventName ||
+          "RCC Live tabuľka",
+
+        eventSub:
+          data?.meta?.eventSub ||
+          "Ružín Carp Classic"
+      });
+
+    } catch (e) {
+      console.error(
+        "API /api/state chyba:",
+        e
+      );
+
+      return res.status(500).json({
+        lb: [],
+        totalWeight: 0,
+        totalFish: 0,
+        topFish: null,
+        lastCatch: null,
+        teamCatches: {},
+        top3teams: [],
+        eventName:
+          "RCC Live tabuľka",
+        eventSub:
+          "Ružín Carp Classic"
+      });
+    }
+  }
+);
+
 
 app.get("/", (req, res) => {
   res.redirect("/live.html");
 });
+
 
 app.get("/health", (req, res) => {
   return res.json({
@@ -939,10 +1861,31 @@ app.get("/health", (req, res) => {
   });
 });
 
+
 server.listen(PORT, () => {
-  console.log("Server beží na porte", PORT);
-  console.log("NODE_ENV =", process.env.NODE_ENV || "undefined");
-  console.log("DATA_ROOT =", DATA_ROOT);
-  console.log("DATA_FILE =", DATA_FILE);
-  console.log("UPLOADS_DIR =", UPLOADS_DIR);
+  console.log(
+    "Server beží na porte",
+    PORT
+  );
+
+  console.log(
+    "NODE_ENV =",
+    process.env.NODE_ENV ||
+    "undefined"
+  );
+
+  console.log(
+    "DATA_ROOT =",
+    DATA_ROOT
+  );
+
+  console.log(
+    "DATA_FILE =",
+    DATA_FILE
+  );
+
+  console.log(
+    "UPLOADS_DIR =",
+    UPLOADS_DIR
+  );
 });

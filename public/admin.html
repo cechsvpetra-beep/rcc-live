@@ -348,6 +348,28 @@ label.inline{
   text-align:center;
 }
 
+.liveControl{
+  border:2px solid #245f3a;
+  background:linear-gradient(180deg,#10251a 0%,#0e1814 100%);
+}
+.liveControl.paused{
+  border-color:#b45309;
+  background:linear-gradient(180deg,#2a1b0c 0%,#17120d 100%);
+}
+.liveControlGrid{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:16px;
+  align-items:center;
+}
+.liveState{font-size:20px;font-weight:900;margin-top:5px}
+.liveState.on{color:#4ade80}
+.liveState.off{color:#f59e0b}
+.liveButtons{display:flex;gap:10px;flex-wrap:wrap}
+.livePauseBtn{background:#b45309;color:white}
+.livePublishBtn{background:#22c55e;color:#07130b}
+.hiddenCount{font-weight:900;color:#fbbf24}
+
 @media (max-width:1200px){
   .rowTeam{
     grid-template-columns:60px 1fr 90px 90px 110px 1fr 120px;
@@ -397,6 +419,21 @@ label.inline{
 </div>
 
 <div id="status"></div>
+
+<div class="section liveControl" id="liveControlBox">
+  <div class="liveControlGrid">
+    <div>
+      <h2>LIVE zverejňovanie úlovkov</h2>
+      <div class="sectionSub">Rozhodcovia môžu ďalej zapisovať úlovky. Pri pozastavení sa nové úlovky bezpečne uložia na server, ale verejný LIVE ich neuvidí.</div>
+      <div id="livePublishingState" class="liveState on">● ZVEREJŇOVANIE ZAPNUTÉ</div>
+      <div class="small" style="margin-top:8px;">Skryté úlovky čakajúce na zverejnenie: <span id="hiddenCatchCount" class="hiddenCount">0</span></div>
+    </div>
+    <div class="liveButtons">
+      <button id="pauseLiveBtn" class="livePauseBtn" onclick="setLivePublishing(true)">POZASTAVIŤ LIVE</button>
+      <button id="publishHiddenBtn" class="livePublishBtn" onclick="publishHiddenCatches()">ZVEREJNIŤ SKRYTÉ ÚLOVKY</button>
+    </div>
+  </div>
+</div>
 
 <div class="section">
   <h2>Nastavenia preteku</h2>
@@ -577,6 +614,10 @@ function ensureMeta() {
 
   adminData.meta.eventName = normalizeEventName(adminData.meta.eventName);
   adminData.meta.eventSub = normalizeEventSub(adminData.meta.eventSub);
+
+  if (typeof adminData.meta.livePublishingPaused !== "boolean") {
+    adminData.meta.livePublishingPaused = false;
+  }
 }
 
 async function loadAdmin() {
@@ -625,6 +666,7 @@ async function loadAdmin() {
     renderJudges();
     renderCatchSectorFilter();
     renderCatches();
+    renderLivePublishing();
 
     setStatus("Dáta načítané");
   } catch (e) {
@@ -739,6 +781,84 @@ function normalizeData() {
     Number(adminData.meta.nextJudgeId || 1),
     adminData.meta.judges.reduce((max, j) => Math.max(max, Number(j.id) || 0), 0) + 1
   );
+}
+
+function getHiddenCatchCount() {
+  return (Array.isArray(allCatches) ? allCatches : []).filter(c => c?.liveHidden === true).length;
+}
+
+function renderLivePublishing() {
+  ensureMeta();
+  const paused = adminData.meta.livePublishingPaused === true;
+  const count = getHiddenCatchCount();
+  const box = document.getElementById("liveControlBox");
+  const stateEl = document.getElementById("livePublishingState");
+  const countEl = document.getElementById("hiddenCatchCount");
+  const pauseBtn = document.getElementById("pauseLiveBtn");
+  const publishBtn = document.getElementById("publishHiddenBtn");
+
+  if (box) box.classList.toggle("paused", paused);
+  if (stateEl) {
+    stateEl.className = "liveState " + (paused ? "off" : "on");
+    stateEl.textContent = paused ? "● ZVEREJŇOVANIE POZASTAVENÉ" : "● ZVEREJŇOVANIE ZAPNUTÉ";
+  }
+  if (countEl) countEl.textContent = String(count);
+  if (pauseBtn) {
+    pauseBtn.textContent = paused ? "OBNOVIŤ LIVE PRE NOVÉ ÚLOVKY" : "POZASTAVIŤ LIVE";
+    pauseBtn.onclick = () => setLivePublishing(!paused);
+  }
+  if (publishBtn) publishBtn.disabled = count === 0;
+}
+
+async function setLivePublishing(paused) {
+  const question = paused
+    ? "Pozastaviť LIVE? Nové úlovky sa budú ukladať na server, ale verejnosť ich neuvidí."
+    : "Obnoviť LIVE pre nové úlovky? Už skryté úlovky zostanú skryté, kým ich samostatne nezverejníš.";
+  if (!confirm(question)) return;
+
+  try {
+    setStatus(paused ? "Pozastavujem LIVE..." : "Obnovujem LIVE...");
+    const res = await fetch("/api/admin/live-publishing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paused }),
+      credentials: "same-origin"
+    });
+    const out = await res.json();
+    if (!out.ok) { setStatus(out.error || "Zmena LIVE režimu zlyhala", true); return; }
+    adminData.meta.livePublishingPaused = out.paused === true;
+    await loadCatches();
+    renderCatches();
+    renderLivePublishing();
+    setStatus(out.paused ? "LIVE POZASTAVENÉ 🔒 Nové úlovky sa nezverejňujú." : "LIVE pre nové úlovky je opäť zapnuté ✔");
+  } catch (e) {
+    console.error(e);
+    setStatus("Server neodpovedá pri zmene LIVE režimu", true);
+  }
+}
+
+async function publishHiddenCatches() {
+  const count = getHiddenCatchCount();
+  if (!count) return;
+  if (!confirm(`Naozaj chceš naraz zverejniť ${count} skrytých úlovkov? LIVE tabuľka sa okamžite aktualizuje.`)) return;
+
+  try {
+    setStatus(`Zverejňujem ${count} skrytých úlovkov...`);
+    const res = await fetch("/api/admin/publish-hidden-catches", {
+      method: "POST",
+      credentials: "same-origin"
+    });
+    const out = await res.json();
+    if (!out.ok) { setStatus(out.error || "Zverejnenie zlyhalo", true); return; }
+    adminData.meta.livePublishingPaused = false;
+    await loadCatches();
+    renderCatches();
+    renderLivePublishing();
+    setStatus(`ZVEREJNENÉ ✔ Na LIVE bolo pridaných ${out.publishedCount || count} úlovkov.`);
+  } catch (e) {
+    console.error(e);
+    setStatus("Server neodpovedá pri zverejňovaní", true);
+  }
 }
 
 function renderEventSettings() {
@@ -1068,6 +1188,7 @@ function renderCatches() {
           </div>
           <div class="small">
             <span class="tag">${escapeHtml(String(c.weight))} kg</span>
+            ${c.liveHidden ? `<span class="tag" style="background:#7c2d12;color:#fed7aa;">SKRYTÉ Z LIVE</span>` : ""}
           </div>
         </div>
       </div>
