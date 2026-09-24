@@ -4047,6 +4047,91 @@ tbody tr.rank-top-3 td{border-bottom-color:rgba(255,255,255,.075)!important}
 }
 </style>
 
+
+<style id="lk-premium-v15-final">
+/* V15 FINAL — funkčný LIVE balík */
+
+/* Toast nového úlovku */
+.v15Toast{
+  position:fixed;right:22px;top:92px;z-index:20000;
+  width:min(430px,calc(100vw - 28px));
+  display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;
+  padding:11px 14px;border-radius:10px;
+  background:linear-gradient(110deg,#07552f,#07130e 74%);
+  border:1px solid rgba(62,235,139,.38);
+  box-shadow:0 18px 55px rgba(0,0,0,.52),0 0 24px rgba(32,211,113,.10);
+  transform:translateX(calc(100% + 40px));opacity:0;
+  transition:.35s ease;pointer-events:none
+}
+.v15Toast.show{transform:translateX(0);opacity:1}
+.v15ToastPhoto,.v15ToastNoPhoto{width:64px;height:56px;border-radius:7px;object-fit:cover;background:#0c1913}
+.v15ToastNoPhoto{display:grid;place-items:center;color:#678176;font-size:9px}
+.v15ToastLive{color:#48e28d;font-size:9px;font-weight:1000;letter-spacing:1.4px}
+.v15ToastMain{color:#fff;font-size:14px;font-weight:1000;margin-top:2px}
+.v15ToastSub{color:#f0bd4b;font-size:19px;font-weight:1000;margin-top:2px}
+
+/* Detail tímu — premium hero */
+#detailPage .detailCard{
+  border:1px solid rgba(231,172,52,.23)!important;
+  background:linear-gradient(180deg,#0d1714,#07100e)!important;
+}
+#detailPage .detailTop{
+  background:
+    radial-gradient(circle at 12% 30%,rgba(229,170,51,.11),transparent 28%),
+    linear-gradient(100deg,#101916,#07100e)!important;
+}
+#detailPage .detailTitle{color:#f3bf4c!important;letter-spacing:.4px!important}
+#detailPage .detailTeamPhoto{
+  border:2px solid rgba(234,179,60,.42)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.34)!important
+}
+.v15ModeTag{
+  display:inline-flex;align-items:center;margin-top:9px;padding:5px 9px;border-radius:999px;
+  color:#f4c356;background:rgba(224,163,45,.08);border:1px solid rgba(224,163,45,.20);
+  font-size:9px;font-weight:1000;letter-spacing:.8px
+}
+
+/* Detail úlovku s navigáciou */
+.v15ImageNav{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+  width:46px;height:58px;border-radius:8px;border:1px solid rgba(255,255,255,.13);
+  background:rgba(0,0,0,.55);color:#fff;font-size:28px;cursor:pointer
+}
+.v15ImagePrev{left:10px}.v15ImageNext{right:10px}
+.v15ImageNav:hover{background:rgba(214,155,42,.82);color:#120d05}
+.v15ImageCounter{text-align:center;color:#8f9b95;font-size:10px;margin-top:5px}
+
+/* Rekordy v TOP5 */
+.v15Records{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 14px
+}
+.v15Record{
+  min-height:92px;padding:13px 14px;border-radius:8px;
+  border:1px solid rgba(225,165,48,.18);
+  background:linear-gradient(180deg,#0d1714,#07100e)
+}
+.v15Record small{display:block;color:#8a9690;font-size:9px;font-weight:900;letter-spacing:.8px}
+.v15Record strong{display:block;color:#f1bd49;font-size:21px;margin-top:6px;line-height:1}
+.v15Record span{display:block;color:#d8ded9;font-size:10px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Podľa dní — najlepší tím dňa */
+.v15DayWinner{
+  display:inline-flex;align-items:center;gap:6px;margin-left:10px;
+  color:#f0bd49;font-size:9px;font-weight:900
+}
+
+/* Mobil */
+@media(max-width:900px){
+  .v15Toast{top:72px;right:14px}
+  .v15Records{grid-template-columns:1fr 1fr}
+  .v15ImageNav{width:38px;height:50px;font-size:23px}
+  .heroStats{grid-template-columns:1fr!important}
+  .rccDashboard{display:block!important}
+  .rccLeft,.rccCenter,.rccRight{width:100%!important;margin-bottom:12px!important}
+  .rccCenter{order:1!important}.rccLeft{order:2!important}.rccRight{order:3!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -5602,6 +5687,169 @@ startFallbackRefresh();
       }).join("");
     }
   };
+})();
+</script>
+
+
+<script id="lk-premium-v15-final-js">
+(function(){
+  let v15InitialStateSeen=false;
+  let v15LastCatchKey="";
+  let v15Gallery=[];
+  let v15GalleryIndex=0;
+  let v15ToastTimer=null;
+
+  function catchKey(c){
+    if(!c)return "";
+    return String(c.id||c.catchId||"")+"|"+String(c.teamId||"")+"|"+String(c.weight||c.kg||"")+"|"+String(c.recordedTime||c.time||c.catchTime||"");
+  }
+
+  function showToast(c){
+    if(!c)return;
+    let el=document.getElementById("v15Toast");
+    if(!el){
+      el=document.createElement("div");
+      el.id="v15Toast"; el.className="v15Toast";
+      document.body.appendChild(el);
+    }
+    const ph=getCatchPhoto(c);
+    const team=escapeHtml(c.teamName||c.team||("Tím "+(c.teamId||"")));
+    const sector=escapeHtml(c.sector||"-"), peg=escapeHtml(c.peg||"-");
+    el.innerHTML=`
+      ${ph?`<img class="v15ToastPhoto" src="${escapeAttr(ph)}" alt="Nový úlovok">`:`<div class="v15ToastNoPhoto">bez foto</div>`}
+      <div><div class="v15ToastLive">● NOVÝ ÚLOVOK • LIVE</div>
+      <div class="v15ToastMain">${team} · Sektor ${sector}/${peg}</div>
+      <div class="v15ToastSub">${formatKg(Number(c.weight||c.kg||0))}</div></div>`;
+    clearTimeout(v15ToastTimer);
+    requestAnimationFrame(()=>el.classList.add("show"));
+    v15ToastTimer=setTimeout(()=>el.classList.remove("show"),5200);
+  }
+
+  /* Nový úlovok — iba pri zmene po prvom načítaní */
+  const prevRenderLive=renderLive;
+  renderLive=function(data){
+    const incoming=data?.lastCatch||null;
+    const key=catchKey(incoming);
+    if(v15InitialStateSeen && key && key!==v15LastCatchKey) showToast(incoming);
+    prevRenderLive(data);
+    v15InitialStateSeen=true;
+    if(key)v15LastCatchKey=key;
+
+    /* dopln režim do detailu tímu, ak je otvorený */
+    if(selectedTeamId!==null){
+      const meta=document.querySelector("#detailPage .detailMeta");
+      if(meta && !document.querySelector("#detailPage .v15ModeTag")){
+        const tag=document.createElement("div");
+        tag.className="v15ModeTag";
+        tag.textContent=currentLeaderboardMode==="TOP5"?"HODNOTENIE: TOP 5 NAJŤAŽŠÍCH RÝB":
+          currentLeaderboardMode==="BOTH"?"HODNOTENIE: CELKOVÁ VÁHA + TOP 5":"HODNOTENIE: CELKOVÁ VÁHA";
+        meta.after(tag);
+      }
+    }
+  };
+
+  /* Galéria všetkých fotografovaných úlovkov */
+  function rebuildGallery(){
+    v15Gallery=proAllCatches().filter(c=>getCatchPhoto(c));
+  }
+  window.v15OpenCatch=function(c){
+    rebuildGallery();
+    const key=catchKey(c);
+    v15GalleryIndex=Math.max(0,v15Gallery.findIndex(x=>catchKey(x)===key));
+    if(v15GalleryIndex<0)v15GalleryIndex=0;
+    renderGallery();
+  };
+  function renderGallery(){
+    if(!v15Gallery.length)return;
+    const c=v15Gallery[v15GalleryIndex];
+    const ph=getCatchPhoto(c);
+    const team=c._teamName||c.teamName||c.team||("Tím "+(c.teamId||""));
+    openImageModal(ph,`${team} • ${formatKg(Number(c.weight||c.kg||0))} • ${formatDateTime(c.catchTime||c.time||c.recordedTime||"")}`);
+    const inner=document.querySelector("#imageModal .imageModalInner");
+    if(!inner)return;
+    inner.querySelectorAll(".v15ImageNav,.v15ImageCounter").forEach(x=>x.remove());
+    if(v15Gallery.length>1){
+      const p=document.createElement("button"); p.className="v15ImageNav v15ImagePrev"; p.textContent="‹";
+      p.onclick=e=>{e.stopPropagation();v15GalleryIndex=(v15GalleryIndex-1+v15Gallery.length)%v15Gallery.length;renderGallery()};
+      const n=document.createElement("button"); n.className="v15ImageNav v15ImageNext"; n.textContent="›";
+      n.onclick=e=>{e.stopPropagation();v15GalleryIndex=(v15GalleryIndex+1)%v15Gallery.length;renderGallery()};
+      const count=document.createElement("div"); count.className="v15ImageCounter"; count.textContent=`${v15GalleryIndex+1} / ${v15Gallery.length}`;
+      inner.append(p,n,count);
+    }
+  }
+
+  /* Kliknutie na fotku úlovku prepne obyčajný modal na galériu */
+  document.addEventListener("click",function(e){
+    const img=e.target.closest(".v7CatchCard img,.v7LatestCatch img,.catchPhoto,.v8DayTeam img,.v8RecentMini img,.v8LatestPhoto");
+    if(!img)return;
+    const all=proAllCatches();
+    const src=img.getAttribute("src")||"";
+    const found=all.find(c=>getCatchPhoto(c)===src);
+    if(found){
+      e.preventDefault();e.stopPropagation();
+      v15OpenCatch(found);
+    }
+  },true);
+
+  /* TOP5: vlož rekordy preteku nad obsah */
+  const oldRenderProView=renderProView;
+  renderProView=function(view){
+    oldRenderProView(view);
+    if(view==="top5"){
+      const page=document.getElementById("proViewPage");
+      const catches=proAllCatches();
+      if(!page||!catches.length)return;
+      const biggest=[...catches].sort((a,b)=>Number(b.weight||0)-Number(a.weight||0))[0];
+      const teams=lastRenderedLb||[];
+      const mostFish=[...teams].sort((a,b)=>Number(b.count||0)-Number(a.count||0))[0];
+      const bestTotal=[...teams].sort((a,b)=>Number(b.total||0)-Number(a.total||0))[0];
+      const sectors={};
+      teams.forEach(t=>{const s=String(t.sectorCode||t.sector||"-");sectors[s]=(sectors[s]||0)+Number(t.total||0)});
+      const bestSector=Object.entries(sectors).sort((a,b)=>b[1]-a[1])[0];
+      const records=document.createElement("div");
+      records.className="v15Records";
+      records.innerHTML=`
+        <div class="v15Record"><small>NAJVÄČŠIA RYBA</small><strong>${formatKg(Number(biggest?.weight||0))}</strong><span>${escapeHtml(biggest?._teamName||"-")}</span></div>
+        <div class="v15Record"><small>NAJVIAC ÚLOVKOV</small><strong>${Number(mostFish?.count||0)} ks</strong><span>${escapeHtml(mostFish?getTeamName(mostFish):"-")}</span></div>
+        <div class="v15Record"><small>NAJVÄČŠIA CELKOVÁ VÁHA</small><strong>${formatKg(Number(bestTotal?.total||0))}</strong><span>${escapeHtml(bestTotal?getTeamName(bestTotal):"-")}</span></div>
+        <div class="v15Record"><small>NAJÚSPEŠNEJŠÍ SEKTOR</small><strong>${bestSector?`Sektor ${escapeHtml(bestSector[0])}`:"-"}</strong><span>${bestSector?formatKg(bestSector[1]):"0.00 kg"}</span></div>`;
+      const head=page.querySelector(".proViewHead");
+      if(head)head.insertAdjacentElement("afterend",records);
+    }
+
+    /* PODĽA DNÍ: doplň najúspešnejší tím každého dňa */
+    if(view==="days"){
+      const page=document.getElementById("proViewPage");
+      if(!page)return;
+      page.querySelectorAll(".v8DayCard").forEach(card=>{
+        const dateText=card.querySelector("h3")?.textContent||"";
+        const rows=[...card.querySelectorAll("tbody tr")];
+        const sums={};
+        rows.forEach(r=>{
+          const name=r.querySelector(".v8DayTeam strong")?.textContent||"";
+          const kg=parseFloat((r.querySelector(".v8DayKg")?.textContent||"0").replace(",","."));
+          if(name)sums[name]=(sums[name]||0)+(Number.isFinite(kg)?kg:0);
+        });
+        const best=Object.entries(sums).sort((a,b)=>b[1]-a[1])[0];
+        if(best){
+          const top=card.querySelector(".v8DayCardTop>div");
+          if(top){
+            const w=document.createElement("div");w.className="v15DayWinner";
+            w.textContent=`★ Tím dňa: ${best[0]} • ${formatKg(best[1])}`;
+            top.appendChild(w);
+          }
+        }
+      });
+    }
+  };
+
+  /* Šípky v galérii aj klávesnicou */
+  document.addEventListener("keydown",e=>{
+    const modal=document.getElementById("imageModal");
+    if(!modal||modal.style.display!=="flex"||v15Gallery.length<2)return;
+    if(e.key==="ArrowLeft"){v15GalleryIndex=(v15GalleryIndex-1+v15Gallery.length)%v15Gallery.length;renderGallery()}
+    if(e.key==="ArrowRight"){v15GalleryIndex=(v15GalleryIndex+1)%v15Gallery.length;renderGallery()}
+  });
 })();
 </script>
 
