@@ -1447,6 +1447,45 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   }
 }
 </style>
+
+<style id="rcc-v4-polish">
+/* V4 – TOP 3 + vyváženie hlavnej obrazovky */
+@media (min-width:1051px){
+  .rccDashboard{grid-template-columns:minmax(250px,.82fr) minmax(650px,2.45fr) minmax(270px,.9fr)!important;gap:14px!important;}
+  .rccLeft,.rccRight{min-width:0!important;}
+  .podiumPanel{display:block!important;margin-bottom:14px!important;}
+  .podiumHead{padding:13px 14px 11px!important;}
+  .podiumCards{padding:10px!important;display:grid!important;gap:9px!important;}
+  .podiumCard{width:100%;min-height:82px;border:1px solid rgba(244,191,88,.18);border-radius:10px;background:linear-gradient(100deg,rgba(25,22,15,.98),rgba(5,8,9,.98));display:grid;grid-template-columns:34px 58px minmax(0,1fr);align-items:center;gap:10px;padding:9px 10px;color:#fff;text-align:left;cursor:pointer;transition:.18s ease;}
+  .podiumCard:hover{transform:translateY(-1px);border-color:rgba(244,191,88,.5);box-shadow:0 8px 24px rgba(0,0,0,.35);}
+  .podium-1{background:linear-gradient(100deg,rgba(112,78,20,.72),rgba(13,12,9,.98) 70%);}
+  .podium-2{background:linear-gradient(100deg,rgba(88,96,101,.56),rgba(10,12,13,.98) 70%);}
+  .podium-3{background:linear-gradient(100deg,rgba(105,55,24,.62),rgba(11,10,9,.98) 70%);}
+  .podiumRank{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-head);font-size:18px;font-weight:900;background:#17130b;border:1px solid rgba(244,191,88,.55);color:#f4c362;}
+  .podium-1 .podiumRank{background:linear-gradient(180deg,#ffd66f,#a66b08);color:#201400;}
+  .podium-2 .podiumRank{background:linear-gradient(180deg,#f0f2f2,#858c91);color:#151719;}
+  .podium-3 .podiumRank{background:linear-gradient(180deg,#df9254,#7e3d18);color:#1e0c02;}
+  .podiumPhoto{width:54px;height:54px;border-radius:50%;overflow:hidden;border:2px solid rgba(244,191,88,.45);background:#060809;display:grid;place-items:center;}
+  .podiumPhoto img{width:100%;height:100%;object-fit:cover;display:block;}
+  .podiumNoPhoto{font-family:var(--font-head);font-size:20px;color:#b99a59;}
+  .podiumInfo{min-width:0;display:flex;flex-direction:column;gap:5px;}
+  .podiumInfo strong{font-family:var(--font-head);font-size:15px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .podiumInfo span{font-size:11px;color:#d9b764;font-weight:800;letter-spacing:.4px;}
+  .podiumEmpty{padding:18px;color:#a99b7c;font-size:12px;}
+  .compactLastCatch{min-height:0!important;}
+  .compactLastCatch .lastCatchHead{padding:10px 12px!important;}
+  .compactLastCatch .lastCatchTitle{font-size:16px!important;}
+  .compactLastCatch .lastCatchText{padding:8px 11px 10px!important;}
+  .bigFishPanel{margin-bottom:0!important;}
+  .bigFishPanel .sectionHead{padding:11px 12px 9px!important;}
+  .bigFishPanel .sectionHead h2{font-size:17px!important;}
+}
+@media (max-width:1050px){
+  .podiumCards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;}
+  .podiumCard{border:1px solid rgba(244,191,88,.2);border-radius:10px;background:#080b0c;color:#fff;padding:10px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;}
+  .podiumPhoto{width:58px;height:58px;border-radius:50%;overflow:hidden;border:2px solid rgba(244,191,88,.4);}.podiumPhoto img{width:100%;height:100%;object-fit:cover}.podiumRank{font-weight:900;color:#f4c362}.podiumInfo{display:flex;flex-direction:column;gap:3px}.podiumInfo strong{font-size:12px}.podiumInfo span{font-size:10px;color:#cda957}.podiumNoPhoto{padding-top:18px;color:#cda957}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1511,7 +1550,14 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
 
     <div class="rccDashboard">
       <aside class="rccLeft">
-        <div class="lastCatch" id="lastCatchBox">
+        <div class="section podiumPanel" id="podiumPanel">
+          <div class="sectionHead podiumHead">
+            <h2>TOP 3 TÍMY</h2>
+            <div class="sectionSub">Priebežné poradie podľa TOP 5</div>
+          </div>
+          <div id="podiumCards" class="podiumCards"></div>
+        </div>
+        <div class="lastCatch compactLastCatch" id="lastCatchBox">
           <div class="lastCatchHead">
             <div class="lastCatchTitle">Posledné úlovky</div>
             <div class="livePill">● LIVE</div>
@@ -1848,6 +1894,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
 
   renderRecentCatches(currentRecentCatches);
   renderTop3(top5teams);
+  renderPodiumCards(top5teams);
   renderSectorTabs(lb);
   renderSectorSummary(lbByTotal);
   renderSponsors(data);
@@ -2088,6 +2135,30 @@ function renderTopFishPanel(rows) {
       </div>
     `;
   }).join("");
+}
+
+
+function renderPodiumCards(rows) {
+  const box = document.getElementById("podiumCards");
+  if (!box) return;
+  const source = Array.isArray(rows) && rows.length ? rows.slice(0,3) : [];
+  if (!source.length) {
+    box.innerHTML = '<div class="podiumEmpty">Zatiaľ bez výsledkov.</div>';
+    return;
+  }
+  box.innerHTML = source.map((team,index) => {
+    const id = getTeamId(team);
+    const photo = getTeamPhoto(team);
+    const photoHtml = photo
+      ? `<img src="${escapeAttr(photo)}" alt="foto tímu">`
+      : `<div class="podiumNoPhoto">${index+1}</div>`;
+    const sum = Number(team.top5sum || team.top5Sum || 0);
+    return `<button class="podiumCard podium-${index+1}" type="button" onclick="openTeamDetail(${Number(id)})">
+      <div class="podiumRank">${index+1}</div>
+      <div class="podiumPhoto">${photoHtml}</div>
+      <div class="podiumInfo"><strong>${escapeHtml(getTeamName(team,id))}</strong><span>TOP 5 • ${formatKg(sum)}</span></div>
+    </button>`;
+  }).join('');
 }
 
 function renderTop3(rows) {
