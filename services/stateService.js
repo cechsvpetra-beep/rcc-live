@@ -28,6 +28,7 @@ function buildCatchPublicItem(catchItem, team) {
     peg: team?.peg || "",
     time: getDisplayTime(catchItem),
     catchTime: catchItem.catchTime || "",
+    catchDate: catchItem.catchDate || "",
     recordedTime: catchItem.time || "",
     photo: catchItem.photo || null
   };
@@ -135,6 +136,7 @@ function buildPublicState(data) {
           weight: Number(c.weight || 0),
           time: getDisplayTime(c),
           catchTime: c.catchTime || "",
+          catchDate: c.catchDate || "",
           recordedTime: c.time || "",
           photo: c.photo || null
         }))

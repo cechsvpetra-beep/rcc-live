@@ -280,6 +280,9 @@ button:disabled{
   <label>Váha (kg)</label>
   <input type="number" id="weight" step="0.01" min="0" inputmode="decimal">
 
+  <label>Dátum ulovenia</label>
+  <input type="date" id="catchDate">
+
   <label>Čas ulovenia</label>
   <input type="time" id="catchTime">
 
@@ -441,6 +444,35 @@ function normalizeCatchTime(value) {
   return `${match[1]}:${match[2]}`;
 }
 
+function normalizeCatchDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return "";
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const test = new Date(year, month - 1, day);
+
+  if (
+    test.getFullYear() !== year ||
+    test.getMonth() !== month - 1 ||
+    test.getDate() !== day
+  ) return "";
+
+  return raw;
+}
+
+function getCurrentDateYYYYMMDD() {
+  const now = new Date();
+  const yyyy = String(now.getFullYear());
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function getCurrentTimeHHMM() {
   const now = new Date();
   const hh = String(now.getHours()).padStart(2, "0");
@@ -448,11 +480,16 @@ function getCurrentTimeHHMM() {
   return `${hh}:${mm}`;
 }
 
-function setDefaultCatchTime() {
-  const input = document.getElementById("catchTime");
-  if (!input) return;
-  if (!input.value) {
-    input.value = getCurrentTimeHHMM();
+function setDefaultCatchDateTime() {
+  const dateInput = document.getElementById("catchDate");
+  const timeInput = document.getElementById("catchTime");
+
+  if (dateInput && !dateInput.value) {
+    dateInput.value = getCurrentDateYYYYMMDD();
+  }
+
+  if (timeInput && !timeInput.value) {
+    timeInput.value = getCurrentTimeHHMM();
   }
 }
 
@@ -518,6 +555,7 @@ function migrateOldPendingCatchesIfNeeded() {
       ...item,
       clientSubmissionId: item.clientSubmissionId || generateClientSubmissionId(),
       catchTime: normalizeCatchTime(item.catchTime),
+      catchDate: normalizeCatchDate(item.catchDate),
       // Staré V1/V2 fronty fotografiu fyzicky neukladali.
       hasPhoto: false,
       photoStored: false,
@@ -559,6 +597,7 @@ function createPendingCatch(data) {
     teamLabel: String(data.teamLabel || ""),
     weight: Number(data.weight || 0),
     catchTime: normalizeCatchTime(data.catchTime),
+    catchDate: normalizeCatchDate(data.catchDate),
     hasPhoto: !!data.hasPhoto,
     photoStored: !!data.photoStored,
     status: "pending",
@@ -634,6 +673,7 @@ function renderPendingList() {
           ${getBadgeHtml(item.status)}
         </div>
         <div>Váha: ${escapeHtml(String(item.weight))} kg</div>
+        <div>Dátum ulovenia: ${escapeHtml(item.catchDate || "-")}</div>
         <div>Čas ulovenia: ${escapeHtml(item.catchTime || "-")}</div>
         <div>Zapísané offline: ${escapeHtml(formatDate(item.createdAt))}</div>
         <div>Fotka: ${item.photoStored ? "áno – uložená v mobile" : (item.hasPhoto ? "neuložená" : "nie")}</div>
@@ -841,6 +881,7 @@ function getSelectedTeamLabel() {
 async function saveCatch() {
   const teamId = Number(document.getElementById("team").value || 0);
   const weight = normalizeWeight(document.getElementById("weight").value);
+  const catchDate = normalizeCatchDate(document.getElementById("catchDate").value);
   const catchTime = normalizeCatchTime(document.getElementById("catchTime").value);
   const file = document.getElementById("photo").files[0];
 
@@ -854,6 +895,11 @@ async function saveCatch() {
     return;
   }
 
+  if (!catchDate) {
+    setStatus("Zadaj dátum ulovenia", true, "error");
+    return;
+  }
+
   if (!catchTime) {
     setStatus("Zadaj čas ulovenia", true, "error");
     return;
@@ -864,6 +910,7 @@ async function saveCatch() {
       teamId,
       teamLabel: getSelectedTeamLabel(),
       weight,
+      catchDate,
       catchTime,
       hasPhoto: !!file,
       photoStored: false
@@ -895,6 +942,7 @@ async function saveCatch() {
   const form = new FormData();
   form.append("teamId", String(teamId));
   form.append("weight", String(weight));
+  form.append("catchDate", String(catchDate));
   form.append("catchTime", String(catchTime));
   form.append("clientSubmissionId", generateClientSubmissionId());
 
@@ -972,6 +1020,7 @@ async function syncPendingCatches() {
       const form = new FormData();
       form.append("teamId", String(item.teamId));
       form.append("weight", String(item.weight));
+      form.append("catchDate", String(normalizeCatchDate(item.catchDate)));
       form.append("catchTime", String(normalizeCatchTime(item.catchTime)));
       form.append("clientSubmissionId", String(item.clientSubmissionId || generateClientSubmissionId()));
 
@@ -1079,6 +1128,7 @@ function clearForm() {
   document.getElementById("weight").value = "";
   document.getElementById("photo").value = "";
   document.getElementById("photoPreview").innerHTML = "bez foto";
+  document.getElementById("catchDate").value = getCurrentDateYYYYMMDD();
   document.getElementById("catchTime").value = getCurrentTimeHHMM();
 }
 
@@ -1145,7 +1195,7 @@ window.addEventListener("offline", () => {
   await registerJudgeServiceWorker();
   migrateOldPendingCatchesIfNeeded();
   renderPendingList();
-  setDefaultCatchTime();
+  setDefaultCatchDateTime();
 
   const ok = await checkLogin();
   if (!ok) return;

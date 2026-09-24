@@ -202,6 +202,30 @@ function normalizeCatchTime(value) {
   return `${match[1]}:${match[2]}`;
 }
 
+function normalizeCatchDate(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) return null;
+
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const test = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    test.getUTCFullYear() !== year ||
+    test.getUTCMonth() !== month - 1 ||
+    test.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return `${match[1]}-${match[2]}-${match[3]}`;
+}
+
 function normalizeCatch(raw) {
   const id =
     Number(raw?.id || 0);
@@ -228,6 +252,11 @@ function normalizeCatch(raw) {
     catchTime:
       normalizeCatchTime(
         raw?.catchTime
+      ),
+
+    catchDate:
+      normalizeCatchDate(
+        raw?.catchDate
       ),
 
     photo:
@@ -783,6 +812,7 @@ module.exports = {
   normalizeSectorCode,
   normalizeSectors,
   normalizeTeam,
+  normalizeCatchDate,
   normalizeCatch,
   normalizeJudge,
   normalizeJudges,

@@ -2067,12 +2067,16 @@ function renderProView(view){
  if(view==='days'){
    const groups=new Map();
    catches.forEach(c=>{
+     const explicitDate=String(c.catchDate||'').trim();
      const raw=c.recordedTime||c.createdAt||c.timestamp||'';
      const date=new Date(raw);
-     // Dátum počítame v slovenskom čase, nie podľa nastavenia prehliadača.
-     const key=raw&&!Number.isNaN(date.getTime())
-       ?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)
-       :'unknown';
+     // Nové úlovky používajú skutočný dátum ulovenia z Judge.
+     // Staré úlovky bez catchDate zostávajú kompatibilné cez recordedTime.
+     const key=/^\d{4}-\d{2}-\d{2}$/.test(explicitDate)
+       ?explicitDate
+       :(raw&&!Number.isNaN(date.getTime())
+         ?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)
+         :'unknown');
      if(!groups.has(key))groups.set(key,[]);
      groups.get(key).push(c);
    });
