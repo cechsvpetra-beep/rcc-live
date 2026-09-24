@@ -1668,6 +1668,30 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   .v7LatestMedia,.v7LatestMedia img,.v7LatestNoPhoto{min-height:245px;height:245px}
   .v7LatestWeight{font-size:48px}.v7LatestMeta{grid-template-columns:1fr 1fr}.v7CatchSectionTitle small{display:none}
 }
+
+/* V8 — DENNÉ ŠTATISTIKY */
+.v8DaySummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:13px 0 17px}
+.v8DaySummary>div{min-height:96px;padding:18px 20px;background:linear-gradient(145deg,#1a1d1a,#0b0f0e);border:1px solid rgba(223,175,75,.22);border-radius:9px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.v8DaySummary small,.v8DayCardStats small{font-size:10px;letter-spacing:1.1px;font-weight:900;color:#9c9b90}
+.v8DaySummary strong{font:900 30px var(--font-head);color:#f8c769;line-height:1.1}
+.v8DayCard{overflow:hidden;margin-bottom:16px}
+.v8DayCardTop{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:21px 24px;background:linear-gradient(100deg,rgba(188,132,38,.2),transparent 70%);border-bottom:1px solid rgba(223,175,75,.24)}
+.v8DayIndex{font:900 11px var(--font-head);color:#e5b558;letter-spacing:1.5px}
+.v8DayCardTop h3{font:900 26px var(--font-head);color:#fff0cc;margin:5px 0 0}
+.v8DayCount{font:900 12px var(--font-head);color:#f5c565;background:rgba(227,169,62,.12);border:1px solid rgba(227,169,62,.35);border-radius:30px;padding:9px 13px;white-space:nowrap}
+.v8DayCardStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(231,181,82,.12);border-bottom:1px solid rgba(223,175,75,.18)}
+.v8DayCardStats>div{background:#111613;padding:18px 24px;display:flex;flex-direction:column;gap:6px}
+.v8DayCardStats strong{font:900 23px var(--font-head);color:#f8c769}
+.v8DayTableWrap{overflow-x:auto}
+.v8DayTable{width:100%;border-collapse:collapse}.v8DayTable th{padding:13px 22px;text-align:left}.v8DayTable th:last-child,.v8DayTable td:last-child{text-align:right}
+.v8DayTable td{padding:12px 22px;border-top:1px solid rgba(255,255,255,.055)}
+.v8DayTime{color:#e4bb6b;font-weight:900;white-space:nowrap}
+.v8DayTeam{display:flex;align-items:center;gap:13px}.v8DayTeam img,.v8DayFish{width:54px;height:48px;object-fit:cover;border-radius:6px;border:1px solid rgba(225,175,72,.25)}
+.v8DayFish{display:grid;place-items:center}.v8DayTeam strong{display:block;font-weight:900;color:#f2f0e9}.v8DayTeam small{display:block;color:#a9a79c;margin-top:5px;font-size:10px;letter-spacing:.6px}
+.v8DayKg{font:900 18px var(--font-head);color:#f8c769;white-space:nowrap}
+.v8DaysEmpty{padding:65px 20px;text-align:center}.v8DaysEmpty span{font-size:46px;opacity:.7}.v8DaysEmpty h3{color:#f5c76c;font:900 23px var(--font-head);margin:12px 0}.v8DaysEmpty p{color:#aaa99e;max-width:430px;margin:auto;line-height:1.6}
+@media(max-width:800px){.v8DaySummary{grid-template-columns:repeat(2,minmax(0,1fr))}.v8DayCardStats>div{padding:15px}.v8DayCardStats strong{font-size:19px}}
+@media(max-width:480px){.v8DaySummary>div{padding:13px}.v8DaySummary strong{font-size:24px}.v8DayCardTop{padding:16px}.v8DayCardTop h3{font-size:21px}.v8DayCardStats small{font-size:8px}.v8DayCardStats strong{font-size:16px}.v8DayTable td,.v8DayTable th{padding:11px}.v8DayTeam img,.v8DayFish{width:40px;height:40px}}
 </style>
 
 </head>
@@ -2041,8 +2065,45 @@ function renderProView(view){
    page.innerHTML=proHead('Sektory','Samostatné LIVE poradie tímov v jednotlivých sektoroch.')+`<div class="v6SectorGrid">${Object.keys(groups).sort().map(sec=>`<div class="proPanel v6SectorPanel"><div class="v6SectorHeader"><div class="v6SectorTitle">SEKTOR ${escapeHtml(sec)}</div><div class="v6SectorMeta">${groups[sec].length} tímov</div></div><table class="v6SectorTable"><thead><tr><th>#</th><th>Tím</th><th>Stan.</th><th>TOP 5</th><th>Ryby</th></tr></thead><tbody>${groups[sec].map(proSectorRow).join('')}</tbody></table></div>`).join('')}</div>`; return;
  }
  if(view==='days'){
-   const groups={}; catches.forEach(c=>{const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';let key='Bez dátumu';try{const d=new Date(raw);if(!Number.isNaN(d.getTime()))key=d.toLocaleDateString('sk-SK')}catch{};(groups[key]??=[]).push(c)});
-   page.innerHTML=proHead('Podľa dní','Úlovky rozdelené podľa jednotlivých dní preteku.')+(Object.keys(groups).length?Object.entries(groups).map(([day,arr])=>`<div class="proPanel proDayGroup"><div class="proDayTitle">${escapeHtml(day)} • ${arr.length} úlovkov</div><table class="proTable"><thead><tr><th>Čas</th><th>Tím</th><th>Váha</th></tr></thead><tbody>${arr.map(c=>`<tr><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td></tr>`).join('')}</tbody></table></div>`).join(''):`<div class="proPanel proEmpty">Zatiaľ nie sú evidované úlovky podľa dní.</div>`); return;
+   const groups=new Map();
+   catches.forEach(c=>{
+     const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';
+     const date=new Date(raw);
+     // Dátum počítame v slovenskom čase, nie podľa nastavenia prehliadača.
+     const key=raw&&!Number.isNaN(date.getTime())
+       ?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)
+       :'unknown';
+     if(!groups.has(key))groups.set(key,[]);
+     groups.get(key).push(c);
+   });
+   const entries=[...groups.entries()].sort(([a],[b])=>b.localeCompare(a));
+   const allWeight=catches.reduce((sum,c)=>sum+Number(c.weight||c.kg||0),0);
+   const maxWeight=Math.max(0,...catches.map(c=>Number(c.weight||c.kg||0)));
+   const dayTitle=key=>{
+     if(key==='unknown')return 'Bez dátumu';
+     const [y,m,d]=key.split('-');
+     return `${d}. ${m}. ${y}`;
+   };
+   const dayCard=([key,arr],index)=>{
+     const total=arr.reduce((sum,c)=>sum+Number(c.weight||c.kg||0),0);
+     const biggest=Math.max(0,...arr.map(c=>Number(c.weight||c.kg||0)));
+     const uniqueTeams=new Set(arr.map(c=>String(c._teamId))).size;
+     const rows=arr.map(c=>{
+       const ph=getCatchPhoto(c);
+       const w=Number(c.weight||c.kg||0);
+       const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';
+       let clock='—';
+       const dt=new Date(raw);
+       if(!Number.isNaN(dt.getTime()))clock=new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',hour:'2-digit',minute:'2-digit'}).format(dt);
+       else if(/^([01]\d|2[0-3]):[0-5]\d$/.test(String(raw)))clock=String(raw);
+       return `<tr><td class="v8DayTime">${escapeHtml(clock)}</td><td><div class="v8DayTeam">${ph?`<img src="${escapeAttr(ph)}" alt="Úlovok" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName+' • '+formatKg(w))}')">`:'<span class="v8DayFish">🐟</span>'}<div><strong>${escapeHtml(c._teamName)}</strong><small>SEKTOR ${escapeHtml(c._teamSector||'-')} · STANOVIŠTE ${escapeHtml(c._teamPeg||'-')}</small></div></div></td><td class="v8DayKg">${formatKg(w)}</td></tr>`;
+     }).join('');
+     return `<section class="proPanel v8DayCard"><div class="v8DayCardTop"><div><span class="v8DayIndex">${key==='unknown'?'BEZ DÁTUMU':`DEŇ ${entries.filter(([k])=>k!=='unknown').length-index}`}</span><h3>${escapeHtml(dayTitle(key))}</h3></div><span class="v8DayCount">${arr.length} ${arr.length===1?'ÚLOVOK':'ÚLOVKOV'}</span></div><div class="v8DayCardStats"><div><small>CELKOVÁ VÁHA</small><strong>${formatKg(total)}</strong></div><div><small>NAJVÄČŠIA RYBA</small><strong>${formatKg(biggest)}</strong></div><div><small>AKTÍVNE TÍMY</small><strong>${uniqueTeams}</strong></div></div><div class="v8DayTableWrap"><table class="proTable v8DayTable"><thead><tr><th>ČAS</th><th>TÍM / ÚLOVOK</th><th>VÁHA</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+   };
+   page.innerHTML=proHead('Podľa dní','Denné štatistiky a všetky zaevidované úlovky v slovenskom čase.')+
+     `<div class="v8DaySummary"><div><small>ZA EVIDOVANÉ DNI</small><strong>${entries.filter(([key])=>key!=='unknown').length}</strong></div><div><small>CELKOVÝ POČET RÝB</small><strong>${catches.length}</strong></div><div><small>CELKOVÁ VÁHA</small><strong>${formatKg(allWeight)}</strong></div><div><small>NAJVÄČŠIA RYBA</small><strong>${formatKg(maxWeight)}</strong></div></div>`+
+     (entries.length?entries.map(dayCard).join(''):`<div class="proPanel v8DaysEmpty"><span>🐟</span><h3>ČAKÁME NA PRVÝ ÚLOVOK</h3><p>Po zaevidovaní prvej ryby sa tu automaticky zobrazia denné štatistiky, tím aj čas úlovku.</p></div>`);
+   return;
  }
 }
 
