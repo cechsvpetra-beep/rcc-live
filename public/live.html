@@ -1971,6 +1971,246 @@ tr.rank-top-3{background:linear-gradient(90deg,rgba(164,91,49,.18),rgba(15,20,18
 }
 </style>
 
+
+<style id="lk-desktop-v2">
+/* =========================================================
+   PREMIUM V2 — väčší desktop / zachovaná logika TOP5-TOTAL-BOTH
+   Iba vizuálna vrstva, bez zásahu do JavaScriptu a výpočtov.
+   ========================================================= */
+
+/* Na veľkom monitore využijeme takmer celú šírku. */
+@media (min-width:1351px){
+  .wrap{
+    max-width:2100px!important;
+    width:calc(100% - 24px)!important;
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+
+  .topbar{
+    margin-left:-12px!important;
+    margin-right:-12px!important;
+    min-height:250px!important;
+  }
+
+  .logo{
+    width:218px!important;
+    height:218px!important;
+    left:34px!important;
+  }
+
+  .titleBox{
+    left:282px!important;
+    top:43px!important;
+  }
+
+  .titleBox h1{
+    font-size:64px!important;
+    letter-spacing:2.5px!important;
+  }
+
+  .titleBox .sub{
+    font-size:15px!important;
+    letter-spacing:5.5px!important;
+  }
+
+  .proNav{
+    margin-left:-12px!important;
+    margin-right:-12px!important;
+    height:64px!important;
+  }
+
+  .proNav button{
+    height:63px!important;
+    font-size:13px!important;
+    padding-left:26px!important;
+    padding-right:26px!important;
+  }
+
+  .heroStats{
+    gap:14px!important;
+    margin-top:16px!important;
+    margin-bottom:16px!important;
+  }
+
+  .stat{
+    min-height:126px!important;
+    padding:20px 24px!important;
+    grid-template-columns:70px 1fr!important;
+  }
+
+  .statIcon{font-size:42px!important}
+  .statIcon svg{width:48px!important;height:48px!important}
+  .statLabel{font-size:13px!important}
+  .statValue{font-size:43px!important;line-height:1!important}
+  .statSub{font-size:11px!important}
+
+  /* Predloha: ľavý panel výrazný, stred dominantný, pravý informatívny. */
+  .rccDashboard{
+    grid-template-columns:minmax(340px,.82fr) minmax(760px,1.72fr) minmax(350px,.86fr)!important;
+    gap:16px!important;
+    align-items:start!important;
+  }
+
+  .rccLeft,.rccRight{gap:16px!important}
+
+  .section,.sidePanel,.lastCatch{
+    border-radius:9px!important;
+  }
+
+  .sectionHead{
+    min-height:58px!important;
+    padding:15px 18px!important;
+  }
+
+  .sectionHead h2,.sideTitle,.bottomTickerTitle{
+    font-size:22px!important;
+  }
+
+  .sectionSub{font-size:11px!important}
+
+  /* TOP 3 — väčšie a čitateľnejšie bez zásahu do generovaných dát. */
+  .podiumCards{
+    gap:10px!important;
+    padding:12px!important;
+  }
+
+  .podiumCard{
+    min-height:92px!important;
+    padding:12px!important;
+  }
+
+  .podiumCard img{
+    width:58px!important;
+    height:58px!important;
+  }
+
+  .podiumRank{
+    font-size:24px!important;
+    min-width:36px!important;
+  }
+
+  .podiumName{
+    font-size:15px!important;
+  }
+
+  .podiumWeight{
+    font-size:14px!important;
+  }
+
+  /* Hlavné tabuľky — vyššie riadky a väčšie písmo. */
+  th{
+    height:42px!important;
+    padding:11px 12px!important;
+    font-size:11px!important;
+  }
+
+  td{
+    height:54px!important;
+    padding:11px 12px!important;
+    font-size:14px!important;
+  }
+
+  .teamName{
+    font-size:14px!important;
+  }
+
+  .teamPhoto{
+    width:42px!important;
+    height:42px!important;
+  }
+
+  .rank{
+    font-size:15px!important;
+  }
+
+  .badge{
+    padding:6px 9px!important;
+    font-size:12px!important;
+  }
+
+  /* Posledné úlovky — väčšie dlaždice. */
+  .lastCatch{
+    padding-bottom:12px!important;
+  }
+
+  .lastCatch .catchTickerPhoto,
+  .catchTickerPhoto{
+    width:66px!important;
+    height:52px!important;
+  }
+
+  .catchTickerItem{
+    font-size:14px!important;
+  }
+
+  /* Pravý panel */
+  .sidePanel{
+    padding:14px!important;
+  }
+
+  .bigFishRow{
+    min-height:58px!important;
+    padding:8px 10px!important;
+  }
+
+  .bigFishKg{
+    font-size:17px!important;
+  }
+
+  .sectorDonut{
+    width:150px!important;
+    height:150px!important;
+  }
+
+  /* Pri režime BOTH zostanú obe tabuľky plnohodnotné.
+     Neobmedzujeme výšku ani počet riadkov. */
+  .tableWrap{
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+  }
+
+  .section{
+    overflow:visible!important;
+  }
+
+  /* Pohľady PORADIE / ÚLOVKY / TOP5 / SEKTORY / PODĽA DNÍ */
+  .proViewPage{
+    max-width:none!important;
+  }
+
+  .proViewPage .section{
+    margin-bottom:16px!important;
+  }
+
+  .dayCard,.dayBlock{
+    border-radius:9px!important;
+  }
+}
+
+/* 1600–1900 px: stále veľké, ale bez horizontálneho pretekania. */
+@media (min-width:1351px) and (max-width:1900px){
+  .rccDashboard{
+    grid-template-columns:minmax(300px,.76fr) minmax(650px,1.62fr) minmax(300px,.78fr)!important;
+    gap:12px!important;
+  }
+  .titleBox h1{font-size:56px!important}
+  td{font-size:12px!important;padding-left:9px!important;padding-right:9px!important}
+  th{font-size:10px!important;padding-left:9px!important;padding-right:9px!important}
+  .teamName{font-size:12px!important}
+}
+
+/* Extra-wide obrazovky: dashboard nech nepôsobí ako malá tabuľka v strede. */
+@media (min-width:2100px){
+  .wrap{max-width:2360px!important}
+  .rccDashboard{
+    grid-template-columns:minmax(380px,.84fr) minmax(900px,1.82fr) minmax(390px,.88fr)!important;
+  }
+  td{height:58px!important;font-size:15px!important}
+  th{font-size:11px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
