@@ -2211,6 +2211,154 @@ tr.rank-top-3{background:linear-gradient(90deg,rgba(164,91,49,.18),rgba(15,20,18
 }
 </style>
 
+
+<style id="lk-premium-v3">
+/* PREMIUM V3 — finálne vizuálne doladenie, bez zásahu do logiky */
+
+/* Kompaktnejší hero, aby výsledky začínali vyššie */
+@media (min-width:901px){
+  .topbar{min-height:205px!important}
+  .brand{min-height:158px!important}
+  .logo{width:176px!important;height:176px!important;top:8px!important}
+  .titleBox{left:230px!important;top:30px!important}
+  .titleBox h1{font-size:56px!important}
+  .topbar::after{top:128px!important;left:232px!important}
+}
+
+/* Horné KPI */
+.stat{
+  position:relative!important;
+  overflow:hidden!important;
+  border-top:1px solid rgba(244,190,70,.28)!important;
+}
+.stat::after{
+  content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;
+  height:2px!important;background:linear-gradient(90deg,transparent,#d99c2e,transparent)!important;opacity:.42!important;
+}
+.statValue{font-weight:800!important;letter-spacing:.3px!important}
+.stat:nth-child(3)::after{background:linear-gradient(90deg,transparent,#ff5149,transparent)!important}
+
+/* TOP 3 — pódiový vzhľad */
+.podiumCard{
+  position:relative!important;
+  min-height:102px!important;
+  display:grid!important;
+  grid-template-columns:48px 68px 1fr!important;
+  align-items:center!important;
+  gap:10px!important;
+  overflow:hidden!important;
+}
+.podiumCard::after{
+  content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;
+  background:linear-gradient(105deg,rgba(255,255,255,.045),transparent 38%)!important;
+}
+.podiumCard:nth-child(1){
+  border-color:#e7b53e!important;
+  background:linear-gradient(105deg,rgba(122,87,20,.42),rgba(10,16,14,.98) 65%)!important;
+  box-shadow:inset 4px 0 #efbd48!important;
+}
+.podiumCard:nth-child(2){
+  border-color:rgba(204,213,215,.52)!important;
+  background:linear-gradient(105deg,rgba(116,128,130,.18),rgba(10,16,14,.98) 65%)!important;
+  box-shadow:inset 4px 0 #bfc8ca!important;
+}
+.podiumCard:nth-child(3){
+  border-color:rgba(196,117,63,.58)!important;
+  background:linear-gradient(105deg,rgba(137,72,34,.22),rgba(10,16,14,.98) 65%)!important;
+  box-shadow:inset 4px 0 #c47b4a!important;
+}
+.podiumRank{
+  width:38px!important;height:38px!important;border-radius:50%!important;
+  display:grid!important;place-items:center!important;
+  font-size:19px!important;font-weight:900!important;
+  background:#e9b83f!important;color:#171006!important;
+  box-shadow:0 0 18px rgba(238,185,64,.22)!important;
+}
+.podiumCard:nth-child(2) .podiumRank{background:#cbd1d2!important;color:#172020!important}
+.podiumCard:nth-child(3) .podiumRank{background:#c57b49!important;color:#1b0e08!important}
+.podiumCard img{width:64px!important;height:64px!important;border-radius:50%!important;object-fit:cover!important}
+.podiumName{font-size:16px!important;letter-spacing:.3px!important}
+.podiumWeight{font-size:17px!important;font-weight:900!important}
+
+/* Hlavné poradie */
+.tableWrap{border-radius:0 0 8px 8px!important}
+thead th{color:#b9c1bd!important}
+tbody tr{height:58px!important}
+tbody tr td:first-child{font-weight:900!important}
+tbody tr.rank-top-1 td:first-child{color:#f3c14d!important}
+tbody tr.rank-top-2 td:first-child{color:#d3d9d9!important}
+tbody tr.rank-top-3 td:first-child{color:#d38a57!important}
+tr.rank-top-1{box-shadow:inset 5px 0 #f0bd45!important}
+tr.rank-top-2{box-shadow:inset 5px 0 #c8d0d0!important}
+tr.rank-top-3{box-shadow:inset 5px 0 #c77a48!important}
+.teamName{font-weight:800!important;letter-spacing:.15px!important}
+td:last-child .badge{font-weight:900!important}
+
+/* Posledné úlovky — fotografie a váha výraznejšie */
+.lastCatch{
+  border-color:rgba(31,204,104,.42)!important;
+  background:linear-gradient(180deg,rgba(7,48,29,.72),rgba(5,14,11,.98))!important;
+}
+.lastCatchTitle{
+  min-height:52px!important;
+  background:linear-gradient(90deg,#08733d,rgba(7,61,37,.40))!important;
+  padding:0 15px!important;
+}
+.catchTickerPhoto{
+  width:82px!important;height:62px!important;border-radius:7px!important;
+  border:1px solid rgba(236,183,65,.48)!important;
+}
+.catchTickerItem{font-size:15px!important}
+.catchTickerItem strong{font-size:18px!important;color:#f1bd49!important}
+
+/* Pravý panel — sektorový graf dominantnejší */
+.sectorDonut{width:166px!important;height:166px!important}
+.sectorDonut::after{inset:38px!important}
+.sectorRowTop{font-size:13px!important}
+.sectorRowSub{font-size:10px!important;color:#8d9893!important}
+
+/* Partneri vizuálne ustúpia */
+.partnerCard,.partnerItem{
+  opacity:.78!important;filter:saturate(.72)!important;
+  transition:.18s ease!important;
+}
+.partnerCard:hover,.partnerItem:hover{opacity:1!important;filter:none!important}
+
+/* Sekčné nadpisy */
+.sectionHead h2,.sideTitle{
+  position:relative!important;
+  padding-left:3px!important;
+}
+.sectionHead h2::after,.sideTitle::after{
+  content:""!important;display:block!important;width:42px!important;height:2px!important;
+  margin-top:6px!important;background:#dca234!important;
+}
+
+/* Lepšia práca s BOTH — druhá tabuľka sa vizuálne odlíši, nie funkčne */
+.rccCenter .section + .section{
+  margin-top:14px!important;
+  border-top-color:rgba(229,167,52,.44)!important;
+}
+
+/* široké monitory */
+@media (min-width:1901px){
+  .rccDashboard{
+    grid-template-columns:minmax(360px,.80fr) minmax(820px,1.78fr) minmax(360px,.82fr)!important;
+  }
+  .sectionHead h2,.sideTitle{font-size:23px!important}
+}
+
+/* Mobil ostáva kompaktný */
+@media(max-width:900px){
+  .podiumCard{
+    grid-template-columns:42px 54px 1fr!important;
+    min-height:82px!important;
+  }
+  .podiumCard img{width:50px!important;height:50px!important}
+  .catchTickerPhoto{width:64px!important;height:50px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
