@@ -1954,7 +1954,7 @@ function proAllCatches(){
     const team=findRenderedTeam(teamId)||{};
     arr.forEach((c,i)=>out.push({...c,_teamId:teamId,_teamName:getTeamName(team,teamId),_teamPhoto:getTeamPhoto(team),_teamSector:String(team.sectorCode||team.sector||'-'),_teamPeg:String(team.peg||'-'),_idx:i}));
   });
-  return out.sort((a,b)=>new Date(b.time||b.catchTime||b.createdAt||b.timestamp||0)-new Date(a.time||a.catchTime||a.createdAt||a.timestamp||0));
+  return out.sort((a,b)=>new Date(b.recordedTime||b.createdAt||b.timestamp||0)-new Date(a.recordedTime||a.createdAt||a.timestamp||0));
 }
 function proHead(title,sub){return `<div class="proViewHead"><div><h2>${title}</h2><p>${sub}</p></div><span class="proViewBadge">● LIVE</span></div>`}
 function proTeamFishWeights(t){
@@ -2067,7 +2067,7 @@ function renderProView(view){
  if(view==='days'){
    const groups=new Map();
    catches.forEach(c=>{
-     const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';
+     const raw=c.recordedTime||c.createdAt||c.timestamp||'';
      const date=new Date(raw);
      // Dátum počítame v slovenskom čase, nie podľa nastavenia prehliadača.
      const key=raw&&!Number.isNaN(date.getTime())
@@ -2091,11 +2091,14 @@ function renderProView(view){
      const rows=arr.map(c=>{
        const ph=getCatchPhoto(c);
        const w=Number(c.weight||c.kg||0);
-       const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';
+       const displayTime=c.catchTime||c.time||'';
+       const recordedRaw=c.recordedTime||c.createdAt||c.timestamp||'';
        let clock='—';
-       const dt=new Date(raw);
-       if(!Number.isNaN(dt.getTime()))clock=new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',hour:'2-digit',minute:'2-digit'}).format(dt);
-       else if(/^([01]\d|2[0-3]):[0-5]\d$/.test(String(raw)))clock=String(raw);
+       if(/^([01]\d|2[0-3]):[0-5]\d$/.test(String(displayTime)))clock=String(displayTime);
+       else {
+         const dt=new Date(recordedRaw);
+         if(!Number.isNaN(dt.getTime()))clock=new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',hour:'2-digit',minute:'2-digit'}).format(dt);
+       }
        return `<tr><td class="v8DayTime">${escapeHtml(clock)}</td><td><div class="v8DayTeam">${ph?`<img src="${escapeAttr(ph)}" alt="Úlovok" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName+' • '+formatKg(w))}')">`:'<span class="v8DayFish">🐟</span>'}<div><strong>${escapeHtml(c._teamName)}</strong><small>SEKTOR ${escapeHtml(c._teamSector||'-')} · STANOVIŠTE ${escapeHtml(c._teamPeg||'-')}</small></div></div></td><td class="v8DayKg">${formatKg(w)}</td></tr>`;
      }).join('');
      return `<section class="proPanel v8DayCard"><div class="v8DayCardTop"><div><span class="v8DayIndex">${key==='unknown'?'BEZ DÁTUMU':`DEŇ ${entries.filter(([k])=>k!=='unknown').length-index}`}</span><h3>${escapeHtml(dayTitle(key))}</h3></div><span class="v8DayCount">${arr.length} ${arr.length===1?'ÚLOVOK':'ÚLOVKOV'}</span></div><div class="v8DayCardStats"><div><small>CELKOVÁ VÁHA</small><strong>${formatKg(total)}</strong></div><div><small>NAJVÄČŠIA RYBA</small><strong>${formatKg(biggest)}</strong></div><div><small>AKTÍVNE TÍMY</small><strong>${uniqueTeams}</strong></div></div><div class="v8DayTableWrap"><table class="proTable v8DayTable"><thead><tr><th>ČAS</th><th>TÍM / ÚLOVOK</th><th>VÁHA</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
