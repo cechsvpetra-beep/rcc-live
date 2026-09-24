@@ -1446,6 +1446,18 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
     text-transform:uppercase;
   }
 }
+
+/* ===== V5 REAL NAVIGATION VIEWS ===== */
+.proViewPage{min-height:620px;padding:8px 0 40px}
+.proViewHead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:4px 0 18px;padding:18px 22px;border:1px solid rgba(244,191,88,.28);border-radius:12px;background:linear-gradient(135deg,rgba(19,24,23,.98),rgba(4,7,8,.98))}
+.proViewHead h2{margin:0;color:#f3bd4e;font-size:28px;letter-spacing:.7px;text-transform:uppercase}.proViewHead p{margin:5px 0 0;color:#9c9a92;font-size:12px}.proViewBadge{color:#fff;background:#a52b1e;border:1px solid #e25442;border-radius:999px;padding:8px 13px;font-weight:900;font-size:11px}
+.proPanel{border:1px solid rgba(244,191,88,.24);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,rgba(13,18,18,.98),rgba(3,6,7,.98));box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.proTable{width:100%;border-collapse:collapse}.proTable th{padding:13px 12px;text-align:left;color:#e9b74e;background:rgba(244,191,88,.07);font-size:11px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid rgba(244,191,88,.2)}.proTable td{padding:13px 12px;color:#e8e6df;border-bottom:1px solid rgba(255,255,255,.055);font-size:12px}.proTable tr:hover td{background:rgba(244,191,88,.045)}
+.proRank{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid rgba(244,191,88,.38);border-radius:50%;color:#f4c05a;font-weight:900}.proTeamCell{display:flex;align-items:center;gap:10px;font-weight:900}.proTeamCell img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(244,191,88,.35)}
+.proCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.proCard{border:1px solid rgba(244,191,88,.24);border-radius:12px;padding:16px;background:linear-gradient(145deg,rgba(18,23,22,.98),rgba(4,7,8,.98))}.proCard h3{margin:0 0 12px;color:#f2bb4d;text-transform:uppercase}.proCatchGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.proCatchCard{overflow:hidden;border:1px solid rgba(244,191,88,.22);border-radius:12px;background:#080c0d}.proCatchCard img,.proCatchNoImg{width:100%;height:170px;object-fit:cover}.proCatchNoImg{display:grid;place-items:center;background:linear-gradient(135deg,#111817,#050707);color:#7e7b70;font-weight:800}.proCatchBody{padding:13px}.proCatchWeight{font-size:23px;font-weight:1000;color:#f4bd4d}.proCatchTeam{font-weight:900;margin-top:4px}.proCatchMeta{margin-top:5px;color:#99978e;font-size:11px}
+.proSectorGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.proSectorTitle{padding:13px 15px;color:#f2bb4d;font-weight:1000;font-size:18px;border-bottom:1px solid rgba(244,191,88,.18)}.proEmpty{padding:50px 20px;text-align:center;color:#aaa79d}.proDayGroup{margin-bottom:14px}.proDayTitle{padding:14px 18px;background:rgba(244,191,88,.08);color:#f2bb4d;font-weight:1000;font-size:16px;border-bottom:1px solid rgba(244,191,88,.18)}
+@media(max-width:900px){.proCards,.proCatchGrid,.proSectorGrid{grid-template-columns:1fr}.proViewHead{align-items:flex-start;flex-direction:column}.proTable{min-width:760px}.proPanel{overflow:auto}}
+
 </style>
 
 <style id="rcc-v4-polish">
@@ -1506,14 +1518,16 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   </div>
 
   <nav class="proNav" aria-label="Navigácia live výsledkov">
-    <button class="active" onclick="proGo('livePage',this)">Aktuálne</button>
-    <button onclick="proGo('mainLeaderboardSection',this)">Poradie</button>
-    <button onclick="proGo('lastCatchBox',this)">Úlovky</button>
-    <button onclick="proGo('top5Section',this)">TOP 5</button>
-    <button onclick="proGo('sectorTabs',this)">Sektory</button>
-    <button onclick="proGo('bottomLiveTicker',this)">Podľa dní</button>
+    <button class="active" onclick="proSwitch('current',this)">Aktuálne</button>
+    <button onclick="proSwitch('ranking',this)">Poradie</button>
+    <button onclick="proSwitch('catches',this)">Úlovky</button>
+    <button onclick="proSwitch('top5',this)">TOP 5</button>
+    <button onclick="proSwitch('sectors',this)">Sektory</button>
+    <button onclick="proSwitch('days',this)">Podľa dní</button>
     <button class="navLive" type="button">● LIVE</button>
   </nav>
+
+  <div id="proViewPage" class="proViewPage" style="display:none"></div>
 
   <div id="livePage">
     <div class="heroStats">
@@ -1707,13 +1721,6 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
-function proGo(id, btn){
-  document.querySelectorAll('.proNav button:not(.navLive)').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-}
-
 <script>
 let socket = null;
 let socketConnected = false;
@@ -1730,6 +1737,55 @@ let currentLastCatch = null;
 let currentRecentCatches = [];
 let recentCatchIndex = 0;
 const FALLBACK_MS = 30000;
+
+let currentProView = "current";
+
+function proSwitch(view, btn){
+  currentProView = view;
+  document.querySelectorAll('.proNav button:not(.navLive)').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const live=document.getElementById('livePage');
+  const page=document.getElementById('proViewPage');
+  if(view==='current'){
+    page.style.display='none'; live.style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); return;
+  }
+  live.style.display='none'; page.style.display='block'; renderProView(view); window.scrollTo({top:0,behavior:'smooth'});
+}
+function proAllCatches(){
+  const out=[];
+  Object.entries(currentTeamCatches||{}).forEach(([teamId,arr])=>{
+    if(!Array.isArray(arr)) return;
+    const team=findRenderedTeam(teamId)||{};
+    arr.forEach((c,i)=>out.push({...c,_teamId:teamId,_teamName:getTeamName(team,teamId),_teamPhoto:getTeamPhoto(team),_idx:i}));
+  });
+  return out.sort((a,b)=>new Date(b.time||b.catchTime||b.createdAt||b.timestamp||0)-new Date(a.time||a.catchTime||a.createdAt||a.timestamp||0));
+}
+function proHead(title,sub){return `<div class="proViewHead"><div><h2>${title}</h2><p>${sub}</p></div><span class="proViewBadge">● LIVE</span></div>`}
+function proTeamRow(t,i){const photo=getTeamPhoto(t)||'/logo.png';return `<tr><td><span class="proRank">${i+1}</span></td><td><div class="proTeamCell"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span>${escapeHtml(getTeamName(t))}</span></div></td><td>${escapeHtml(String(t.sectorCode||t.sector||'-'))}</td><td>${escapeHtml(String(t.peg||'-'))}</td><td><b>${formatKg(Number(t.top5sum||t.top5Sum||0))}</b></td><td>${escapeHtml(String(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0))}</td></tr>`}
+function renderProView(view){
+ const page=document.getElementById('proViewPage'); if(!page)return;
+ if(view==='ranking'){
+   page.innerHTML=proHead('Celkové poradie tímov','Kompletné LIVE poradie všetkých tímov podľa aktuálnych výsledkov.')+`<div class="proPanel"><table class="proTable"><thead><tr><th>#</th><th>Tím</th><th>Sektor</th><th>Stanovište</th><th>Súčet TOP 5</th><th>Ryby</th></tr></thead><tbody>${(lastRenderedLb||[]).map(proTeamRow).join('')}</tbody></table></div>`; return;
+ }
+ const catches=proAllCatches();
+ if(view==='catches'){
+   page.innerHTML=proHead('Úlovky','Všetky zaevidované úlovky zoradené od najnovšieho.')+(catches.length?`<div class="proCatchGrid">${catches.map(c=>{const ph=getCatchPhoto(c);const tm=c.time||c.catchTime||c.createdAt||c.timestamp||'';return `<div class="proCatchCard">${ph?`<img src="${escapeAttr(ph)}" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName)} • ${formatKg(Number(c.weight||c.kg||0))}')">`:`<div class="proCatchNoImg">BEZ FOTKY</div>`}<div class="proCatchBody"><div class="proCatchWeight">${formatKg(Number(c.weight||c.kg||0))}</div><div class="proCatchTeam">${escapeHtml(c._teamName)}</div><div class="proCatchMeta">${escapeHtml(formatDateTime(tm)||'-')}</div></div></div>`}).join('')}</div>`:`<div class="proPanel proEmpty">Zatiaľ bez úlovkov.</div>`); return;
+ }
+ if(view==='top5'){
+   const fish=[...catches].sort((a,b)=>Number(b.weight||b.kg||0)-Number(a.weight||a.kg||0)).slice(0,5);
+   const teams=[...(lastRenderedLb||[])].sort((a,b)=>Number(b.top5sum||b.top5Sum||0)-Number(a.top5sum||a.top5Sum||0)).slice(0,5);
+   page.innerHTML=proHead('TOP 5','Najväčšie ryby a najlepších päť tímov podľa súčtu TOP 5.')+`<div class="proCards"><div class="proCard" style="grid-column:span 2"><h3>TOP 5 najväčších rýb</h3>${fish.length?`<table class="proTable"><tbody>${fish.map((c,i)=>`<tr><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td></tr>`).join('')}</tbody></table>`:`<div class="proEmpty">Zatiaľ bez úlovkov.</div>`}</div><div class="proCard"><h3>TOP 5 tímov</h3><table class="proTable"><tbody>${teams.map((t,i)=>`<tr><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(getTeamName(t))}</b></td><td>${formatKg(Number(t.top5sum||t.top5Sum||0))}</td></tr>`).join('')}</tbody></table></div></div>`; return;
+ }
+ if(view==='sectors'){
+   const groups={}; (lastRenderedLb||[]).forEach(t=>{const sec=String(t.sectorCode||t.sector||'Bez sektora');(groups[sec]??=[]).push(t)});
+   page.innerHTML=proHead('Sektory','Samostatné LIVE poradie tímov v jednotlivých sektoroch.')+`<div class="proSectorGrid">${Object.keys(groups).sort().map(sec=>`<div class="proPanel"><div class="proSectorTitle">SEKTOR ${escapeHtml(sec)}</div><table class="proTable"><tbody>${groups[sec].map(proTeamRow).join('')}</tbody></table></div>`).join('')}</div>`; return;
+ }
+ if(view==='days'){
+   const groups={}; catches.forEach(c=>{const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';let key='Bez dátumu';try{const d=new Date(raw);if(!Number.isNaN(d.getTime()))key=d.toLocaleDateString('sk-SK')}catch{};(groups[key]??=[]).push(c)});
+   page.innerHTML=proHead('Podľa dní','Úlovky rozdelené podľa jednotlivých dní preteku.')+(Object.keys(groups).length?Object.entries(groups).map(([day,arr])=>`<div class="proPanel proDayGroup"><div class="proDayTitle">${escapeHtml(day)} • ${arr.length} úlovkov</div><table class="proTable"><thead><tr><th>Čas</th><th>Tím</th><th>Váha</th></tr></thead><tbody>${arr.map(c=>`<tr><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td></tr>`).join('')}</tbody></table></div>`).join(''):`<div class="proPanel proEmpty">Zatiaľ nie sú evidované úlovky podľa dní.</div>`); return;
+ }
+}
+
 
 function applyEventSettings(data) {
   document.getElementById("eventNameTitle").textContent = data?.eventName || "ĽUBOVNIANSKY KAPOR";
