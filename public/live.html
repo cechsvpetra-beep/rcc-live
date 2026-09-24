@@ -1498,6 +1498,115 @@ tbody tr{transition:.15s ease!important}tbody tr:hover{background:rgba(244,191,8
   .podiumPhoto{width:58px;height:58px;border-radius:50%;overflow:hidden;border:2px solid rgba(244,191,88,.4);}.podiumPhoto img{width:100%;height:100%;object-fit:cover}.podiumRank{font-weight:900;color:#f4c362}.podiumInfo{display:flex;flex-direction:column;gap:3px}.podiumInfo strong{font-size:12px}.podiumInfo span{font-size:10px;color:#cda957}.podiumNoPhoto{padding-top:18px;color:#cda957}
 }
 </style>
+
+<style id="v6-polish">
+/* V6 – finálne leštenie PORADIE + SEKTORY */
+.proViewPage{padding-top:14px}
+.proViewHead{
+  padding:20px 22px;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(213,159,50,.08),transparent 32%),
+    linear-gradient(135deg,rgba(13,20,19,.98),rgba(5,9,9,.98));
+}
+.proViewHead h2{font-size:25px;letter-spacing:.7px}
+.proViewHead p{font-size:11px;margin-top:5px;color:#8f9690}
+
+.v6RankingPanel{overflow:hidden}
+.v6Table{table-layout:fixed}
+.v6Table th{height:42px;padding:0 12px;font-size:10px;white-space:nowrap}
+.v6Table td{height:58px;padding:7px 12px;font-size:12px;vertical-align:middle}
+.v6Table th:nth-child(1),.v6Table td:nth-child(1){width:58px}
+.v6Table th:nth-child(2),.v6Table td:nth-child(2){width:28%}
+.v6Table th:nth-child(3),.v6Table td:nth-child(3){width:70px;text-align:center}
+.v6Table th:nth-child(4),.v6Table td:nth-child(4){width:90px;text-align:center}
+.v6Table .fishCol{text-align:center}
+.v6Table .sumCol{width:105px;text-align:center}
+.v6Table .countCol{width:68px;text-align:center}
+
+.v6TeamCell{display:flex;align-items:center;gap:12px;min-width:0}
+.v6TeamCell img{
+  width:38px;height:38px;object-fit:cover;border-radius:50%;
+  border:1px solid rgba(225,174,66,.38);
+  box-shadow:0 0 0 3px rgba(255,255,255,.025);
+}
+.v6TeamName{font-weight:900;font-size:12px;color:#f1f0eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v6SectorBadge,.v6PegBadge{
+  display:inline-flex;min-width:30px;height:28px;align-items:center;justify-content:center;
+  border:1px solid rgba(225,174,66,.28);border-radius:7px;color:#e7bd62;font-weight:900;
+  background:rgba(225,174,66,.045)
+}
+.v6PegBadge{color:#d9ddd8;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.025)}
+.v6FishWeight{font-variant-numeric:tabular-nums;color:#c7ccc7;font-weight:700}
+.v6FishWeight.hasFish{color:#f1c55f}
+.v6Sum{
+  display:inline-flex;align-items:center;justify-content:center;min-width:72px;height:29px;
+  padding:0 10px;border-radius:15px;border:1px solid rgba(225,174,66,.34);
+  background:rgba(225,174,66,.08);color:#f0c45e;font-weight:950;
+  box-shadow:inset 0 0 14px rgba(225,174,66,.035)
+}
+.v6Count{font-weight:900;color:#e6e8e3}
+
+.v6RankingPanel tbody tr:nth-child(1) td{
+  background:linear-gradient(90deg,rgba(183,127,22,.28),rgba(183,127,22,.06) 58%,transparent);
+}
+.v6RankingPanel tbody tr:nth-child(2) td{
+  background:linear-gradient(90deg,rgba(184,193,199,.18),rgba(184,193,199,.035) 58%,transparent);
+}
+.v6RankingPanel tbody tr:nth-child(3) td{
+  background:linear-gradient(90deg,rgba(169,83,29,.23),rgba(169,83,29,.045) 58%,transparent);
+}
+.v6RankingPanel tbody tr:nth-child(-n+3) .v6TeamName{font-size:13px}
+.v6RankingPanel tbody tr:nth-child(1){box-shadow:inset 3px 0 #dca62f}
+.v6RankingPanel tbody tr:nth-child(2){box-shadow:inset 3px 0 #bfc8ce}
+.v6RankingPanel tbody tr:nth-child(3){box-shadow:inset 3px 0 #b36b37}
+
+.v6Medal{
+  width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-weight:950;border:1px solid rgba(225,174,66,.38);color:#e8bd5a;background:#101514
+}
+.v6Medal.m1{color:#19140a;background:linear-gradient(145deg,#ffe68a,#b77a13);box-shadow:0 0 18px rgba(224,166,45,.32)}
+.v6Medal.m2{color:#171a1c;background:linear-gradient(145deg,#f0f3f4,#8e9aa0)}
+.v6Medal.m3{color:#1b1009;background:linear-gradient(145deg,#e7a66b,#8b431e)}
+
+.v6SectorGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.v6SectorPanel{overflow:hidden}
+.v6SectorHeader{
+  display:flex;align-items:center;justify-content:space-between;padding:14px 15px;
+  border-bottom:1px solid rgba(225,174,66,.23);
+  background:linear-gradient(90deg,rgba(225,174,66,.10),rgba(225,174,66,.015));
+}
+.v6SectorTitle{font-size:17px;font-weight:950;color:#edbd54;text-transform:uppercase}
+.v6SectorMeta{font-size:9px;color:#8e958e;text-transform:uppercase;letter-spacing:.7px}
+.v6SectorTable{width:100%;border-collapse:collapse;table-layout:fixed}
+.v6SectorTable th{
+  padding:9px 8px;font-size:8px;color:#b99a55;text-transform:uppercase;letter-spacing:.45px;
+  border-bottom:1px solid rgba(255,255,255,.055);text-align:left
+}
+.v6SectorTable td{height:48px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px}
+.v6SectorTable th:nth-child(1),.v6SectorTable td:nth-child(1){width:42px;text-align:center}
+.v6SectorTable th:nth-child(3),.v6SectorTable td:nth-child(3){width:60px;text-align:center}
+.v6SectorTable th:nth-child(4),.v6SectorTable td:nth-child(4){width:78px;text-align:right}
+.v6SectorTable th:nth-child(5),.v6SectorTable td:nth-child(5){width:46px;text-align:center}
+.v6SectorTeam{display:flex;align-items:center;gap:8px;min-width:0}
+.v6SectorTeam img{width:29px;height:29px;border-radius:50%;object-fit:cover;border:1px solid rgba(225,174,66,.28)}
+.v6SectorTeam span{font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v6SectorRank{
+  width:25px;height:25px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(225,174,66,.30);color:#e8b94e;font-weight:900
+}
+.v6SectorTable tr:nth-child(1) .v6SectorRank{background:linear-gradient(145deg,#f1ca63,#9c6715);color:#171107}
+.v6SectorTable tr:nth-child(1) td{background:rgba(218,163,48,.045)}
+
+@media(max-width:1150px){
+  .v6SectorGrid{grid-template-columns:1fr 1fr}
+  .v6Table{min-width:1080px}
+  .v6RankingPanel{overflow:auto}
+}
+@media(max-width:760px){
+  .v6SectorGrid{grid-template-columns:1fr}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -1761,11 +1870,49 @@ function proAllCatches(){
   return out.sort((a,b)=>new Date(b.time||b.catchTime||b.createdAt||b.timestamp||0)-new Date(a.time||a.catchTime||a.createdAt||a.timestamp||0));
 }
 function proHead(title,sub){return `<div class="proViewHead"><div><h2>${title}</h2><p>${sub}</p></div><span class="proViewBadge">● LIVE</span></div>`}
-function proTeamRow(t,i){const photo=getTeamPhoto(t)||'/logo.png';return `<tr><td><span class="proRank">${i+1}</span></td><td><div class="proTeamCell"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span>${escapeHtml(getTeamName(t))}</span></div></td><td>${escapeHtml(String(t.sectorCode||t.sector||'-'))}</td><td>${escapeHtml(String(t.peg||'-'))}</td><td><b>${formatKg(Number(t.top5sum||t.top5Sum||0))}</b></td><td>${escapeHtml(String(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0))}</td></tr>`}
+function proTeamFishWeights(t){
+  const id=getTeamId(t);
+  const catches=getTeamCatches(id)||[];
+  return catches
+    .map(c=>Number(c?.weight||c?.kg||0))
+    .filter(w=>Number.isFinite(w)&&w>0)
+    .sort((a,b)=>b-a)
+    .slice(0,5);
+}
+function proTeamRow(t,i){
+  const photo=getTeamPhoto(t)||'/logo.png';
+  const weights=proTeamFishWeights(t);
+  const fishCells=Array.from({length:5},(_,n)=>{
+    const w=weights[n]||0;
+    return `<td class="fishCol"><span class="v6FishWeight ${w>0?'hasFish':''}">${formatKg(w)}</span></td>`;
+  }).join('');
+  const count=Number(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0);
+  const medalClass=i===0?'m1':i===1?'m2':i===2?'m3':'';
+  return `<tr>
+    <td><span class="v6Medal ${medalClass}">${i+1}</span></td>
+    <td><div class="v6TeamCell"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span class="v6TeamName">${escapeHtml(getTeamName(t))}</span></div></td>
+    <td><span class="v6SectorBadge">${escapeHtml(String(t.sectorCode||t.sector||'-'))}</span></td>
+    <td><span class="v6PegBadge">${escapeHtml(String(t.peg||'-'))}</span></td>
+    ${fishCells}
+    <td class="sumCol"><span class="v6Sum">${formatKg(Number(t.top5sum||t.top5Sum||0))}</span></td>
+    <td class="countCol"><span class="v6Count">${count}</span></td>
+  </tr>`;
+}
+function proSectorRow(t,i){
+  const photo=getTeamPhoto(t)||'/logo.png';
+  const count=Number(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0);
+  return `<tr>
+    <td><span class="v6SectorRank">${i+1}</span></td>
+    <td><div class="v6SectorTeam"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span>${escapeHtml(getTeamName(t))}</span></div></td>
+    <td><span class="v6PegBadge">${escapeHtml(String(t.peg||'-'))}</span></td>
+    <td><span class="v6Sum">${formatKg(Number(t.top5sum||t.top5Sum||0))}</span></td>
+    <td><span class="v6Count">${count}</span></td>
+  </tr>`;
+}
 function renderProView(view){
  const page=document.getElementById('proViewPage'); if(!page)return;
  if(view==='ranking'){
-   page.innerHTML=proHead('Celkové poradie tímov','Kompletné LIVE poradie všetkých tímov podľa aktuálnych výsledkov.')+`<div class="proPanel"><table class="proTable"><thead><tr><th>#</th><th>Tím</th><th>Sektor</th><th>Stanovište</th><th>Súčet TOP 5</th><th>Ryby</th></tr></thead><tbody>${(lastRenderedLb||[]).map(proTeamRow).join('')}</tbody></table></div>`; return;
+   page.innerHTML=proHead('Celkové poradie tímov','Kompletné LIVE poradie • rozhoduje súčet TOP 5 najťažších rýb tímu.')+`<div class="proPanel v6RankingPanel"><table class="proTable v6Table"><thead><tr><th>#</th><th>Tím</th><th>Sektor</th><th>Stan.</th><th class="fishCol">1. ryba</th><th class="fishCol">2. ryba</th><th class="fishCol">3. ryba</th><th class="fishCol">4. ryba</th><th class="fishCol">5. ryba</th><th class="sumCol">Súčet TOP 5</th><th class="countCol">Ryby</th></tr></thead><tbody>${(lastRenderedLb||[]).map(proTeamRow).join('')}</tbody></table></div>`; return;
  }
  const catches=proAllCatches();
  if(view==='catches'){
@@ -1778,7 +1925,7 @@ function renderProView(view){
  }
  if(view==='sectors'){
    const groups={}; (lastRenderedLb||[]).forEach(t=>{const sec=String(t.sectorCode||t.sector||'Bez sektora');(groups[sec]??=[]).push(t)});
-   page.innerHTML=proHead('Sektory','Samostatné LIVE poradie tímov v jednotlivých sektoroch.')+`<div class="proSectorGrid">${Object.keys(groups).sort().map(sec=>`<div class="proPanel"><div class="proSectorTitle">SEKTOR ${escapeHtml(sec)}</div><table class="proTable"><tbody>${groups[sec].map(proTeamRow).join('')}</tbody></table></div>`).join('')}</div>`; return;
+   page.innerHTML=proHead('Sektory','Samostatné LIVE poradie tímov v jednotlivých sektoroch.')+`<div class="v6SectorGrid">${Object.keys(groups).sort().map(sec=>`<div class="proPanel v6SectorPanel"><div class="v6SectorHeader"><div class="v6SectorTitle">SEKTOR ${escapeHtml(sec)}</div><div class="v6SectorMeta">${groups[sec].length} tímov</div></div><table class="v6SectorTable"><thead><tr><th>#</th><th>Tím</th><th>Stan.</th><th>TOP 5</th><th>Ryby</th></tr></thead><tbody>${groups[sec].map(proSectorRow).join('')}</tbody></table></div>`).join('')}</div>`; return;
  }
  if(view==='days'){
    const groups={}; catches.forEach(c=>{const raw=c.time||c.catchTime||c.createdAt||c.timestamp||'';let key='Bez dátumu';try{const d=new Date(raw);if(!Number.isNaN(d.getTime()))key=d.toLocaleDateString('sk-SK')}catch{};(groups[key]??=[]).push(c)});
