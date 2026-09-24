@@ -329,7 +329,7 @@ const CACHE_KEYS = {
 };
 
 const PHOTO_DB = {
-  name: "rcc_judge_offline_v3",
+  name: "rcc_judge_offline_v31",
   version: 1,
   store: "photos"
 };
@@ -357,6 +357,10 @@ function openPhotoDb() {
 
 async function saveOfflinePhoto(localId, file) {
   if (!file) return false;
+
+  // Android/WebView kompatibilita:
+  // File objekt najprv prevedieme na obyčajný ArrayBuffer a až ten uložíme do IndexedDB.
+  const bytes = await file.arrayBuffer();
   const db = await openPhotoDb();
 
   try {
@@ -364,7 +368,7 @@ async function saveOfflinePhoto(localId, file) {
       const tx = db.transaction(PHOTO_DB.store, "readwrite");
       tx.objectStore(PHOTO_DB.store).put({
         localId,
-        blob: file,
+        bytes,
         name: file.name || "catch.jpg",
         type: file.type || "image/jpeg",
         lastModified: Number(file.lastModified || Date.now())
@@ -416,7 +420,7 @@ async function registerJudgeServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   try {
-    await navigator.serviceWorker.register("/sw-judge.js?v=3");
+    await navigator.serviceWorker.register("/sw-judge.js?v=31");
     console.log("Judge service worker registrovaný");
   } catch (e) {
     console.error("Service worker registrácia zlyhala:", e);
@@ -974,7 +978,7 @@ async function syncPendingCatches() {
       if (item.photoStored) {
         try {
           const storedPhoto = await getOfflinePhoto(item.localId);
-          if (!storedPhoto || !storedPhoto.blob) {
+          if (!storedPhoto || !storedPhoto.bytes) {
             updatePendingCatch(item.localId, {
               status: "error",
               error: "Offline fotografia sa v telefóne nenašla"
@@ -982,15 +986,16 @@ async function syncPendingCatches() {
             continue;
           }
 
-          const uploadFile = new File(
-            [storedPhoto.blob],
-            storedPhoto.name || "catch.jpg",
-            {
-              type: storedPhoto.type || storedPhoto.blob.type || "image/jpeg",
-              lastModified: storedPhoto.lastModified || Date.now()
-            }
+          const uploadBlob = new Blob(
+            [storedPhoto.bytes],
+            { type: storedPhoto.type || "image/jpeg" }
           );
-          form.append("photo", uploadFile);
+
+          form.append(
+            "photo",
+            uploadBlob,
+            storedPhoto.name || "catch.jpg"
+          );
         } catch (e) {
           console.error("Načítanie offline fotografie zlyhalo:", e);
           updatePendingCatch(item.localId, {
