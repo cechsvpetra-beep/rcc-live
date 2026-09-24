@@ -3888,6 +3888,165 @@ tbody tr.rank-top-3 td{border-bottom-color:rgba(255,255,255,.075)!important}
 }
 </style>
 
+
+<style id="lk-premium-v14">
+/* V14 — úpravy presne podľa reálneho screenshotu */
+
+/* BOJUJ: odstránenie starého nakloneného rámu/karty */
+.promoBox *,
+.promoBig,.promoSmall{transform:none!important}
+.promoBox>div::before,
+.promoBox>div::after,
+.promoBig::before,.promoBig::after,
+.promoSmall::before,.promoSmall::after{
+  content:none!important;
+  display:none!important;
+}
+.promoBox{
+  min-height:150px!important;
+  border:1px solid rgba(229,170,51,.15)!important;
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(226,164,46,.10),transparent 36%),
+    linear-gradient(180deg,#0c1512,#07100e)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025),0 10px 24px rgba(0,0,0,.20)!important;
+}
+.promoBig{
+  display:block!important;
+  padding:0!important;
+  border:0!important;
+  background:linear-gradient(180deg,#ffe5a4,#e4a12e)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
+  font-size:38px!important;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.55))!important;
+}
+.promoSmall{
+  display:block!important;
+  padding:0!important;
+  border:0!important;
+  color:#efbd50!important;
+  font-size:14px!important;
+  line-height:1.5!important;
+}
+
+/* Pravý panel — všetky tri boxy presne zarovnať */
+.rccRight{
+  gap:14px!important;
+}
+.rccRight>.sidePanel,
+.rccRight>.promoBox{
+  width:100%!important;
+  border-radius:8px!important;
+}
+
+/* SEKTORY: viac vizuálnej informácie, ale stále presné dáta */
+.sectorRow{
+  position:relative!important;
+}
+.sectorBar{
+  height:10px!important;
+  background:#111a17!important;
+}
+.sectorRowTop span{
+  letter-spacing:.35px!important;
+}
+.sectorRowTop b{
+  color:#f7f2e8!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* PARTNERI: logá väčšie, boxy čistejšie */
+.partnerStrip,.partnerGrid{
+  gap:10px!important;
+  padding:9px 10px!important;
+}
+.partnerCard,.partnerItem{
+  min-height:50px!important;
+  padding:6px 10px!important;
+  border-radius:7px!important;
+  background:linear-gradient(180deg,#101815,#090f0d)!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+}
+.partnerCard img,.partnerItem img{
+  max-height:34px!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  filter:none!important;
+}
+
+/* POSLEDNÝ ÚLOVOK: ľavý panel zjednotiť s ostatnými */
+.lastCatch{
+  border-radius:8px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(31,203,103,.22)!important;
+}
+.lastCatchTitle{
+  min-height:58px!important;
+  display:flex!important;
+  align-items:center!important;
+  background:linear-gradient(90deg,#08713e,#034523)!important;
+  border-bottom:1px solid rgba(77,238,145,.17)!important;
+}
+.v8LatestHero{
+  min-height:198px!important;
+}
+.v8LatestPhoto,.v8LatestNoPhoto{
+  height:198px!important;
+}
+
+/* Screenshot ukazuje, že text posledného úlovku môže byť drobný */
+.v8LatestLabel{font-size:10px!important;letter-spacing:1.25px!important}
+.v8LatestWeight{font-size:40px!important}
+.v8LatestTeam{font-size:15px!important}
+.v8LatestMeta,.v8LatestTime{font-size:10px!important}
+
+/* Hlavná tabuľka — viac oddeliť TOP5 a TOTAL sekcie */
+.rccCenter>.section + .section{
+  margin-top:14px!important;
+}
+.rccCenter .sectionHead{
+  min-height:58px!important;
+}
+.rccCenter .sectionHead h2{
+  line-height:1!important;
+}
+
+/* Horné KPI — foto najväčšej ryby nech nepôsobí ako screenshot nalepený na kartu */
+.v8TopFishPhoto{
+  width:116px!important;
+  height:70px!important;
+  padding:2px!important;
+  background:#090d0c!important;
+  border:1px solid rgba(255,105,93,.26)!important;
+}
+#topFishCard{
+  overflow:hidden!important;
+}
+
+/* Jemnejší realtime text */
+.liveStatusLine{
+  opacity:.76!important;
+  font-size:9px!important;
+}
+
+/* Full HD */
+@media(min-width:1651px){
+  .rccRight{gap:16px!important}
+  .promoBox{min-height:160px!important}
+  .v8LatestHero{min-height:205px!important}
+  .v8LatestPhoto,.v8LatestNoPhoto{height:205px!important}
+}
+
+/* Mobil */
+@media(max-width:900px){
+  .promoBox{min-height:120px!important}
+  .promoBig{font-size:30px!important}
+  .v8LatestHero{min-height:155px!important}
+  .v8LatestPhoto,.v8LatestNoPhoto{height:155px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
