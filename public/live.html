@@ -11086,6 +11086,52 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v65-team-row-click-fix">
+/* V65 — skutočná oprava klikateľnosti PORADIE + SEKTORY */
+#proViewPage tr[data-team-id]{
+  cursor:pointer!important;
+}
+#proViewPage tr[data-team-id] .v6TeamName,
+#proViewPage tr[data-team-id] .v6SectorTeam span{
+  text-decoration:none!important;
+}
+@media(hover:hover){
+  #proViewPage tr[data-team-id]:hover td{
+    background:rgba(231,178,62,.06)!important;
+  }
+  #proViewPage tr[data-team-id]:hover .v6TeamName,
+  #proViewPage tr[data-team-id]:hover .v6SectorTeam span{
+    color:#f0b940!important;
+  }
+}
+@media(max-width:900px){
+  #proViewPage tr[data-team-id]:active td{
+    background:rgba(231,178,62,.10)!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v66-catches-team-links">
+/* V66 — ÚLOVKY: klik na názov tímu otvorí jeho detail; foto ostáva samostatné. */
+#proViewPage .v66TeamLink{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;
+  cursor:pointer!important;color:#f2f0e9!important;
+}
+#proViewPage .v66TeamLink::after{
+  content:"›"!important;color:rgba(239,184,63,.78)!important;
+  font-size:18px!important;line-height:1!important;
+}
+@media(hover:hover){
+  #proViewPage .v66TeamLink:hover{color:#efb83f!important}
+  #proViewPage .v66TeamLink:hover::after{color:#efb83f!important}
+}
+@media(max-width:900px){
+  #proViewPage .v66TeamLink{min-height:32px!important;padding-right:8px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -11407,7 +11453,7 @@ function proTeamRow(t,i){
   }).join('');
   const count=Number(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0);
   const medalClass=i===0?'m1':i===1?'m2':i===2?'m3':'';
-  return `<tr>
+  return `<tr class="proTeamClickable" data-team-id="${Number(getTeamId(t))}" onclick="openTeamDetail(${Number(getTeamId(t))})" title="Otvoriť detail tímu">
     <td><span class="v6Medal ${medalClass}">${i+1}</span></td>
     <td><div class="v6TeamCell"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span class="v6TeamName">${escapeHtml(getTeamName(t))}</span></div></td>
     <td><span class="v6SectorBadge">${escapeHtml(String(t.sectorCode||t.sector||'-'))}</span></td>
@@ -11420,7 +11466,7 @@ function proTeamRow(t,i){
 function proSectorRow(t,i){
   const photo=getTeamPhoto(t)||'/logo.png';
   const count=Number(t.count||t.fishCount||getTeamCatches(getTeamId(t)).length||0);
-  return `<tr>
+  return `<tr class="proTeamClickable" data-team-id="${Number(getTeamId(t))}" onclick="openTeamDetail(${Number(getTeamId(t))})" title="Otvoriť detail tímu">
     <td><span class="v6SectorRank">${i+1}</span></td>
     <td><div class="v6SectorTeam"><img src="${escapeAttr(photo)}" onerror="this.src='/logo.png'"><span>${escapeHtml(getTeamName(t))}</span></div></td>
     <td><span class="v6PegBadge">${escapeHtml(String(t.peg||'-'))}</span></td>
@@ -11456,7 +11502,7 @@ function renderProView(view){
          <span class="v7CatchKg">${formatKg(w)}</span>
        </div>
        <div class="v7CatchBody">
-         <div class="v7CatchTeam">${escapeHtml(c._teamName)}</div>
+         <div class="v7CatchTeam v66TeamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(c._teamId)})" title="Otvoriť detail tímu">${escapeHtml(c._teamName)}</div>
          <div class="v7CatchDetails">
            <span><b>Sektor</b> ${escapeHtml(c._teamSector||'-')}</span>
            <span><b>Stan.</b> ${escapeHtml(c._teamPeg||'-')}</span>
@@ -11474,7 +11520,7 @@ function renderProView(view){
       <div class="v7LatestInfo">
         <div class="v7LatestEyebrow">PRÁVE ZAEVIDOVANÉ</div>
         <div class="v7LatestWeight">${formatKg(latestWeight)}</div>
-        <div class="v7LatestTeam">${escapeHtml(latest._teamName)}</div>
+        <div class="v7LatestTeam v66TeamLink" onclick="event.stopPropagation(); openTeamDetail(${Number(latest._teamId)})" title="Otvoriť detail tímu">${escapeHtml(latest._teamName)}</div>
         <div class="v7LatestRule"></div>
         <div class="v7LatestMeta">
           <div><small>SEKTOR</small><strong>${escapeHtml(latest._teamSector||'-')}</strong></div>
@@ -12958,6 +13004,29 @@ startFallbackRefresh();
       }
     };
   }
+})();
+</script>
+
+
+<script id="lk-premium-v65-team-row-click-fix-js">
+(function(){
+  document.addEventListener('click', function(e){
+    var row = e.target.closest && e.target.closest('#proViewPage tr[data-team-id]');
+    if(!row) return;
+
+    /* Don't double-open when the inline handler already handled the row click. */
+    if(e.__lkTeamHandled) return;
+
+    var id = Number(row.getAttribute('data-team-id'));
+    if(!Number.isFinite(id) || id <= 0) return;
+
+    /* Photo/lightbox links can keep their own behavior. */
+    if(e.target.closest('a,[data-no-team-open]')) return;
+
+    if(typeof openTeamDetail === 'function'){
+      openTeamDetail(id);
+    }
+  }, false);
 })();
 </script>
 
