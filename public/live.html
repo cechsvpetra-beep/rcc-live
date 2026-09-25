@@ -12496,6 +12496,350 @@ body{
 }
 </style>
 
+
+<style id="lk-premium-v75-reference-podium-final">
+/* =========================================================
+   V75 FINAL — TOP 3 podľa schválenej referencie
+   2 | 1 | 3, veľký vavrín + číslo NAD kartou,
+   logo samostatne v karte, váha, počet úlovkov a TOP ryby.
+   ========================================================= */
+
+#podiumCards{
+  padding:8px 12px 14px!important;
+  overflow:visible!important;
+}
+.v73PodiumGrid{
+  display:grid!important;
+  grid-template-columns:1fr 1.13fr 1fr!important;
+  align-items:end!important;
+  gap:9px!important;
+  padding:62px 0 8px!important;
+  overflow:visible!important;
+}
+
+/* KARTY */
+.v73PodiumCard{
+  position:relative!important;
+  height:190px!important;
+  min-height:190px!important;
+  padding:46px 10px 10px!important;
+  border-radius:9px!important;
+  overflow:visible!important;
+  background:
+    radial-gradient(circle at 50% 8%,rgba(255,255,255,.055),transparent 34%),
+    linear-gradient(180deg,#18211e,#0a1110)!important;
+  border:1px solid rgba(213,220,218,.52)!important;
+  box-shadow:
+    inset 0 0 24px rgba(212,220,218,.035),
+    0 11px 24px rgba(0,0,0,.30)!important;
+}
+.v73Place1{
+  height:224px!important;
+  min-height:224px!important;
+  transform:translateY(-18px)!important;
+  padding-top:52px!important;
+  border:1px solid #e8ae2f!important;
+  background:
+    radial-gradient(circle at 50% 5%,rgba(255,203,64,.23),transparent 40%),
+    linear-gradient(180deg,#49340f,#17170c)!important;
+  box-shadow:
+    inset 0 0 32px rgba(242,183,47,.10),
+    0 0 25px rgba(236,174,41,.16),
+    0 13px 28px rgba(0,0,0,.34)!important;
+}
+.v73Place3{
+  border-color:rgba(203,105,52,.68)!important;
+  background:
+    radial-gradient(circle at 50% 8%,rgba(205,101,45,.12),transparent 36%),
+    linear-gradient(180deg,#291a13,#0d1110)!important;
+}
+
+/* MEDAILA/VAVRÍN — úplne oddelené od loga tímu */
+.v73Medal.v74Medal.v75Award{
+  position:absolute!important;
+  top:-65px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:102px!important;
+  height:78px!important;
+  z-index:8!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  pointer-events:none!important;
+  filter:none!important;
+}
+.v73Place1 .v73Medal.v74Medal.v75Award{
+  top:-79px!important;
+  width:122px!important;
+  height:94px!important;
+}
+
+/* číslo */
+.v75Award strong{
+  position:relative!important;
+  z-index:3!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:49px!important;
+  height:49px!important;
+  border-radius:50%!important;
+  font-size:30px!important;
+  font-weight:950!important;
+  line-height:1!important;
+  letter-spacing:-1px!important;
+  color:#242a28!important;
+  border:2px solid #e7ecea!important;
+  background:
+    radial-gradient(circle at 32% 25%,#fff 0 9%,#e0e5e3 27%,#9ba4a1 65%,#59615f 100%)!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,255,255,.14),
+    0 4px 12px rgba(0,0,0,.42),
+    0 0 14px rgba(220,227,225,.15)!important;
+}
+.v73Place1 .v75Award strong{
+  width:61px!important;
+  height:61px!important;
+  font-size:38px!important;
+  color:#2a1902!important;
+  border-color:#ffd15a!important;
+  background:
+    radial-gradient(circle at 32% 24%,#fff0a2 0 9%,#f2c34c 28%,#cf8f18 66%,#80510a 100%)!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,238,160,.18),
+    0 5px 14px rgba(0,0,0,.42),
+    0 0 25px rgba(239,177,38,.35)!important;
+}
+.v73Place3 .v75Award strong{
+  color:#2a1307!important;
+  border-color:#df8c55!important;
+  background:
+    radial-gradient(circle at 32% 24%,#f8c196 0 9%,#d57c45 29%,#a44f28 66%,#643018 100%)!important;
+}
+
+/* CSS vavríny — listy po bokoch čísla, nie emoji ani textový ornament */
+.v75Laurel{
+  position:absolute!important;
+  top:12px!important;
+  width:31px!important;
+  height:52px!important;
+  opacity:.95!important;
+}
+.v75LaurelL{left:5px!important;transform:rotate(-8deg)!important}
+.v75LaurelR{right:5px!important;transform:scaleX(-1) rotate(-8deg)!important}
+.v75Laurel::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  background:
+    radial-gradient(ellipse at 72% 92%,currentColor 0 19%,transparent 21%),
+    radial-gradient(ellipse at 48% 77%,currentColor 0 18%,transparent 20%),
+    radial-gradient(ellipse at 35% 60%,currentColor 0 17%,transparent 19%),
+    radial-gradient(ellipse at 32% 42%,currentColor 0 16%,transparent 18%),
+    radial-gradient(ellipse at 42% 25%,currentColor 0 15%,transparent 17%),
+    radial-gradient(ellipse at 58% 10%,currentColor 0 14%,transparent 16%)!important;
+  transform:rotate(-13deg)!important;
+}
+.v75Laurel::after{
+  content:""!important;
+  position:absolute!important;
+  left:16px!important;
+  bottom:1px!important;
+  width:1.5px!important;
+  height:46px!important;
+  background:currentColor!important;
+  transform:rotate(19deg)!important;
+  transform-origin:bottom!important;
+  opacity:.72!important;
+}
+.v73Place2 .v75Laurel{color:#c8cfcd!important}
+.v73Place1 .v75Laurel{color:#dba326!important}
+.v73Place3 .v75Laurel{color:#ad5b32!important}
+.v73Place1 .v75Laurel{
+  top:12px!important;
+  width:37px!important;
+  height:62px!important;
+}
+.v73Place1 .v75LaurelL{left:4px!important}
+.v73Place1 .v75LaurelR{right:4px!important}
+
+/* odstráni všetky zvyšky V74 halo/label */
+.v74MedalHalo,.v74MedalLabel{display:none!important}
+
+/* LOGO TÍMU — samostatný kruh POD označením miesta */
+.v73TeamPhoto{
+  position:absolute!important;
+  top:24px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:57px!important;
+  height:57px!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  border:2px solid rgba(220,225,223,.72)!important;
+  background:#07100c!important;
+  box-shadow:0 0 0 4px rgba(3,8,6,.86),0 5px 13px rgba(0,0,0,.38)!important;
+}
+.v73Place1 .v73TeamPhoto{
+  top:27px!important;
+  width:66px!important;
+  height:66px!important;
+  border-color:#efb42d!important;
+  box-shadow:0 0 0 4px rgba(21,15,3,.82),0 0 17px rgba(238,177,40,.18)!important;
+}
+.v73Place3 .v73TeamPhoto{border-color:#bd6a3c!important}
+.v73TeamPhoto img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+
+/* TEXTY */
+.v73TeamName{
+  width:100%!important;
+  margin-top:45px!important;
+  color:#f1f2ee!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  line-height:1.1!important;
+  text-transform:uppercase!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.v73Place1 .v73TeamName{
+  margin-top:52px!important;
+  font-size:13px!important;
+}
+.v73Weight{
+  margin-top:7px!important;
+  color:#f0f1ed!important;
+  font-size:25px!important;
+  line-height:1!important;
+  font-weight:950!important;
+}
+.v73Place1 .v73Weight{
+  color:#f5bd35!important;
+  font-size:31px!important;
+}
+.v73Place3 .v73Weight{color:#dc8a51!important}
+.v73Catches{
+  margin-top:6px!important;
+  color:#b1b9b4!important;
+  font-size:10px!important;
+  font-weight:700!important;
+}
+
+/* 3 najväčšie ryby — spodná línia ako v predlohe */
+.v73FishChips{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  width:100%!important;
+  margin-top:auto!important;
+  padding-top:8px!important;
+  border-top:1px solid rgba(255,255,255,.10)!important;
+}
+.v73FishChips span{
+  min-width:40px!important;
+  padding:4px 6px!important;
+  border-radius:5px!important;
+  border:1px solid rgba(210,217,214,.34)!important;
+  background:linear-gradient(180deg,#111815,#080d0b)!important;
+  color:#e9ebe7!important;
+  font-size:8px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  font-variant-numeric:tabular-nums!important;
+}
+.v73Place1 .v73FishChips span{
+  border-color:rgba(237,180,43,.58)!important;
+}
+.v73Place3 .v73FishChips span{
+  border-color:rgba(191,99,51,.50)!important;
+}
+
+/* tlačidlo */
+.v73AllRanking{
+  min-width:226px!important;
+  min-height:38px!important;
+  margin:5px auto 0!important;
+  border-color:rgba(235,176,39,.72)!important;
+  background:linear-gradient(180deg,#0b120e,#060b08)!important;
+  color:#eab02a!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025)!important;
+}
+.v73AllRanking span{
+  margin-left:7px!important;
+  font-size:18px!important;
+}
+
+/* hover bez lacných animácií */
+@media(hover:hover){
+  .v73PodiumCard:hover{
+    filter:brightness(1.055)!important;
+  }
+  .v73Place1:hover{
+    box-shadow:
+      inset 0 0 32px rgba(242,183,47,.11),
+      0 0 31px rgba(236,174,41,.20),
+      0 13px 28px rgba(0,0,0,.34)!important;
+  }
+}
+
+/* notebook */
+@media(min-width:901px) and (max-width:1350px){
+  .v73PodiumGrid{gap:6px!important;padding-top:57px!important}
+  .v73PodiumCard{height:178px!important;min-height:178px!important}
+  .v73Place1{height:208px!important;min-height:208px!important}
+  .v73TeamName{font-size:10px!important}
+  .v73Weight{font-size:21px!important}
+  .v73Place1 .v73Weight{font-size:27px!important}
+  .v73FishChips span{min-width:34px!important;padding:3px 4px!important;font-size:7px!important}
+}
+
+/* mobil — zachovaný rovnaký vizuálny jazyk, len kompaktnejší */
+@media(max-width:900px){
+  #podiumCards{padding:6px 5px 10px!important}
+  .v73PodiumGrid{
+    grid-template-columns:1fr 1.12fr 1fr!important;
+    gap:4px!important;
+    padding-top:48px!important;
+  }
+  .v73PodiumCard{
+    height:153px!important;
+    min-height:153px!important;
+    padding:37px 4px 7px!important;
+  }
+  .v73Place1{
+    height:174px!important;
+    min-height:174px!important;
+    transform:translateY(-9px)!important;
+  }
+  .v73Medal.v74Medal.v75Award{
+    top:-50px!important;
+    transform:translateX(-50%) scale(.72)!important;
+  }
+  .v73Place1 .v73Medal.v74Medal.v75Award{
+    top:-62px!important;
+    transform:translateX(-50%) scale(.73)!important;
+  }
+  .v73TeamPhoto{top:17px!important;width:42px!important;height:42px!important}
+  .v73Place1 .v73TeamPhoto{top:20px!important;width:48px!important;height:48px!important}
+  .v73TeamName{margin-top:24px!important;font-size:8px!important}
+  .v73Place1 .v73TeamName{margin-top:31px!important;font-size:9px!important}
+  .v73Weight{font-size:16px!important;margin-top:5px!important}
+  .v73Place1 .v73Weight{font-size:20px!important}
+  .v73Catches{font-size:7px!important;margin-top:4px!important}
+  .v73FishChips{gap:2px!important;padding-top:5px!important}
+  .v73FishChips span{min-width:0!important;padding:2px 3px!important;font-size:6px!important}
+  .v73AllRanking{min-width:190px!important;min-height:32px!important;font-size:8px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -13452,10 +13796,10 @@ function renderPodiumCards(rows) {
     const chips = top5.slice(0,3).map(v => `<span>${Number(v).toFixed(2)}</span>`).join("");
 
     return `<button class="v73PodiumCard v73Place${place}" type="button" onclick="openTeamDetail(${Number(id)})">
-      <div class="v73Medal v74Medal" aria-label="${place}. miesto">
-        <span class="v74MedalHalo"></span>
+      <div class="v73Medal v74Medal v75Award" aria-label="${place}. miesto">
+        <span class="v75Laurel v75LaurelL" aria-hidden="true"></span>
         <strong>${place}</strong>
-        <span class="v74MedalLabel">MIESTO</span>
+        <span class="v75Laurel v75LaurelR" aria-hidden="true"></span>
       </div>
       <div class="v73TeamPhoto">${photoHtml}</div>
       <div class="v73TeamName">${escapeHtml(getTeamName(team,id))}</div>
