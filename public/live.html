@@ -12298,6 +12298,204 @@ body{
 }
 </style>
 
+
+<style id="lk-premium-v74-final-medals">
+/* =========================================================
+   V74 FINAL — PREMIUM MEDALS
+   Čisté športové medaily bez textových ornamentov.
+   Renderer, poradie a všetky LIVE výpočty zostávajú bez zmeny.
+   ========================================================= */
+
+.v73PodiumGrid{
+  padding-top:48px!important;
+}
+
+/* vypnutie starých ornamentov pre istotu */
+.v73Laurel,.v73Mirror{display:none!important}
+
+.v73Medal.v74Medal{
+  position:absolute!important;
+  top:-39px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:76px!important;
+  height:76px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  filter:none!important;
+  z-index:5!important;
+  pointer-events:none!important;
+}
+
+/* vonkajší jemný prstenec */
+.v74MedalHalo{
+  position:absolute!important;
+  inset:4px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  box-shadow:
+    0 0 0 5px rgba(255,255,255,.025),
+    0 9px 18px rgba(0,0,0,.44)!important;
+}
+.v74MedalHalo::before,
+.v74MedalHalo::after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:28px!important;
+  height:3px!important;
+  border-radius:99px!important;
+  background:currentColor!important;
+  opacity:.72!important;
+}
+.v74MedalHalo::before{top:-8px!important}
+.v74MedalHalo::after{bottom:-8px!important}
+
+/* samotná minca */
+.v73Medal.v74Medal strong{
+  position:relative!important;
+  z-index:2!important;
+  width:58px!important;
+  height:58px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:50%!important;
+  font-size:31px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  font-family:inherit!important;
+  letter-spacing:-1px!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.24)!important;
+}
+
+/* malé MIESTO pod mincou */
+.v74MedalLabel{
+  position:absolute!important;
+  z-index:6!important;
+  bottom:-9px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  padding:2px 7px!important;
+  border-radius:99px!important;
+  font-size:6px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  letter-spacing:1.05px!important;
+  white-space:nowrap!important;
+  color:#10130f!important;
+}
+
+/* -------- 1. MIESTO — GOLD -------- */
+.v73Place1 .v73Medal.v74Medal{
+  top:-52px!important;
+  width:94px!important;
+  height:94px!important;
+}
+.v73Place1 .v74MedalHalo{
+  color:#f5c84f!important;
+  border-color:rgba(255,210,91,.62)!important;
+  background:
+    radial-gradient(circle at 50% 50%,transparent 57%,rgba(255,211,92,.11) 58%,transparent 70%)!important;
+  box-shadow:
+    0 0 0 5px rgba(239,184,61,.045),
+    0 0 27px rgba(239,184,61,.30),
+    0 12px 23px rgba(0,0,0,.48)!important;
+}
+.v73Place1 .v73Medal.v74Medal strong{
+  width:70px!important;
+  height:70px!important;
+  font-size:39px!important;
+  color:#2a1902!important;
+  border:2px solid #ffd96c!important;
+  background:
+    radial-gradient(circle at 31% 24%,#fff2ae 0 8%,#f6cc59 24%,#d99a22 61%,#87580d 100%)!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,242,174,.23),
+    inset 0 -8px 14px rgba(107,64,4,.20),
+    0 0 22px rgba(239,184,61,.36)!important;
+}
+.v73Place1 .v74MedalLabel{
+  color:#2b1b03!important;
+  background:linear-gradient(180deg,#ffd969,#dca126)!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.35)!important;
+}
+
+/* -------- 2. MIESTO — SILVER -------- */
+.v73Place2 .v74MedalHalo{
+  color:#d9e1df!important;
+  border-color:rgba(225,233,231,.48)!important;
+  box-shadow:
+    0 0 0 5px rgba(218,226,224,.025),
+    0 0 19px rgba(218,226,224,.14),
+    0 10px 20px rgba(0,0,0,.45)!important;
+}
+.v73Place2 .v73Medal.v74Medal strong{
+  color:#242a28!important;
+  border:2px solid #e4e9e7!important;
+  background:
+    radial-gradient(circle at 31% 24%,#fff 0 8%,#dce2e0 25%,#a2aaa7 63%,#59625f 100%)!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,255,255,.16),
+    inset 0 -7px 12px rgba(43,51,48,.18),
+    0 0 16px rgba(216,224,221,.16)!important;
+}
+.v73Place2 .v74MedalLabel{
+  color:#202523!important;
+  background:linear-gradient(180deg,#e9eeec,#9ba5a1)!important;
+}
+
+/* -------- 3. MIESTO — BRONZE -------- */
+.v73Place3 .v74MedalHalo{
+  color:#d7824d!important;
+  border-color:rgba(218,132,78,.48)!important;
+  box-shadow:
+    0 0 0 5px rgba(199,105,56,.025),
+    0 0 19px rgba(201,105,55,.13),
+    0 10px 20px rgba(0,0,0,.45)!important;
+}
+.v73Place3 .v73Medal.v74Medal strong{
+  color:#291307!important;
+  border:2px solid #e19560!important;
+  background:
+    radial-gradient(circle at 31% 24%,#ffd0a7 0 8%,#d98750 27%,#a7552d 64%,#63301a 100%)!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,214,177,.13),
+    inset 0 -7px 12px rgba(67,28,10,.20),
+    0 0 16px rgba(199,104,54,.15)!important;
+}
+.v73Place3 .v74MedalLabel{
+  color:#2a1307!important;
+  background:linear-gradient(180deg,#e79a65,#a9562f)!important;
+}
+
+/* jemný prémiový hover celej karty */
+@media(hover:hover){
+  .v73Place1:hover .v74MedalHalo{
+    box-shadow:
+      0 0 0 5px rgba(239,184,61,.06),
+      0 0 34px rgba(239,184,61,.42),
+      0 12px 23px rgba(0,0,0,.48)!important;
+  }
+}
+
+/* mobil */
+@media(max-width:900px){
+  .v73PodiumGrid{padding-top:40px!important}
+  .v73Medal.v74Medal{
+    top:-34px!important;
+    transform:translateX(-50%) scale(.78)!important;
+  }
+  .v73Place1 .v73Medal.v74Medal{
+    top:-45px!important;
+    transform:translateX(-50%) scale(.80)!important;
+  }
+  .v74MedalLabel{font-size:6px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -13254,10 +13452,10 @@ function renderPodiumCards(rows) {
     const chips = top5.slice(0,3).map(v => `<span>${Number(v).toFixed(2)}</span>`).join("");
 
     return `<button class="v73PodiumCard v73Place${place}" type="button" onclick="openTeamDetail(${Number(id)})">
-      <div class="v73Medal" aria-label="${place}. miesto">
-        <span class="v73Laurel">❧</span>
+      <div class="v73Medal v74Medal" aria-label="${place}. miesto">
+        <span class="v74MedalHalo"></span>
         <strong>${place}</strong>
-        <span class="v73Laurel v73Mirror">❧</span>
+        <span class="v74MedalLabel">MIESTO</span>
       </div>
       <div class="v73TeamPhoto">${photoHtml}</div>
       <div class="v73TeamName">${escapeHtml(getTeamName(team,id))}</div>
