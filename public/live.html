@@ -7229,6 +7229,297 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v37-mobile-fix">
+/* V37 — MOBILE FIX podľa reálnych screenshotov */
+
+/* Telefón: stránka nesmie mať desktopovú minimálnu šírku */
+@media(max-width:900px){
+  html,body{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+  body{
+    min-width:0!important;
+  }
+  .wrap{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0 10px 22px!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+
+  /* HEADER — na mobile len logo + kompaktný názov, žiadny orez doprava */
+  .headerInner{
+    min-width:0!important;
+    width:100%!important;
+    min-height:150px!important;
+    height:auto!important;
+    padding:14px 12px!important;
+    display:grid!important;
+    grid-template-columns:112px minmax(0,1fr)!important;
+    gap:14px!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .logo{
+    width:106px!important;
+    height:106px!important;
+    min-width:106px!important;
+    margin:0!important;
+  }
+  .titleBox{
+    min-width:0!important;
+    width:auto!important;
+    overflow:hidden!important;
+  }
+  .titleBox h1,
+  .titleBox .title,
+  .mainTitle{
+    font-size:25px!important;
+    line-height:1!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    margin:0!important;
+  }
+  .titleBox .season,
+  .titleBox .subtitle{
+    font-size:10px!important;
+    letter-spacing:2px!important;
+  }
+  .headerActions{
+    display:none!important;
+  }
+
+  /* NAV — žiadne rozťahovanie celej stránky; horizontálny scroll iba v menu */
+  .nav{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+    box-sizing:border-box!important;
+  }
+  .nav::-webkit-scrollbar{display:none!important}
+  .nav a,.nav button,.nav [role="button"]{
+    flex:0 0 auto!important;
+    min-width:112px!important;
+    height:58px!important;
+    padding:0 18px!important;
+    font-size:14px!important;
+    white-space:nowrap!important;
+  }
+
+  /* KPI — jeden pod druhým, ale nižšie než teraz */
+  .heroStats{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    width:100%!important;
+  }
+  .heroStats .stat,.heroStats #topFishCard{
+    width:100%!important;
+    min-width:0!important;
+    height:142px!important;
+    min-height:142px!important;
+    padding:14px 18px!important;
+    box-sizing:border-box!important;
+  }
+  .statValue,#topFishCard .statValue{
+    font-size:42px!important;
+  }
+
+  /* DASHBOARD — striktne jeden stĺpec */
+  .rccDashboard{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    max-width:100%!important;
+    gap:12px!important;
+  }
+  .rccLeft,.rccCenter,.rccRight{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:12px!important;
+  }
+  .rccCenter::before,.rccCenter::after{display:none!important}
+
+  /* TOP 3 — screenshot ukázal tri úzke karty vedľa seba: na mobile musia ísť POD SEBA */
+  .rccLeft .section:first-child .podium,
+  .rccLeft .section:first-child [class*="podiumWrap"],
+  .rccLeft .section:first-child [class*="podiumGrid"]{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .podiumCard{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    min-height:72px!important;
+    display:grid!important;
+    grid-template-columns:46px 52px minmax(0,1fr) 82px!important;
+    padding:9px 10px!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .podiumName{
+    font-size:13px!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    line-height:1.1!important;
+  }
+  .podiumWeight{
+    width:82px!important;
+    min-width:82px!important;
+    font-size:14px!important;
+    white-space:nowrap!important;
+  }
+
+  /* Posledný úlovok */
+  .v8LatestHero{
+    min-height:176px!important;
+    display:grid!important;
+    grid-template-columns:44% 56%!important;
+  }
+  .v8LatestPhoto,.v8LatestNoPhoto{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .v8LatestInfo{
+    min-width:0!important;
+    padding:15px!important;
+  }
+  .v8LatestWeight{font-size:31px!important}
+
+  /* mini úlovky: 1 na riadok na úzkych telefónoch */
+  .v8RecentStrip{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+  .v8RecentMini{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  /* TOP 5 najväčších rýb — mobilná karta */
+  .rccLeft .section:last-child table,
+  .rccLeft .section:last-child tbody,
+  .rccLeft .section:last-child tr{
+    width:100%!important;
+  }
+
+  /* HLAVNÁ TOP5 TABUĽKA:
+     nechceme zmrzačené stĺpce — iba táto tabuľka sa môže horizontálne posúvať */
+  .rccCenter .section:first-child{
+    overflow:hidden!important;
+  }
+  .rccCenter .section:first-child .tableWrap,
+  .rccCenter .section:first-child [class*="tableWrap"]{
+    width:100%!important;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .rccCenter .section:first-child table{
+    width:760px!important;
+    min-width:760px!important;
+    table-layout:fixed!important;
+  }
+  .rccCenter .section:first-child tbody tr{
+    height:54px!important;
+  }
+
+  /* CELKOVÁ VÁHA — na mobile už vyzerá dobre, ale odstránime vnútorný horizontálny overflow */
+  .rccCenter .section + .section{
+    width:100%!important;
+    overflow:hidden!important;
+  }
+  .rccCenter .section + .section table{
+    width:100%!important;
+    min-width:0!important;
+    table-layout:auto!important;
+  }
+  .rccCenter .section + .section thead th:nth-child(2),
+  .rccCenter .section + .section tbody td:nth-child(2){
+    display:none!important;
+  }
+  .rccCenter .section + .section tbody td:nth-child(3){
+    min-width:0!important;
+    width:auto!important;
+    white-space:normal!important;
+  }
+
+  /* filtre sa môžu zalomiť */
+  .rccCenter .section + .section .tabs,
+  .rccCenter .section + .section [class*="tabs"]{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:6px!important;
+  }
+  .tabBtn{
+    flex:0 0 auto!important;
+  }
+
+  /* Sektory + partneri */
+  .sectorRow{
+    padding:13px 4px!important;
+  }
+  .partnerGrid,.partnerStrip{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+  .partnerCard,.partnerItem{
+    width:100%!important;
+    min-width:0!important;
+    min-height:72px!important;
+  }
+  .partnerCard img,.partnerItem img{
+    max-width:82%!important;
+    max-height:46px!important;
+  }
+
+  /* všetky panely sa zmestia do viewportu */
+  .section,.sidePanel,.lastCatch,.partnerStrip,.partnerGrid{
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+}
+
+/* Veľmi úzky mobil */
+@media(max-width:430px){
+  .wrap{padding-left:7px!important;padding-right:7px!important}
+  .headerInner{
+    grid-template-columns:94px minmax(0,1fr)!important;
+    min-height:132px!important;
+    padding:10px 8px!important;
+  }
+  .logo{width:90px!important;height:90px!important;min-width:90px!important}
+  .titleBox h1,.titleBox .title,.mainTitle{font-size:21px!important}
+  .nav a,.nav button,.nav [role="button"]{min-width:105px!important;padding:0 15px!important}
+  .heroStats .stat,.heroStats #topFishCard{height:132px!important;min-height:132px!important}
+  .statValue,#topFishCard .statValue{font-size:38px!important}
+  .podiumCard{grid-template-columns:42px 46px minmax(0,1fr) 72px!important}
+  .podiumWeight{width:72px!important;min-width:72px!important;font-size:13px!important}
+  .v8LatestHero{grid-template-columns:42% 58%!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
