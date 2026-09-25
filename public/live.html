@@ -11154,6 +11154,40 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v68-top5-team-photos">
+/* V68 — malé kruhové fotky tímov v TOP 5 */
+.v68TopTeam{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+.v68TopTeam img{
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  border-radius:50%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border:1px solid rgba(235,181,62,.42)!important;
+  background:#0a120d!important;
+  box-shadow:0 0 0 2px rgba(0,0,0,.24)!important;
+}
+.v68TopTeam b{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+@media(max-width:900px){
+  .v68TopTeam{gap:7px!important}
+  .v68TopTeam img{
+    width:30px!important;height:30px!important;min-width:30px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -11608,7 +11642,7 @@ function renderProView(view){
  if(view==='top5'){
    const fish=[...catches].sort((a,b)=>Number(b.weight||b.kg||0)-Number(a.weight||a.kg||0)).slice(0,5);
    const teams=[...(lastRenderedLb||[])].sort((a,b)=>Number(b.top5sum||b.top5Sum||0)-Number(a.top5sum||a.top5Sum||0)).slice(0,5);
-   page.innerHTML=proHead('TOP 5','Najväčšie ryby a najlepších päť tímov podľa súčtu TOP 5.')+`<div class="proCards"><div class="proCard" style="grid-column:span 2"><h3>TOP 5 najväčších rýb</h3>${fish.length?`<table class="proTable"><tbody>${fish.map((c,i)=>`<tr class="proTeamClickable" onclick="openTeamDetail(${Number(c._teamId)})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td></tr>`).join('')}</tbody></table>`:`<div class="proEmpty">Zatiaľ bez úlovkov.</div>`}</div><div class="proCard"><h3>TOP 5 tímov</h3><table class="proTable"><tbody>${teams.map((t,i)=>`<tr class="proTeamClickable" onclick="openTeamDetail(${Number(getTeamId(t))})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(getTeamName(t))}</b></td><td>${formatKg(Number(t.top5sum||t.top5Sum||0))}</td></tr>`).join('')}</tbody></table></div></div>`; return;
+   page.innerHTML=proHead('TOP 5','Najväčšie ryby a najlepších päť tímov podľa súčtu TOP 5.')+`<div class="proCards"><div class="proCard" style="grid-column:span 2"><h3>TOP 5 najväčších rýb</h3>${fish.length?`<table class="proTable"><tbody>${fish.map((c,i)=>{const tm=getTeamById(c._teamId);const tp=tm?getTeamPhoto(tm):'';return `<tr class="proTeamClickable" onclick="openTeamDetail(${Number(c._teamId)})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><div class="v68TopTeam">${tp?`<img src="${escapeAttr(tp)}" alt="${escapeAttr(c._teamName)}" onerror="this.src='/logo.png'">`:`<img src="/logo.png" alt="${escapeAttr(c._teamName)}">`}<b>${escapeHtml(c._teamName)}</b></div></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td></tr>`}).join('')}</tbody></table>`:`<div class="proEmpty">Zatiaľ bez úlovkov.</div>`}</div><div class="proCard"><h3>TOP 5 tímov</h3><table class="proTable"><tbody>${teams.map((t,i)=>{const tp=getTeamPhoto(t);return `<tr class="proTeamClickable" onclick="openTeamDetail(${Number(getTeamId(t))})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><div class="v68TopTeam"><img src="${escapeAttr(tp||'/logo.png')}" alt="${escapeAttr(getTeamName(t))}" onerror="this.src='/logo.png'"><b>${escapeHtml(getTeamName(t))}</b></div></td><td>${formatKg(Number(t.top5sum||t.top5Sum||0))}</td></tr>`}).join('')}</tbody></table></div></div>`; return;
  }
  if(view==='sectors'){
    const groups={}; (lastRenderedLb||[]).forEach(t=>{const sec=String(t.sectorCode||t.sector||'Bez sektora');(groups[sec]??=[]).push(t)});
@@ -12639,6 +12673,17 @@ function getTeamId(team) {
 
 function getTeamName(team, fallbackId = "") {
   return team?.name || team?.teamName || team?.team || (fallbackId ? `Tím ${fallbackId}` : "-");
+}
+
+
+function getTeamById(teamId){
+  const id=Number(teamId);
+  const pools=[lastRenderedLb,currentTeams,currentLeaderboard].filter(Array.isArray);
+  for(const pool of pools){
+    const found=pool.find(t=>Number(getTeamId(t))===id);
+    if(found) return found;
+  }
+  return null;
 }
 
 function getTeamPhoto(team) {
