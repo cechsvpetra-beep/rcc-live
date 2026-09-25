@@ -6830,6 +6830,405 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v34">
+/* V34 — screenshot-driven 2K rebalance: väčší obsah, menej prázdna */
+
+/* Na širokom monitore využijeme viac plochy */
+@media(min-width:2000px){
+  .wrap{
+    width:calc(100% - 22px)!important;
+    max-width:2480px!important;
+  }
+
+  .rccDashboard{
+    grid-template-columns:minmax(390px,.78fr) minmax(1180px,2.36fr) minmax(410px,.82fr)!important;
+    gap:12px!important;
+  }
+
+  /* TOP 3 je na screenshote príliš drobná */
+  .podiumCard{
+    min-height:70px!important;
+    grid-template-columns:38px 46px minmax(0,1fr) 96px!important;
+    padding:9px 12px!important;
+  }
+  .podiumRank{
+    font-size:16px!important;
+  }
+  .podiumName{
+    font-size:14px!important;
+  }
+  .podiumWeight{
+    width:96px!important;
+    min-width:96px!important;
+    font-size:15px!important;
+  }
+
+  /* Hlavná TOP5 tabuľka */
+  .rccCenter .section:first-child thead th{
+    height:34px!important;
+    font-size:10px!important;
+  }
+  .rccCenter .section:first-child tbody tr{
+    height:56px!important;
+  }
+  .rccCenter .section:first-child tbody td{
+    font-size:12px!important;
+  }
+  .rccCenter .section:first-child tbody td:nth-child(3){
+    font-size:14px!important;
+  }
+  .rccCenter .section:first-child tbody td:last-child{
+    font-size:13px!important;
+  }
+  .rccCenter .section:first-child .teamPhoto,
+  .rccCenter .section:first-child tbody img{
+    width:38px!important;
+    height:38px!important;
+  }
+
+  /* Celková váha — toto je hlavná pracovná tabuľka */
+  .rccCenter .section + .section thead th{
+    height:36px!important;
+    font-size:10px!important;
+  }
+  .rccCenter .section + .section tbody tr{
+    height:55px!important;
+  }
+  .rccCenter .section + .section tbody td{
+    font-size:12px!important;
+  }
+  .rccCenter .section + .section tbody td:nth-child(3){
+    font-size:14px!important;
+  }
+  .rccCenter .section + .section .teamPhoto,
+  .rccCenter .section + .section tbody img{
+    width:36px!important;
+    height:36px!important;
+  }
+
+  /* Pravá strana nech nie je opticky prázdna */
+  .sectorRow{
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+  }
+  .sectorRowTop{
+    font-size:12px!important;
+  }
+  .sectorRowTop b{
+    width:88px!important;
+    font-size:13px!important;
+  }
+  .sectorRowSub{
+    font-size:9px!important;
+  }
+
+  .partnerCard,.partnerItem{
+    min-height:58px!important;
+  }
+  .partnerCard img,.partnerItem img{
+    max-height:38px!important;
+    max-width:88%!important;
+  }
+}
+
+/* Partner panel dostane trochu vzduchu aj mimo 2K */
+.partnerGrid,.partnerStrip{
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+}
+
+/* Prázdny BOJUJ/promo panel už nemá zaberať miesto */
+.promoBox{
+  display:none!important;
+}
+
+/* Ak po starom promo ostane prázdny panel/kontajner, schováme ho */
+.rccRight > .section:has(.promoBox),
+.rccRight > .sidePanel:has(.promoBox){
+  display:none!important;
+}
+
+/* Posledný úlovok mierne väčší, aby držal krok s TOP3 */
+@media(min-width:2000px){
+  .v8LatestHero{
+    min-height:142px!important;
+  }
+  .v8LatestWeight{
+    font-size:30px!important;
+  }
+  .v8LatestTeam{
+    font-size:12px!important;
+  }
+  .v8RecentMini{
+    min-height:55px!important;
+  }
+  .v8RecentMini img{
+    width:47px!important;
+    height:47px!important;
+    flex-basis:47px!important;
+  }
+}
+
+/* Na menších monitoroch zachovať doterajšie rozmery */
+@media(max-width:1999px){
+  .promoBox{
+    display:none!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v35">
+/* V35 — scoreboard refinement after 2K rebalance */
+
+/* Centrálna tabuľka má byť absolútne dominantná */
+@media(min-width:2000px){
+  .rccDashboard{
+    grid-template-columns:minmax(390px,.76fr) minmax(1240px,2.48fr) minmax(400px,.78fr)!important;
+  }
+
+  /* názvy hlavných sekcií */
+  .rccCenter .sectionHead h2{
+    font-size:18px!important;
+  }
+  .rccCenter .sectionHead{
+    min-height:42px!important;
+  }
+
+  /* TOP5 poradie */
+  .rccCenter .section:first-child tbody tr{
+    height:60px!important;
+  }
+  .rccCenter .section:first-child tbody td:nth-child(3){
+    font-size:15px!important;
+    letter-spacing:.15px!important;
+  }
+  .rccCenter .section:first-child tbody td:nth-child(n+4){
+    font-size:12px!important;
+  }
+
+  /* hlavná tabuľka celkovej váhy */
+  .rccCenter .section + .section tbody tr{
+    height:59px!important;
+  }
+  .rccCenter .section + .section tbody td:nth-child(3){
+    font-size:15px!important;
+  }
+  .rccCenter .section + .section tbody td:nth-last-child(-n+2){
+    font-size:13px!important;
+  }
+
+  /* ľavá strana drží krok s väčším stredom */
+  .sideTitle{
+    font-size:16px!important;
+  }
+  .podiumCard{
+    min-height:74px!important;
+  }
+  .v8LatestHero{
+    min-height:150px!important;
+  }
+
+  /* sektory */
+  .rccRight .sideTitle{
+    font-size:16px!important;
+  }
+}
+
+/* Team foto/logá v tabuľkách majú čistý kruhový rám */
+.rccCenter .teamPhoto,
+.rccCenter tbody img{
+  border-radius:50%!important;
+  object-fit:cover!important;
+  border:1px solid rgba(229,178,68,.18)!important;
+  background:#09100d!important;
+}
+
+/* Poradie: prvé tri riadky majú jemný farebný ľavý marker */
+.rccCenter .section:first-child tbody tr:nth-child(1) td:first-child{
+  box-shadow:inset 3px 0 #e1aa3d!important;
+}
+.rccCenter .section:first-child tbody tr:nth-child(2) td:first-child{
+  box-shadow:inset 3px 0 #aeb7b4!important;
+}
+.rccCenter .section:first-child tbody tr:nth-child(3) td:first-child{
+  box-shadow:inset 3px 0 #a66b45!important;
+}
+
+/* Tabuľkové hlavičky o niečo kontrastnejšie */
+.rccCenter thead{
+  background:#09110e!important;
+}
+.rccCenter thead th{
+  color:#8e9a94!important;
+}
+.rccCenter thead th:last-child{
+  color:#d8aa4a!important;
+}
+
+/* Výsledkové badge sú kompaktnejšie */
+.rccCenter .badge{
+  min-width:58px!important;
+  text-align:center!important;
+  justify-content:center!important;
+}
+
+/* Filtre CELKOVÉ / SEKTOR — jasnejší aktívny stav */
+.tabBtn{
+  border-color:rgba(255,255,255,.075)!important;
+  background:#101814!important;
+}
+.tabBtn.active{
+  background:linear-gradient(180deg,#e0ae45,#c8912e)!important;
+  border-color:#e2b24b!important;
+  color:#11130f!important;
+  box-shadow:0 3px 10px rgba(217,162,53,.12)!important;
+}
+
+/* Posledný úlovok: odstrániť pocit veľkého prázdneho bloku */
+.v8LatestHero{
+  border-color:rgba(39,211,113,.13)!important;
+}
+.v8LatestPhoto,.v8LatestNoPhoto{
+  border-right:1px solid rgba(255,255,255,.05)!important;
+}
+
+/* Partneri — rovnaká plocha pre všetky logá */
+.partnerCard,.partnerItem{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+
+/* Sektorové bary o trochu hrubšie */
+.sectorBar{
+  height:8px!important;
+  border-radius:5px!important;
+  overflow:hidden!important;
+}
+
+/* Na notebooku nemeníme hustotu z V34 */
+@media(max-width:1999px){
+  .sectorBar{height:7px!important}
+}
+</style>
+
+
+<style id="lk-premium-v36">
+/* V36 — TV scoreboard finish: viac športovej identity, stále čisté */
+
+/* Hlavné panely dostanú jemný horný highlight */
+.rccDashboard .section,
+.rccDashboard .sidePanel{
+  position:relative!important;
+  overflow:hidden!important;
+}
+.rccDashboard .section::after,
+.rccDashboard .sidePanel::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:0!important;
+  height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(232,182,74,.18),transparent)!important;
+  pointer-events:none!important;
+}
+
+/* Hlavné poradie — tím a výsledok majú jasnú vizuálnu os */
+.rccCenter .section:first-child tbody td:nth-child(3){
+  letter-spacing:.2px!important;
+}
+.rccCenter .section:first-child tbody td:last-child{
+  letter-spacing:.25px!important;
+}
+
+/* Poradové čísla */
+.rccCenter tbody td:first-child{
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* Druhá tabuľka — poradie a celková váha výraznejšie */
+.rccCenter .section + .section tbody td:first-child{
+  color:#d9aa48!important;
+}
+.rccCenter .section + .section tbody td:nth-last-child(2){
+  color:#f0b947!important;
+}
+
+/* TOP3 ľavý panel: lepšie rozlíšenie pozícií */
+.podiumCard:nth-child(1){
+  background:linear-gradient(90deg,rgba(221,168,59,.075),rgba(255,255,255,.008) 52%,transparent)!important;
+}
+.podiumCard:nth-child(2){
+  background:linear-gradient(90deg,rgba(184,196,192,.045),transparent 52%)!important;
+}
+.podiumCard:nth-child(3){
+  background:linear-gradient(90deg,rgba(170,105,62,.055),transparent 52%)!important;
+}
+
+/* LIVE úlovok — informačný blok čistejší */
+.v8LatestInfo{
+  padding-left:13px!important;
+  padding-right:13px!important;
+}
+.v8LatestMeta{
+  color:#829088!important;
+}
+.v8LatestLabel{
+  font-weight:950!important;
+}
+
+/* TOP5 najväčších rýb — prvé miesto jemne zvýrazniť */
+.rccLeft .section:last-child tbody tr:first-child{
+  background:linear-gradient(90deg,rgba(220,167,57,.06),transparent 70%)!important;
+}
+
+/* Sektory: názov sektora a váha sú hlavné, zvyšok sekundárny */
+.sectorRowTop{
+  color:#e8ece8!important;
+  font-weight:800!important;
+}
+.sectorRowTop b{
+  color:#edb746!important;
+}
+
+/* Partner panel už nebude opticky súťažiť s výsledkami */
+.partnerStrip,.partnerGrid{
+  opacity:.92!important;
+}
+
+/* LIVE pill hore — kompaktnejší */
+.livePill,.liveBadge,[class*="livePill"]{
+  font-weight:950!important;
+  letter-spacing:.6px!important;
+}
+
+/* 2K: posledné jemné zväčšenie výsledkov bez ďalšieho rastu panelov */
+@media(min-width:2000px){
+  .rccCenter .section:first-child tbody td:last-child{
+    font-size:14px!important;
+  }
+  .rccCenter .section + .section tbody td:nth-last-child(2){
+    font-size:14px!important;
+  }
+  .sectorRowTop{
+    font-size:13px!important;
+  }
+}
+
+/* Mobile: odstrániť dekoratívne highlighty kvôli čistote */
+@media(max-width:900px){
+  .rccDashboard .section::after,
+  .rccDashboard .sidePanel::after{
+    display:none!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
