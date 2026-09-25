@@ -10234,6 +10234,434 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v57-team-detail-pro">
+/* V57 — TEAM DETAIL PRO
+   Dolaďuje detail tímu podľa reálneho desktop screenshotu.
+   Bez zásahu do ranking logiky, dát, API a realtime. */
+
+/* DETAIL TÍMU — lepšie využitie veľkého desktopu */
+#teamDetailView{
+  max-width:1540px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+
+/* hlavička tímu */
+#teamDetailView .detailTeamHeader,
+#teamDetailView [class*="detailTeam"]{
+  position:relative;
+}
+
+/* KPI tímu — výsledky výraznejšie */
+#teamDetailView .stat,
+#teamDetailView [class*="detailStat"]{
+  min-height:76px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+#teamDetailView .statValue,
+#teamDetailView [class*="statValue"]{
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* MOTIVÁCIA — z obrázka bola správna, ale príliš plochá */
+.detailGapPanel{
+  padding:18px!important;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(229,174,59,.035),transparent 35%),
+    linear-gradient(180deg,rgba(8,24,16,.98),rgba(5,15,10,.98))!important;
+}
+.detailGapGrid{
+  gap:14px!important;
+}
+.detailGapBox{
+  min-height:145px!important;
+  padding:16px 18px!important;
+}
+.detailGapRow{
+  min-height:38px!important;
+}
+.detailGapRow strong{
+  font-size:13px!important;
+}
+.detailGapRow.current{
+  background:linear-gradient(90deg,transparent,rgba(32,212,108,.025))!important;
+}
+
+/* ÚLOVKY TÍMU — screenshot ukázal priveľa prázdnej výšky.
+   Karta nech sa prispôsobí obsahu. */
+#teamDetailView .catchCard,
+#teamDetailView [class*="catchCard"]{
+  min-height:0!important;
+  height:auto!important;
+}
+
+/* fotografie v detaile nech sú dominantnejšie, ale nie obrovské */
+#teamDetailView .catchCard img,
+#teamDetailView [class*="catchCard"] img{
+  max-height:320px!important;
+  object-fit:contain!important;
+}
+
+/* váha úlovku napravo */
+#teamDetailView .catchWeight{
+  color:#efb83f!important;
+  font-weight:900!important;
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* vizuálne oddeľ úlovky */
+#teamDetailView .catchCard{
+  border-bottom:1px solid rgba(255,255,255,.055)!important;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+  #teamDetailView{
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .detailGapPanel{
+    padding:12px!important;
+  }
+
+  .detailGapBox{
+    min-height:0!important;
+  }
+
+  /* KPI v detaile tímu ako 2x2 */
+  #teamDetailView .heroStats,
+  #teamDetailView [class*="detailStats"]{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  #teamDetailView .stat,
+  #teamDetailView [class*="detailStat"]{
+    min-height:74px!important;
+  }
+
+  /* motivácia: na mobile sektor nad celkovým poradím */
+  .detailGapGrid{
+    grid-template-columns:1fr!important;
+  }
+
+  /* rozdiely sú na mobile najdôležitejšie */
+  .detailGapRow strong{
+    font-size:13px!important;
+    color:#f1ba42!important;
+  }
+  .detailGapRow.current strong{
+    color:#20d46c!important;
+  }
+
+  /* úlovok tímu */
+  #teamDetailView .catchCard,
+  #teamDetailView [class*="catchCard"]{
+    border-radius:8px!important;
+    padding:10px!important;
+  }
+
+  #teamDetailView .catchCard img,
+  #teamDetailView [class*="catchCard"] img{
+    max-height:240px!important;
+    width:100%!important;
+    object-fit:contain!important;
+  }
+}
+
+@media(max-width:430px){
+  .detailGapTitle{
+    font-size:11.5px!important;
+  }
+  .detailGapRow{
+    grid-template-columns:22px 1fr auto!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v58-team-catch-gallery">
+/* V58 — TEAM CATCH GALLERY
+   Úlovky v detaile tímu ako prehľadná chronologická galéria.
+   Iba vzhľad; dáta, upload fotografií, API a ranking logika bez zmeny. */
+
+/* Sekcia úlovkov tímu */
+#teamDetailView .section:has(#detailCatchesWrap){
+  overflow:hidden!important;
+  border:1px solid rgba(231,178,62,.17)!important;
+  border-radius:12px!important;
+  background:linear-gradient(180deg,rgba(9,22,16,.98),rgba(5,14,10,.98))!important;
+}
+
+/* Samotný zoznam */
+#detailCatchesWrap{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(270px,1fr))!important;
+  gap:12px!important;
+  padding:12px!important;
+  align-items:start!important;
+}
+
+/* Každý úlovok ako samostatná karta */
+#detailCatchesWrap > *{
+  position:relative!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  margin:0!important;
+  padding:12px!important;
+  border-radius:10px!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(231,178,62,.045),transparent 36%),
+    rgba(5,15,10,.94)!important;
+  box-shadow:0 7px 18px rgba(0,0,0,.15)!important;
+  overflow:hidden!important;
+}
+
+/* Obrázok úlovku */
+#detailCatchesWrap img{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  height:190px!important;
+  max-height:190px!important;
+  object-fit:cover!important;
+  border-radius:8px!important;
+  border:1px solid rgba(231,178,62,.13)!important;
+  margin:8px 0!important;
+}
+
+/* Váha – športový výsledkový údaj */
+#detailCatchesWrap .catchWeight,
+#detailCatchesWrap [class*="weight"]{
+  color:#f0b940!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  font-variant-numeric:tabular-nums!important;
+  white-space:nowrap!important;
+}
+
+/* dátum/čas/meta */
+#detailCatchesWrap small,
+#detailCatchesWrap [class*="meta"],
+#detailCatchesWrap [class*="time"],
+#detailCatchesWrap [class*="date"]{
+  color:#89948d!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+/* číslo úlovku / názov */
+#detailCatchesWrap strong,
+#detailCatchesWrap b{
+  color:#f1f2ef!important;
+}
+
+/* keď fotka nie je */
+#detailCatchesWrap [class*="noPhoto"],
+#detailCatchesWrap [class*="no-photo"]{
+  min-height:120px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:8px!important;
+  border:1px dashed rgba(231,178,62,.16)!important;
+  background:radial-gradient(circle,rgba(231,178,62,.055),transparent 55%)!important;
+  color:#68756d!important;
+}
+
+/* MOBILE — jedna karta na riadok */
+@media(max-width:900px){
+  #detailCatchesWrap{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    padding:9px!important;
+  }
+
+  #detailCatchesWrap > *{
+    padding:10px!important;
+  }
+
+  #detailCatchesWrap img{
+    height:auto!important;
+    max-height:260px!important;
+    object-fit:contain!important;
+    background:#030a07!important;
+  }
+
+  #detailCatchesWrap .catchWeight,
+  #detailCatchesWrap [class*="weight"]{
+    font-size:17px!important;
+  }
+}
+
+/* veľký desktop: max 3 úlovky vedľa seba */
+@media(min-width:1200px){
+  #detailCatchesWrap{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v59-team-profile-finish">
+/* V59 — TEAM PROFILE FINISH
+   Finálne zjednotenie detailu tímu.
+   Iba vizuál/UX. Ranking, dáta, API, fotografie a realtime bez zmeny. */
+
+/* Hlavička detailu tímu */
+#teamDetailView{
+  position:relative!important;
+}
+#teamDetailView .detailHeader,
+#teamDetailView [class*="teamHeader"],
+#teamDetailView [class*="detailHero"]{
+  border-radius:12px!important;
+}
+
+/* Názov tímu má byť hlavný prvok */
+#detailTeamName{
+  color:#f1bd48!important;
+  letter-spacing:.2px!important;
+  line-height:1.04!important;
+  text-shadow:0 0 20px rgba(231,178,62,.08)!important;
+}
+
+/* Meta: sektor / stanovište / poradie */
+#detailTeamMeta{
+  color:#a8b0aa!important;
+  line-height:1.35!important;
+}
+#detailTeamMeta strong,
+#detailTeamMeta b{
+  color:#e4b04a!important;
+}
+
+/* KPI detailu — jedna vizuálna sada */
+#teamDetailView .heroStats{
+  gap:9px!important;
+}
+#teamDetailView .heroStats .stat{
+  border:1px solid rgba(231,178,62,.14)!important;
+  background:
+    radial-gradient(circle at 90% 0%,rgba(231,178,62,.045),transparent 40%),
+    rgba(7,18,13,.92)!important;
+  border-radius:9px!important;
+}
+#teamDetailView .heroStats .statLabel{
+  color:#8f9992!important;
+}
+#teamDetailView .heroStats .statValue{
+  color:#f0b940!important;
+  font-weight:900!important;
+}
+
+/* Motivačný panel – ešte lepšia hierarchia */
+.detailGapTitle{
+  color:#f0b940!important;
+}
+.detailGapBoxTitle{
+  color:#d7ddd9!important;
+}
+.detailGapRow strong{
+  text-shadow:0 0 12px rgba(240,185,64,.07)!important;
+}
+
+/* Úlovky tímu — poradie kariet zhora nadol vizuálne čitateľné */
+#detailCatchesWrap > *{
+  transition:none!important;
+}
+#detailCatchesWrap > *::before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:3px!important;
+  background:rgba(231,178,62,.45)!important;
+}
+
+/* fotografia má tmavé pozadie, aby portrait/landscape fotky vyzerali rovnako */
+#detailCatchesWrap img{
+  background:#020805!important;
+}
+
+/* váha ešte čitateľnejšia */
+#detailCatchesWrap .catchWeight,
+#detailCatchesWrap [class*="weight"]{
+  text-shadow:0 0 16px rgba(240,185,64,.09)!important;
+}
+
+/* návrat späť na LIVE na desktope – nech pôsobí ako navigácia, nie admin tlačidlo */
+#teamDetailView [href*="live"],
+#teamDetailView [class*="back"]{
+  border-radius:7px!important;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+
+  /* detail nezačína nalepený na navigácii */
+  #teamDetailView{
+    padding-top:6px!important;
+  }
+
+  #detailTeamName{
+    font-size:23px!important;
+  }
+
+  #detailTeamMeta{
+    font-size:10px!important;
+  }
+
+  /* KPI 2x2 – výsledok veľký, popis malý */
+  #teamDetailView .heroStats .stat{
+    min-height:78px!important;
+    padding:10px!important;
+  }
+  #teamDetailView .heroStats .statValue{
+    font-size:20px!important;
+  }
+  #teamDetailView .heroStats .statLabel{
+    font-size:8px!important;
+    letter-spacing:.8px!important;
+  }
+
+  /* motivačný panel – rozdiel na pozíciu musí byť viditeľný bez premýšľania */
+  .detailGapRow{
+    grid-template-columns:24px minmax(0,1fr) auto!important;
+  }
+  .detailGapRow strong{
+    padding-left:8px!important;
+  }
+
+  /* galéria úlovkov */
+  #detailCatchesWrap > *{
+    border-radius:9px!important;
+  }
+
+  /* šípka späť V54/V55 ostáva vždy nad obsahom */
+  #lkTeamBackBtn{
+    z-index:100001!important;
+  }
+}
+
+@media(max-width:430px){
+  #detailTeamName{
+    font-size:21px!important;
+  }
+  #teamDetailView .heroStats .statValue{
+    font-size:18px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
