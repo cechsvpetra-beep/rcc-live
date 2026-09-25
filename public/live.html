@@ -12840,6 +12840,132 @@ body{
 }
 </style>
 
+
+<style id="lk-premium-v76-clean-podium-fix">
+/* V76 — čisté TOP3 označenie + oprava prekrytia nadpisu */
+
+/* Nadpis musí zostať nad pódiom a nič ho nesmie prekrývať */
+.podiumSection,
+#podiumCards{overflow:visible!important}
+.v73PodiumGrid{
+  padding-top:58px!important;
+  margin-top:18px!important;
+}
+
+/* Staré "vavríny" úplne preč */
+.v75Laurel,
+.v75Laurel::before,
+.v75Laurel::after{
+  display:none!important;
+  content:none!important;
+}
+
+/* Čisté elegantné kruhové označenie miesta */
+.v73Medal.v74Medal.v75Award{
+  width:62px!important;
+  height:62px!important;
+  top:-39px!important;
+  z-index:6!important;
+}
+.v73Place1 .v73Medal.v74Medal.v75Award{
+  width:72px!important;
+  height:72px!important;
+  top:-49px!important;
+}
+
+.v75Award strong{
+  width:54px!important;
+  height:54px!important;
+  font-size:28px!important;
+  border-width:2px!important;
+  box-shadow:0 6px 14px rgba(0,0,0,.42)!important;
+}
+.v73Place1 .v75Award strong{
+  width:66px!important;
+  height:66px!important;
+  font-size:35px!important;
+  box-shadow:0 0 20px rgba(239,177,38,.30),0 7px 16px rgba(0,0,0,.44)!important;
+}
+
+/* viac priestoru medzi medailou a logom tímu */
+.v73TeamPhoto{
+  top:31px!important;
+}
+.v73Place1 .v73TeamPhoto{
+  top:34px!important;
+}
+
+/* text tímu bezpečne pod logom */
+.v73TeamName{
+  margin-top:54px!important;
+}
+.v73Place1 .v73TeamName{
+  margin-top:61px!important;
+}
+
+/* TOP3 blok mierne vyšší, aby sa nič netlačilo */
+.v73PodiumCard{
+  height:202px!important;
+  min-height:202px!important;
+}
+.v73Place1{
+  height:238px!important;
+  min-height:238px!important;
+}
+
+/* notebook / veľký desktop */
+@media(min-width:901px) and (max-width:1350px){
+  .v73PodiumGrid{
+    padding-top:55px!important;
+    margin-top:16px!important;
+  }
+  .v73PodiumCard{
+    height:190px!important;
+    min-height:190px!important;
+  }
+  .v73Place1{
+    height:222px!important;
+    min-height:222px!important;
+  }
+  .v73TeamName{margin-top:49px!important}
+  .v73Place1 .v73TeamName{margin-top:55px!important}
+}
+
+/* mobil */
+@media(max-width:900px){
+  .v73PodiumGrid{
+    padding-top:43px!important;
+    margin-top:13px!important;
+  }
+  .v73Medal.v74Medal.v75Award{
+    top:-34px!important;
+    width:48px!important;
+    height:48px!important;
+    transform:translateX(-50%)!important;
+  }
+  .v73Place1 .v73Medal.v74Medal.v75Award{
+    top:-40px!important;
+    width:55px!important;
+    height:55px!important;
+    transform:translateX(-50%)!important;
+  }
+  .v75Award strong{
+    width:44px!important;
+    height:44px!important;
+    font-size:23px!important;
+  }
+  .v73Place1 .v75Award strong{
+    width:51px!important;
+    height:51px!important;
+    font-size:27px!important;
+  }
+  .v73TeamPhoto{top:23px!important}
+  .v73Place1 .v73TeamPhoto{top:26px!important}
+  .v73TeamName{margin-top:34px!important}
+  .v73Place1 .v73TeamName{margin-top:40px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
