@@ -7520,6 +7520,231 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v38-mobile-final">
+/* V38 — MOBILE FINAL podľa screenshotov: opravuje header + TOP3 */
+
+/* Len telefón — desktop zostáva nedotknutý */
+@media(max-width:900px){
+
+  /* 1) HEADER:
+     na screenshote sa názov odrezáva vpravo.
+     Na mobile preto používame čistý brand header: logo hore, názov pod ním. */
+  .headerInner{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:18px 12px 15px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    overflow:hidden!important;
+    text-align:center!important;
+  }
+  .logo{
+    width:104px!important;
+    height:104px!important;
+    min-width:104px!important;
+    flex:0 0 104px!important;
+    margin:0 auto!important;
+  }
+  .titleBox{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0 6px!important;
+    box-sizing:border-box!important;
+    overflow:visible!important;
+    text-align:center!important;
+  }
+  .titleBox h1,
+  .titleBox .title,
+  .mainTitle{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:24px!important;
+    line-height:1.05!important;
+    letter-spacing:.7px!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    text-align:center!important;
+  }
+  .titleBox .season,
+  .titleBox .subtitle{
+    display:block!important;
+    width:100%!important;
+    margin-top:4px!important;
+    font-size:9px!important;
+    line-height:1.25!important;
+    letter-spacing:2px!important;
+    white-space:normal!important;
+    text-align:center!important;
+  }
+  .headerActions{display:none!important}
+
+  /* 2) TOP3:
+     pôvodné desktopové podium bolo na mobile tri úzke stĺpce a názvy zmizli.
+     Spravíme z neho tri plnohodnotné riadky. */
+  .rccLeft .section:first-child{
+    overflow:hidden!important;
+  }
+  .rccLeft .section:first-child .podium,
+  .rccLeft .section:first-child .podiumGrid,
+  .rccLeft .section:first-child .podiumWrap,
+  .rccLeft .section:first-child [class*="podium"]{
+    max-width:100%!important;
+  }
+
+  /* kontajner, ktorý priamo obsahuje podiumCard */
+  .rccLeft .section:first-child :has(> .podiumCard){
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .podiumCard{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    min-height:76px!important;
+    margin:0!important;
+    padding:9px 11px!important;
+    display:grid!important;
+    grid-template-columns:48px 50px minmax(0,1fr) 86px!important;
+    grid-template-rows:auto!important;
+    gap:8px!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  .podiumRank{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    font-size:17px!important;
+  }
+  .podiumCard img,
+  .podiumCard .teamPhoto{
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    max-width:46px!important;
+    margin:0!important;
+    object-fit:cover!important;
+    border-radius:50%!important;
+  }
+  .podiumName{
+    display:block!important;
+    min-width:0!important;
+    width:auto!important;
+    margin:0!important;
+    color:#f7f5ee!important;
+    font-size:14px!important;
+    font-weight:950!important;
+    line-height:1.08!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    word-break:normal!important;
+  }
+  .podiumWeight{
+    display:block!important;
+    width:86px!important;
+    min-width:86px!important;
+    margin:0!important;
+    padding-left:8px!important;
+    text-align:right!important;
+    white-space:nowrap!important;
+    font-size:14px!important;
+    font-weight:950!important;
+    line-height:1.05!important;
+    border-left:1px solid rgba(255,255,255,.06)!important;
+  }
+
+  /* Odstrániť desktopové kruhy/absolútne pozície, ktoré prekrývali text */
+  .podiumCard > *{
+    position:static!important;
+    transform:none!important;
+  }
+
+  /* 3) Hlavná TOP5 tabuľka — používateľ musí vedieť, že sa dá posúvať */
+  .rccCenter .section:first-child{
+    position:relative!important;
+  }
+  .rccCenter .section:first-child::before{
+    content:"TABUĽKU POSUŇ DO STRANY →"!important;
+    display:block!important;
+    padding:6px 10px!important;
+    text-align:right!important;
+    font-size:8px!important;
+    font-weight:900!important;
+    letter-spacing:.8px!important;
+    color:#7c6b45!important;
+    background:#09110e!important;
+    border-bottom:1px solid rgba(220,168,58,.08)!important;
+  }
+
+  /* 4) Partneri — screenshot ukázal odrezanú kartu naľavo.
+     Bez horizontálneho slidera, pevná 2-stĺpcová mriežka. */
+  .partnerGrid,.partnerStrip{
+    margin:0!important;
+    padding:10px!important;
+    width:100%!important;
+    max-width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;
+    gap:8px!important;
+    overflow:visible!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+  .partnerCard,.partnerItem{
+    position:static!important;
+    transform:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+  }
+}
+
+/* Úzky telefón */
+@media(max-width:430px){
+  .headerInner{padding-top:15px!important}
+  .logo{width:94px!important;height:94px!important;min-width:94px!important;flex-basis:94px!important}
+  .titleBox h1,.titleBox .title,.mainTitle{font-size:21px!important}
+
+  .podiumCard{
+    grid-template-columns:44px 46px minmax(0,1fr) 74px!important;
+    gap:6px!important;
+  }
+  .podiumRank{width:40px!important;height:40px!important;min-width:40px!important}
+  .podiumCard img,.podiumCard .teamPhoto{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important}
+  .podiumName{font-size:12px!important}
+  .podiumWeight{width:74px!important;min-width:74px!important;font-size:12px!important;padding-left:5px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
