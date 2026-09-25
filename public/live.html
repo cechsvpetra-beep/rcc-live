@@ -11895,6 +11895,180 @@ body{
 }
 </style>
 
+
+<style id="lk-premium-v72-top3-podium-redesign">
+/* =========================================================
+   V72 — TOP 3 PODIUM REDESIGN
+   Kompaktnejšie športové pódium podľa cieľovej predlohy.
+   Bez zásahu do poradia, výpočtov, API alebo realtime.
+   ========================================================= */
+
+@media(min-width:901px){
+
+  /* TOP3 už nemá tri obrovské vertikálne karty */
+  .podiumSection{
+    padding:10px 10px 12px!important;
+    min-height:0!important;
+  }
+
+  .podiumGrid,
+  .podiumWrap{
+    display:grid!important;
+    grid-template-columns:1fr 1.12fr 1fr!important;
+    align-items:end!important;
+    gap:7px!important;
+    min-height:0!important;
+    padding-top:20px!important;
+  }
+
+  .podiumCard{
+    position:relative!important;
+    min-width:0!important;
+    min-height:154px!important;
+    height:154px!important;
+    padding:42px 8px 10px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    text-align:center!important;
+    border-radius:9px!important;
+    overflow:visible!important;
+  }
+
+  /* 1. miesto je vyššie a dominantné */
+  .podiumCard:nth-child(1),
+  .podiumCard.first{
+    min-height:174px!important;
+    height:174px!important;
+    transform:translateY(-10px)!important;
+    border-color:rgba(239,184,61,.80)!important;
+    background:
+      radial-gradient(circle at 50% 4%,rgba(239,184,61,.25),transparent 39%),
+      linear-gradient(180deg,#392b12,#10150d)!important;
+    box-shadow:0 0 22px rgba(236,177,51,.12),0 12px 24px rgba(0,0,0,.28)!important;
+  }
+
+  /* veľké kruhové logo/foto nad kartou */
+  .podiumCard .teamPhoto,
+  .podiumCard > img,
+  .podiumCard img.teamPhoto{
+    position:absolute!important;
+    top:-22px!important;
+    left:50%!important;
+    transform:translateX(-50%)!important;
+    width:54px!important;
+    height:54px!important;
+    min-width:54px!important;
+    border-radius:50%!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    border:2px solid rgba(235,181,61,.64)!important;
+    background:#07100c!important;
+    box-shadow:0 0 0 4px rgba(3,9,6,.84),0 6px 14px rgba(0,0,0,.40)!important;
+  }
+
+  .podiumCard:nth-child(1) .teamPhoto,
+  .podiumCard.first .teamPhoto,
+  .podiumCard:nth-child(1) > img,
+  .podiumCard.first > img{
+    width:62px!important;
+    height:62px!important;
+    min-width:62px!important;
+    top:-28px!important;
+    border-color:#efb83d!important;
+  }
+
+  .podiumRank{
+    position:absolute!important;
+    top:7px!important;
+    left:9px!important;
+    width:29px!important;
+    height:29px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-radius:50%!important;
+    font-size:15px!important;
+    font-weight:900!important;
+    color:#151006!important;
+    background:linear-gradient(180deg,#ffd66b,#d89a26)!important;
+    box-shadow:0 3px 10px rgba(0,0,0,.28)!important;
+  }
+
+  .podiumCard:nth-child(2) .podiumRank{
+    background:linear-gradient(180deg,#f1f4f2,#929b98)!important;
+  }
+  .podiumCard:nth-child(3) .podiumRank{
+    background:linear-gradient(180deg,#df9a58,#9b5127)!important;
+  }
+
+  .podiumName{
+    width:100%!important;
+    margin-top:8px!important;
+    font-size:13px!important;
+    line-height:1.12!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .podiumWeight{
+    margin-top:8px!important;
+    font-size:25px!important;
+    line-height:1!important;
+    color:#efb940!important;
+  }
+
+  .podiumInfo{
+    margin-top:5px!important;
+    font-size:9px!important;
+    line-height:1.2!important;
+    color:#929e96!important;
+  }
+
+  /* jednotlivé TOP5 váhy v kartách ostanú malé */
+  .podiumCard .badge,
+  .podiumCard [class*="fishWeight"],
+  .podiumCard [class*="topWeight"]{
+    font-size:8px!important;
+  }
+
+  /* posledné úlovky sa vytiahnu vyššie */
+  .rccLeft{
+    align-content:start!important;
+  }
+}
+
+/* Na užšom notebooku ostáva pódium kompaktnejšie */
+@media(min-width:901px) and (max-width:1350px){
+  .podiumGrid,.podiumWrap{
+    grid-template-columns:1fr 1.08fr 1fr!important;
+    gap:5px!important;
+  }
+  .podiumCard{
+    height:145px!important;
+    min-height:145px!important;
+    padding-left:6px!important;
+    padding-right:6px!important;
+  }
+  .podiumCard:nth-child(1),.podiumCard.first{
+    height:164px!important;
+    min-height:164px!important;
+  }
+  .podiumName{font-size:11px!important}
+  .podiumWeight{font-size:22px!important}
+}
+
+/* Mobil: tri miesta zostávajú čitateľné pod sebou/vo svojom existujúcom layoute */
+@media(max-width:900px){
+  .podiumCard{
+    min-height:0!important;
+    height:auto!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
