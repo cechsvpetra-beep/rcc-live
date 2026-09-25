@@ -10662,6 +10662,430 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v60-clickable-teams-fix">
+/* V60 — každý tím je klikateľný + odstránenie "ducha" detailu tímu */
+.proTeamClickable{
+  cursor:pointer!important;
+}
+.proTeamClickable td{
+  transition:background .12s ease,border-color .12s ease!important;
+}
+@media(hover:hover){
+  .proTeamClickable:hover td{
+    background:rgba(229,174,59,.055)!important;
+  }
+  .proTeamClickable:hover .v6TeamName,
+  .proTeamClickable:hover .v6SectorTeam span,
+  .proTeamClickable:hover b{
+    color:#f2bd49!important;
+  }
+}
+@media(max-width:900px){
+  .proTeamClickable:active td{
+    background:rgba(229,174,59,.09)!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v61-click-ux">
+/* V61 — CLICK UX
+   Po V60 zjednocuje správanie klikateľných tímov vo všetkých tabuľkách.
+   Iba UX/vizuál; ranking, dáta, API a realtime bez zmeny. */
+
+/* klikateľný riadok musí pôsobiť klikateľne aj bez hoveru */
+.proTeamClickable{
+  position:relative!important;
+  cursor:pointer!important;
+}
+.proTeamClickable td:last-child{
+  padding-right:28px!important;
+}
+.proTeamClickable td:last-child::after{
+  content:"›"!important;
+  position:absolute!important;
+  right:10px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  color:rgba(232,180,67,.62)!important;
+  font-size:22px!important;
+  line-height:1!important;
+  font-family:Arial,sans-serif!important;
+  font-weight:400!important;
+}
+
+/* tímový názov je hlavný klikateľný prvok */
+.proTeamClickable .v6TeamName,
+.proTeamClickable .v6SectorTeam span,
+.proTeamClickable b{
+  transition:none!important;
+}
+
+/* desktop hover */
+@media(hover:hover){
+  .proTeamClickable:hover{
+    box-shadow:inset 3px 0 rgba(232,180,67,.75)!important;
+  }
+  .proTeamClickable:hover td{
+    background:rgba(232,180,67,.045)!important;
+  }
+  .proTeamClickable:hover td:last-child::after{
+    color:#efb941!important;
+    right:7px!important;
+  }
+}
+
+/* Mobil: celý riadok je pohodlný touch target */
+@media(max-width:900px){
+  .proTeamClickable{
+    min-height:54px!important;
+    -webkit-tap-highlight-color:rgba(232,180,67,.08)!important;
+  }
+  .proTeamClickable td:last-child{
+    padding-right:24px!important;
+  }
+  .proTeamClickable td:last-child::after{
+    right:7px!important;
+    font-size:20px!important;
+  }
+
+  /* pri dotyku jasná odozva */
+  .proTeamClickable:active{
+    box-shadow:inset 3px 0 #e7b33f!important;
+  }
+
+  /* po otvorení detailu musí detail vždy prekryť ostatné pohľady */
+  #detailPage[style*="display: block"]{
+    position:relative!important;
+    z-index:20!important;
+    background:#030a07!important;
+  }
+}
+
+/* Ak je detail skrytý, nesmie zaberať ani pixel priestoru */
+#detailPage[style*="display: none"]{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+</style>
+
+
+<style id="lk-premium-v62-navigation-state">
+/* V62 — NAVIGATION STATE
+   Jemné UX doladenie po zavedení klikateľných tímov.
+   Bez zásahu do výsledkov, dát, API alebo realtime. */
+
+/* Aktívna hlavná záložka má vždy jasný stav */
+.proNav button.active{
+  position:relative!important;
+}
+.proNav button.active::after{
+  content:""!important;
+  position:absolute!important;
+  left:18%!important;
+  right:18%!important;
+  bottom:0!important;
+  height:3px!important;
+  border-radius:99px 99px 0 0!important;
+  background:#efb83f!important;
+  box-shadow:0 0 10px rgba(239,184,63,.22)!important;
+}
+
+/* Klikateľné riadky: šípka je subtílna, názov ostáva dominantný */
+.proTeamClickable td:last-child::after{
+  opacity:.72!important;
+}
+
+/* Detail tímu: návratová navigácia vizuálne oddelená od obsahu */
+#backToLiveBtn:not(.hidden){
+  border:1px solid rgba(231,178,62,.22)!important;
+  background:linear-gradient(180deg,#132018,#0a130e)!important;
+  color:#e9b541!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.20)!important;
+}
+
+/* po návrate sa tabuľka opticky nepresúva */
+#proViewPage{
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+/* Mobil */
+@media(max-width:900px){
+  .proNav button.active::after{
+    left:20%!important;
+    right:20%!important;
+  }
+
+  /* detail tímu – jemná horná navigačná rezerva pre šípku späť */
+  #detailPage[style*="display: block"]{
+    padding-top:4px!important;
+  }
+
+  /* názov tímu nesmie zaliezť pod plávajúce SPÄŤ */
+  #detailPage[style*="display: block"] #teamDetailView{
+    scroll-margin-top:64px!important;
+  }
+
+  /* pri tabuľkách šípka › nesmie prekrývať výsledok */
+  .proTeamClickable td:last-child{
+    position:relative!important;
+  }
+}
+
+/* extra úzky mobil */
+@media(max-width:380px){
+  .proTeamClickable td:last-child::after{
+    font-size:18px!important;
+    right:5px!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v63-subpage-finish">
+/* V63 — SUBPAGE FINISH
+   Zjednotenie PORADIE / ÚLOVKY / TOP5 / SEKTORY / PODĽA DNÍ.
+   Iba vzhľad a UX. Výpočty, dáta, API a realtime bez zmeny. */
+
+/* hlavičky samostatných pohľadov */
+#proViewPage .sectionHead,
+#proViewPage .proViewHead{
+  position:relative!important;
+  min-height:62px!important;
+  padding:14px 16px!important;
+  border-bottom:1px solid rgba(231,178,62,.14)!important;
+  background:
+    linear-gradient(90deg,rgba(231,178,62,.07),transparent 32%),
+    rgba(5,15,10,.76)!important;
+}
+#proViewPage .sectionHead h2,
+#proViewPage .proViewHead h2{
+  color:#efb940!important;
+  letter-spacing:.5px!important;
+}
+
+/* tabuľky v podstránkach */
+#proViewPage table{
+  width:100%!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+#proViewPage thead th{
+  height:38px!important;
+  color:#87928b!important;
+  font-size:9px!important;
+  letter-spacing:.75px!important;
+  border-bottom:1px solid rgba(231,178,62,.11)!important;
+  background:#07100c!important;
+}
+#proViewPage tbody td{
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+}
+#proViewPage tbody tr:last-child td{
+  border-bottom:0!important;
+}
+
+/* TOP 3 v ľubovoľnej výsledkovej tabuľke */
+#proViewPage tbody tr:nth-child(1) .proRank,
+#proViewPage tbody tr:nth-child(1) .v6Medal,
+#proViewPage tbody tr:nth-child(1) .v6SectorRank{
+  box-shadow:0 0 16px rgba(232,180,67,.16)!important;
+}
+
+/* SEKTORY – panely rovnaká geometria */
+#proViewPage .sectorProPanel{
+  height:auto!important;
+  min-height:0!important;
+}
+#proViewPage .sectorProPanel table{
+  table-layout:fixed!important;
+}
+
+/* PODĽA DNÍ */
+#proViewPage .dayBlock{
+  box-shadow:0 8px 20px rgba(0,0,0,.13)!important;
+}
+#proViewPage .dayHeader{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+#proViewPage .dayStats{
+  white-space:nowrap!important;
+}
+
+/* ÚLOVKY – váha je vždy najvýraznejšia */
+#proViewPage .catchWeight{
+  color:#f0b940!important;
+  font-variant-numeric:tabular-nums!important;
+  font-weight:900!important;
+}
+
+/* Klikateľné tímy – názov + šípka majú rovnaký jazyk */
+#proViewPage .proTeamClickable b,
+#proViewPage .proTeamClickable .v6TeamName,
+#proViewPage .proTeamClickable .v6SectorTeam span{
+  color:#f0f2ef!important;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+  #proViewPage .sectionHead,
+  #proViewPage .proViewHead{
+    min-height:54px!important;
+    padding:11px 10px!important;
+  }
+
+  #proViewPage .sectionHead h2,
+  #proViewPage .proViewHead h2{
+    font-size:19px!important;
+  }
+
+  #proViewPage thead th{
+    height:34px!important;
+    padding:6px 5px!important;
+    font-size:8px!important;
+  }
+
+  #proViewPage tbody td{
+    padding-top:9px!important;
+    padding-bottom:9px!important;
+  }
+
+  /* sektorové panely pod seba */
+  #proViewPage .sectorProPanel{
+    width:100%!important;
+  }
+
+  /* deň – dátum hore, štatistika napravo */
+  #proViewPage .dayHeader{
+    min-height:50px!important;
+    padding:9px 10px!important;
+  }
+
+  /* klikateľný riadok musí mať pohodlnú výšku */
+  #proViewPage .proTeamClickable{
+    min-height:52px!important;
+  }
+}
+
+/* veľmi úzky mobil */
+@media(max-width:430px){
+  #proViewPage .sectionHead h2,
+  #proViewPage .proViewHead h2{
+    font-size:18px!important;
+  }
+  #proViewPage .dayStats{
+    font-size:9px!important;
+  }
+}
+</style>
+
+
+<style id="lk-premium-v64-live-status-polish">
+/* V64 — LIVE STATUS + FINAL UI DETAILS
+   Jemné zjednotenie stavových prvkov. Bez zásahu do dát, API, realtime alebo ranking logiky. */
+
+/* LIVE badge — jednotný na celej stránke */
+.navLive,
+[class*="liveBadge"],
+[class*="livePill"]{
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* Realtime stav na hlavnej obrazovke */
+.desktopInfo{
+  border-radius:8px!important;
+}
+.desktopInfo::first-line{
+  font-weight:700!important;
+}
+
+/* všetky hlavné panely dostanú rovnakú jemnú hranu */
+#livePage .section,
+#proViewPage .section,
+#detailPage .section,
+.sectorProPanel,
+.detailGapPanel{
+  border-color:rgba(230,177,61,.16)!important;
+}
+
+/* Číselné výsledky všade rovnakou optikou */
+.statValue,
+.catchWeight,
+.detailGapRow strong,
+#proViewPage td,
+#detailPage td{
+  font-variant-numeric:tabular-nums!important;
+}
+
+/* prázdne výsledky / 0 kg menej dominantné */
+#proViewPage td .badge,
+#proViewPage td [class*="weight"],
+#proViewPage td [class*="sum"]{
+  white-space:nowrap!important;
+}
+
+/* jemné zvýraznenie aktívneho obsahu */
+.proNav button.active{
+  color:#17130a!important;
+  background:linear-gradient(180deg,#f1c257,#dca32f)!important;
+}
+.proNav button.active::after{
+  background:#fff0bd!important;
+  box-shadow:none!important;
+}
+
+/* Detail tímu — oddelenie hlavičky od štatistík */
+#detailPage .heroStats{
+  margin-top:10px!important;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+
+  /* horná navigácia musí zostať pohodlne klikateľná */
+  .proNav button{
+    min-height:48px!important;
+    padding-left:15px!important;
+    padding-right:15px!important;
+  }
+
+  /* LIVE badge nesmie zaberať priveľa miesta */
+  .navLive{
+    min-height:34px!important;
+    padding:7px 12px!important;
+  }
+
+  /* realtime text kompaktnejší */
+  .desktopInfo{
+    margin-top:7px!important;
+    margin-bottom:9px!important;
+  }
+
+  /* všetky samostatné pohľady majú bezpečný spodok */
+  #livePage,
+  #proViewPage,
+  #detailPage{
+    padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
+  }
+
+  /* po kliknutí bez modrého browser highlightu */
+  .proNav button,
+  .proTeamClickable,
+  #lkTeamBackBtn{
+    -webkit-tap-highlight-color:transparent!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -10926,17 +11350,34 @@ let recentCatchIndex = 0;
 const FALLBACK_MS = 30000;
 
 let currentProView = "current";
+let teamDetailReturnView = "current";
 
 function proSwitch(view, btn){
   currentProView = view;
+  selectedTeamId = null;
+
+  const detail=document.getElementById('detailPage');
+  const back=document.getElementById('backToLiveBtn');
+  if(detail) detail.style.display='none';
+  if(back) back.classList.add('hidden');
+
   document.querySelectorAll('.proNav button:not(.navLive)').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+
   const live=document.getElementById('livePage');
   const page=document.getElementById('proViewPage');
+
   if(view==='current'){
-    page.style.display='none'; live.style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); return;
+    page.style.display='none';
+    live.style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
   }
-  live.style.display='none'; page.style.display='block'; renderProView(view); window.scrollTo({top:0,behavior:'smooth'});
+
+  live.style.display='none';
+  page.style.display='block';
+  renderProView(view);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 function proAllCatches(){
   const out=[];
@@ -11049,7 +11490,7 @@ function renderProView(view){
  if(view==='top5'){
    const fish=[...catches].sort((a,b)=>Number(b.weight||b.kg||0)-Number(a.weight||a.kg||0)).slice(0,5);
    const teams=[...(lastRenderedLb||[])].sort((a,b)=>Number(b.top5sum||b.top5Sum||0)-Number(a.top5sum||a.top5Sum||0)).slice(0,5);
-   page.innerHTML=proHead('TOP 5','Najväčšie ryby a najlepších päť tímov podľa súčtu TOP 5.')+`<div class="proCards"><div class="proCard" style="grid-column:span 2"><h3>TOP 5 najväčších rýb</h3>${fish.length?`<table class="proTable"><tbody>${fish.map((c,i)=>`<tr><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td></tr>`).join('')}</tbody></table>`:`<div class="proEmpty">Zatiaľ bez úlovkov.</div>`}</div><div class="proCard"><h3>TOP 5 tímov</h3><table class="proTable"><tbody>${teams.map((t,i)=>`<tr><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(getTeamName(t))}</b></td><td>${formatKg(Number(t.top5sum||t.top5Sum||0))}</td></tr>`).join('')}</tbody></table></div></div>`; return;
+   page.innerHTML=proHead('TOP 5','Najväčšie ryby a najlepších päť tímov podľa súčtu TOP 5.')+`<div class="proCards"><div class="proCard" style="grid-column:span 2"><h3>TOP 5 najväčších rýb</h3>${fish.length?`<table class="proTable"><tbody>${fish.map((c,i)=>`<tr class="proTeamClickable" onclick="openTeamDetail(${Number(c._teamId)})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(c._teamName)}</b></td><td><b>${formatKg(Number(c.weight||c.kg||0))}</b></td><td>${escapeHtml(formatDateTime(c.time||c.catchTime||c.createdAt||c.timestamp||''))}</td></tr>`).join('')}</tbody></table>`:`<div class="proEmpty">Zatiaľ bez úlovkov.</div>`}</div><div class="proCard"><h3>TOP 5 tímov</h3><table class="proTable"><tbody>${teams.map((t,i)=>`<tr class="proTeamClickable" onclick="openTeamDetail(${Number(getTeamId(t))})" title="Otvoriť detail tímu"><td><span class="proRank">${i+1}</span></td><td><b>${escapeHtml(getTeamName(t))}</b></td><td>${formatKg(Number(t.top5sum||t.top5Sum||0))}</td></tr>`).join('')}</tbody></table></div></div>`; return;
  }
  if(view==='sectors'){
    const groups={}; (lastRenderedLb||[]).forEach(t=>{const sec=String(t.sectorCode||t.sector||'Bez sektora');(groups[sec]??=[]).push(t)});
@@ -11094,7 +11535,7 @@ function renderProView(view){
          const dt=new Date(recordedRaw);
          if(!Number.isNaN(dt.getTime()))clock=new Intl.DateTimeFormat('sk-SK',{timeZone:'Europe/Bratislava',hour:'2-digit',minute:'2-digit'}).format(dt);
        }
-       return `<tr><td class="v8DayTime">${escapeHtml(clock)}</td><td><div class="v8DayTeam">${ph?`<img src="${escapeAttr(ph)}" alt="Úlovok" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName+' • '+formatKg(w))}')">`:'<span class="v8DayFish">🐟</span>'}<div><strong>${escapeHtml(c._teamName)}</strong><small>SEKTOR ${escapeHtml(c._teamSector||'-')} · STANOVIŠTE ${escapeHtml(c._teamPeg||'-')}</small></div></div></td><td class="v8DayKg">${formatKg(w)}</td></tr>`;
+       return `<tr class="proTeamClickable" onclick="openTeamDetail(${Number(c._teamId)})" title="Otvoriť detail tímu"><td class="v8DayTime">${escapeHtml(clock)}</td><td><div class="v8DayTeam">${ph?`<img src="${escapeAttr(ph)}" alt="Úlovok" onclick="openImageModal('${escapeJs(ph)}','${escapeJs(c._teamName+' • '+formatKg(w))}')">`:'<span class="v8DayFish">🐟</span>'}<div><strong>${escapeHtml(c._teamName)}</strong><small>SEKTOR ${escapeHtml(c._teamSector||'-')} · STANOVIŠTE ${escapeHtml(c._teamPeg||'-')}</small></div></div></td><td class="v8DayKg">${formatKg(w)}</td></tr>`;
      }).join('');
      return `<section class="proPanel v8DayCard"><div class="v8DayCardTop"><div><span class="v8DayIndex">${key==='unknown'?'BEZ DÁTUMU':`DEŇ ${entries.filter(([k])=>k!=='unknown').length-index}`}</span><h3>${escapeHtml(dayTitle(key))}</h3></div><span class="v8DayCount">${arr.length} ${arr.length===1?'ÚLOVOK':'ÚLOVKOV'}</span></div><div class="v8DayCardStats"><div><small>CELKOVÁ VÁHA</small><strong>${formatKg(total)}</strong></div><div><small>NAJVÄČŠIA RYBA</small><strong>${formatKg(biggest)}</strong></div><div><small>AKTÍVNE TÍMY</small><strong>${uniqueTeams}</strong></div></div><div class="v8DayTableWrap"><table class="proTable v8DayTable"><thead><tr><th>ČAS</th><th>TÍM / ÚLOVOK</th><th>VÁHA</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
    };
@@ -11276,7 +11717,10 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   renderTopFishPanel(top5teams);
   renderLeaderboard(getFilteredRows(lb));
 
-  if (selectedTeamId !== null) {
+  if (
+    selectedTeamId !== null &&
+    document.getElementById("detailPage")?.style.display === "block"
+  ) {
     renderTeamDetail(selectedTeamId);
   }
 }
@@ -11783,23 +12227,48 @@ function renderLeaderboard(rows) {
 }
 
 function openTeamDetail(teamId) {
-  selectedTeamId = Number(teamId);
+  const normalized = Number(teamId);
+  if (!Number.isFinite(normalized) || normalized <= 0) return;
+
+  teamDetailReturnView = currentProView || "current";
+  selectedTeamId = normalized;
 
   document.getElementById("livePage").style.display = "none";
+  document.getElementById("proViewPage").style.display = "none";
   document.getElementById("detailPage").style.display = "block";
   document.getElementById("backToLiveBtn").classList.remove("hidden");
 
   renderTeamDetail(selectedTeamId);
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function closeTeamDetail() {
   selectedTeamId = null;
 
-  document.getElementById("detailPage").style.display = "none";
-  document.getElementById("livePage").style.display = "block";
-  document.getElementById("backToLiveBtn").classList.add("hidden");
+  const detail=document.getElementById("detailPage");
+  const live=document.getElementById("livePage");
+  const page=document.getElementById("proViewPage");
+  const back=document.getElementById("backToLiveBtn");
+
+  detail.style.display = "none";
+  back.classList.add("hidden");
+
+  if (teamDetailReturnView && teamDetailReturnView !== "current") {
+    currentProView = teamDetailReturnView;
+    live.style.display = "none";
+    page.style.display = "block";
+    renderProView(currentProView);
+
+    document.querySelectorAll('.proNav button:not(.navLive)').forEach(b=>b.classList.remove('active'));
+    const viewOrder=['current','ranking','catches','top5','sectors','days'];
+    const idx=viewOrder.indexOf(currentProView);
+    const navButtons=document.querySelectorAll('.proNav button:not(.navLive)');
+    if(idx>=0 && navButtons[idx]) navButtons[idx].classList.add('active');
+  } else {
+    currentProView = "current";
+    page.style.display = "none";
+    live.style.display = "block";
+  }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -12423,6 +12892,72 @@ startFallbackRefresh();
     mo.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden']});
     document.addEventListener('click',function(){setTimeout(refreshBack,30);},true);
   });
+})();
+</script>
+
+
+<script id="lk-premium-v61-click-ux-js">
+(function(){
+  function prepareClickableRows(root){
+    (root || document).querySelectorAll('.proTeamClickable').forEach(function(row){
+      if(row.dataset.lkKeyboardReady === '1') return;
+      row.dataset.lkKeyboardReady='1';
+      row.setAttribute('tabindex','0');
+      row.setAttribute('role','button');
+      row.addEventListener('keydown',function(e){
+        if(e.key==='Enter' || e.key===' '){
+          e.preventDefault();
+          row.click();
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    prepareClickableRows(document);
+    var mo=new MutationObserver(function(records){
+      for(var i=0;i<records.length;i++){
+        for(var j=0;j<records[i].addedNodes.length;j++){
+          var n=records[i].addedNodes[j];
+          if(n.nodeType===1) prepareClickableRows(n);
+        }
+      }
+    });
+    mo.observe(document.body,{childList:true,subtree:true});
+  });
+})();
+</script>
+
+
+<script id="lk-premium-v62-navigation-state-js">
+(function(){
+  /* Pri návrate z detailu zachováme približnú pozíciu v zozname,
+     aby používateľ nemusel znovu hľadať tím. */
+  var savedScrollY = 0;
+  var savedView = "current";
+
+  document.addEventListener('click', function(e){
+    var row = e.target.closest && e.target.closest('.proTeamClickable');
+    if(row){
+      savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      savedView = (typeof currentProView !== 'undefined' && currentProView) ? currentProView : "current";
+    }
+  }, true);
+
+  var originalClose = window.closeTeamDetail;
+  if(typeof originalClose === 'function'){
+    window.closeTeamDetail = function(){
+      var returnView = savedView;
+      var y = savedScrollY;
+      originalClose.apply(this, arguments);
+
+      if(returnView && returnView !== "current"){
+        setTimeout(function(){
+          window.scrollTo({top:y, behavior:'auto'});
+        }, 40);
+      }
+    };
+  }
 })();
 </script>
 
