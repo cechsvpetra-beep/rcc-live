@@ -5370,6 +5370,570 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v23">
+/* V23 — screenshot-driven polish: menej prázdna, viac LIVE dát */
+
+/* Na screenshote boli KPI karty zbytočne vysoké. */
+.heroStats{
+  grid-template-columns:1fr 1fr 1fr!important;
+  gap:12px!important;
+  margin-top:12px!important;
+}
+.stat{
+  min-height:0!important;
+  height:146px!important;
+  padding:18px 22px!important;
+  align-content:center!important;
+}
+#topFishCard{
+  height:146px!important;
+  grid-template-columns:52px minmax(0,1fr) 132px!important;
+}
+.v8TopFishPhoto,.v8TopFishNoPhoto{
+  height:112px!important;
+  min-height:112px!important;
+  align-self:center!important;
+}
+.statValue{
+  font-size:38px!important;
+}
+#topFishCard .statValue{
+  font-size:37px!important;
+}
+
+/* Dashboard ide vyššie a na obrazovku sa zmestí viac tabuľky. */
+.rccDashboard{
+  margin-top:8px!important;
+  gap:14px!important;
+}
+.rccLeft,.rccCenter,.rccRight{
+  gap:10px!important;
+}
+
+/* TOP3 kompaktnejší. */
+.podiumCard,
+.podiumCard:nth-child(1){
+  min-height:74px!important;
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+}
+.podiumCard img{
+  width:42px!important;
+  height:42px!important;
+}
+.podiumCard{
+  grid-template-columns:38px 44px minmax(0,1fr) auto!important;
+  column-gap:8px!important;
+}
+.podiumRank{
+  width:32px!important;
+  height:32px!important;
+}
+.podiumName{
+  font-size:12px!important;
+}
+.podiumWeight{
+  font-size:13px!important;
+}
+
+/* Posledný úlovok – odstrániť veľkú prázdnu fotografickú plochu ak fotka chýba. */
+.v8LatestHero{
+  min-height:142px!important;
+  grid-template-columns:42% 58%!important;
+}
+.v8LatestPhoto,.v8LatestNoPhoto{
+  height:142px!important;
+  min-height:142px!important;
+}
+.v8LatestWeight{
+  font-size:34px!important;
+}
+.v8LatestTeam{
+  font-size:12px!important;
+}
+
+/* Hlavná tabuľka – viac riadkov bez rolovania. */
+.rccCenter thead th{
+  height:32px!important;
+  padding-top:6px!important;
+  padding-bottom:6px!important;
+}
+.rccCenter tbody td{
+  height:43px!important;
+  padding-top:6px!important;
+  padding-bottom:6px!important;
+}
+.rccCenter tbody td:first-child{
+  font-size:15px!important;
+}
+
+/* Dolná tabuľka na screenshote začínala príliš nízko. */
+.rccCenter .section + .section{
+  margin-top:2px!important;
+}
+
+/* Pravý stĺpec – sektory a partneri kompaktnejšie. */
+.sectorRow{
+  padding-top:6px!important;
+  padding-bottom:6px!important;
+}
+.sectorBar{
+  height:7px!important;
+  margin-top:4px!important;
+  margin-bottom:2px!important;
+}
+.partnerCard,.partnerItem{
+  min-height:38px!important;
+}
+.partnerCard img,.partnerItem img{
+  max-height:25px!important;
+}
+
+/* BOJUJ: odstránenie starého šikmého/3D efektu viditeľného na screenshote. */
+.promoBox,
+.promoBox *,
+.promoBig,
+.promoSmall{
+  transform:none!important;
+  rotate:none!important;
+  skew:none!important;
+  text-shadow:none!important;
+}
+.promoBox{
+  min-height:92px!important;
+  height:auto!important;
+  padding:12px!important;
+}
+.promoBig{
+  font-size:27px!important;
+  font-style:normal!important;
+  line-height:1!important;
+  letter-spacing:3px!important;
+  color:#e9b74b!important;
+}
+.promoSmall{
+  font-size:10px!important;
+}
+
+/* Panelové hlavičky menšie, ale stále výrazné. */
+.rccDashboard .sectionHead,
+.rccDashboard .sideTitle,
+.lastCatchTitle{
+  min-height:46px!important;
+  padding-top:9px!important;
+  padding-bottom:8px!important;
+}
+.sectionHead h2,.sideTitle{
+  font-size:17px!important;
+}
+
+/* Partneri: žiadne orezané logo na ľavej strane. */
+.partnerGrid,.partnerStrip{
+  overflow:hidden!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.partnerCard,.partnerItem{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.partnerCard img,.partnerItem img{
+  width:auto!important;
+  max-width:82%!important;
+  object-fit:contain!important;
+}
+
+/* Full HD / 2K: využijeme viac šírky obrazovky. */
+@media(min-width:1900px){
+  .wrap{
+    max-width:2060px!important;
+  }
+  .rccDashboard{
+    grid-template-columns:minmax(330px,.74fr) minmax(930px,1.92fr) minmax(330px,.74fr)!important;
+  }
+}
+
+/* Notebook. */
+@media(max-width:1450px) and (min-width:901px){
+  .stat,#topFishCard{height:132px!important}
+  .v8TopFishPhoto,.v8TopFishNoPhoto{height:100px!important;min-height:100px!important}
+  .statValue,#topFishCard .statValue{font-size:32px!important}
+}
+
+/* Mobil zachová predchádzajúce skladanie pod seba. */
+@media(max-width:900px){
+  .heroStats{grid-template-columns:1fr!important}
+  .stat,#topFishCard{height:auto!important;min-height:88px!important}
+  .v8TopFishPhoto,.v8TopFishNoPhoto{height:78px!important;min-height:78px!important}
+}
+</style>
+
+
+<style id="lk-premium-v24">
+/* V24 — screenshot refinement: výsledky sú hlavný obsah */
+
+/* Horná časť ešte o trochu kompaktnejšia */
+.headerInner{
+  min-height:108px!important;
+}
+.logo{
+  width:104px!important;
+  height:104px!important;
+}
+.titleBox h1{
+  font-size:39px!important;
+}
+.nav a,.nav button{
+  min-height:42px!important;
+}
+
+/* KPI: športová informačná lišta namiesto veľkých bannerov */
+.heroStats{
+  gap:10px!important;
+}
+.stat,#topFishCard{
+  height:118px!important;
+  padding:14px 18px!important;
+}
+.stat{
+  grid-template-columns:48px minmax(0,1fr)!important;
+}
+#topFishCard{
+  grid-template-columns:48px minmax(0,1fr) 108px!important;
+}
+.statValue,#topFishCard .statValue{
+  font-size:33px!important;
+}
+.statIcon{
+  transform:scale(.88)!important;
+}
+.v8TopFishPhoto,.v8TopFishNoPhoto{
+  height:90px!important;
+  min-height:90px!important;
+}
+
+/* Status pod KPI nezaberá skoro žiadnu výšku */
+.liveStatusLine{
+  min-height:18px!important;
+  font-size:8px!important;
+  margin-top:2px!important;
+  margin-bottom:2px!important;
+}
+
+/* Hlavný dashboard */
+.rccDashboard{
+  margin-top:5px!important;
+}
+
+/* TOP3 */
+.podiumCard,.podiumCard:nth-child(1){
+  min-height:66px!important;
+}
+.podiumCard img{
+  width:38px!important;
+  height:38px!important;
+}
+.podiumCard{
+  grid-template-columns:34px 40px minmax(0,1fr) auto!important;
+}
+.podiumRank{
+  width:29px!important;
+  height:29px!important;
+  font-size:12px!important;
+}
+.podiumName{font-size:11px!important}
+.podiumWeight{font-size:12px!important}
+
+/* Posledný úlovok */
+.v8LatestHero{
+  min-height:126px!important;
+}
+.v8LatestPhoto,.v8LatestNoPhoto{
+  height:126px!important;
+  min-height:126px!important;
+}
+.v8LatestWeight{
+  font-size:30px!important;
+}
+.v8LatestInfo{
+  padding:12px 12px!important;
+}
+.v8RecentStrip{
+  padding:5px!important;
+}
+
+/* Hlavná tabuľka: cieľ je vidieť čo najviac tímov */
+.rccCenter thead th{
+  height:29px!important;
+  font-size:8px!important;
+}
+.rccCenter tbody td{
+  height:38px!important;
+  padding-top:4px!important;
+  padding-bottom:4px!important;
+  font-size:10px!important;
+}
+.rccCenter tbody td:nth-child(3){
+  font-size:11px!important;
+}
+.rccCenter tbody td:first-child{
+  font-size:13px!important;
+}
+.rccCenter .teamPhoto{
+  width:30px!important;
+  height:30px!important;
+}
+.rccCenter .badge{
+  min-width:58px!important;
+  padding:4px 6px!important;
+  font-size:9px!important;
+}
+
+/* Sekčné hlavičky */
+.rccDashboard .sectionHead,
+.rccDashboard .sideTitle,
+.lastCatchTitle{
+  min-height:41px!important;
+  padding:7px 10px!important;
+}
+.sectionHead h2,.sideTitle{
+  font-size:15px!important;
+}
+.sectionHead .sub,.sideTitle .sub{
+  font-size:7px!important;
+}
+
+/* Pravý stĺpec */
+.sectorRow{
+  padding-top:5px!important;
+  padding-bottom:5px!important;
+}
+.sectorRowTop{
+  font-size:9px!important;
+}
+.sectorRowTop b{
+  font-size:10px!important;
+}
+.sectorRowSub{
+  font-size:8px!important;
+}
+.partnerGrid,.partnerStrip{
+  padding:6px!important;
+}
+.partnerCard,.partnerItem{
+  min-height:34px!important;
+}
+.partnerCard img,.partnerItem img{
+  max-height:22px!important;
+}
+
+/* BOJUJ nech je len nenápadný footer panel */
+.promoBox{
+  min-height:68px!important;
+  padding:8px!important;
+}
+.promoBig{
+  font-size:22px!important;
+  margin-bottom:6px!important;
+}
+.promoSmall{
+  font-size:8px!important;
+}
+
+/* Full HD / 2K: hlavná tabuľka dostane maximum šírky */
+@media(min-width:1700px){
+  .rccDashboard{
+    grid-template-columns:minmax(300px,.68fr) minmax(960px,2.08fr) minmax(300px,.68fr)!important;
+  }
+}
+
+/* Bežný notebook */
+@media(max-width:1450px) and (min-width:901px){
+  .stat,#topFishCard{height:110px!important}
+  .statValue,#topFishCard .statValue{font-size:29px!important}
+  .v8TopFishPhoto,.v8TopFishNoPhoto{height:82px!important;min-height:82px!important}
+}
+
+/* Mobil: nenecháme pevné desktop výšky */
+@media(max-width:900px){
+  .headerInner{min-height:auto!important}
+  .logo{width:78px!important;height:78px!important}
+  .titleBox h1{font-size:28px!important}
+  .stat,#topFishCard{height:auto!important;min-height:82px!important}
+  .rccCenter tbody td{font-size:10px!important}
+}
+</style>
+
+
+<style id="lk-premium-v25">
+/* V25 — FINAL DESKTOP BALANCE: menej drobného textu, lepšia čitateľnosť a profesionálny 3-stĺpcový layout */
+
+/* Po V24 už ďalej nezmenšujeme. Vrátime text do komfortnej veľkosti. */
+.rccDashboard{
+  grid-template-columns:minmax(310px,.72fr) minmax(860px,1.95fr) minmax(310px,.72fr)!important;
+  gap:13px!important;
+}
+
+/* KPI ostávajú kompaktné, ale čísla budú lepšie čitateľné */
+.stat,#topFishCard{
+  height:122px!important;
+}
+.statLabel{
+  font-size:10px!important;
+}
+.statValue,#topFishCard .statValue{
+  font-size:35px!important;
+}
+.statSub{
+  font-size:8px!important;
+}
+
+/* Panelové hlavičky — trochu väčšie ako vo V24 */
+.rccDashboard .sectionHead,
+.rccDashboard .sideTitle,
+.lastCatchTitle{
+  min-height:44px!important;
+}
+.sectionHead h2,.sideTitle{
+  font-size:16px!important;
+}
+.sectionHead .sub,.sideTitle .sub{
+  font-size:8px!important;
+}
+
+/* TOP3 — čitateľný aj z väčšej vzdialenosti */
+.podiumCard,.podiumCard:nth-child(1){
+  min-height:70px!important;
+}
+.podiumName{
+  font-size:12px!important;
+}
+.podiumWeight{
+  font-size:13px!important;
+}
+
+/* Hlavná tabuľka — ideálny kompromis medzi hustotou a čitateľnosťou */
+.rccCenter thead th{
+  height:31px!important;
+  font-size:8.5px!important;
+  letter-spacing:.35px!important;
+}
+.rccCenter tbody td{
+  height:41px!important;
+  font-size:10.5px!important;
+  padding-left:9px!important;
+  padding-right:9px!important;
+}
+.rccCenter tbody td:nth-child(3){
+  font-size:11.5px!important;
+}
+.rccCenter .teamPhoto{
+  width:31px!important;
+  height:31px!important;
+}
+
+/* Prvé tri riadky — decentný ľavý medal strip */
+.rccCenter tbody tr:nth-child(1) td:first-child{
+  box-shadow:inset 3px 0 #e7b13d!important;
+}
+.rccCenter tbody tr:nth-child(2) td:first-child{
+  box-shadow:inset 3px 0 #aeb8b8!important;
+}
+.rccCenter tbody tr:nth-child(3) td:first-child{
+  box-shadow:inset 3px 0 #bd7447!important;
+}
+
+/* Posledný úlovok — vyvážený blok */
+.v8LatestHero{
+  min-height:134px!important;
+  grid-template-columns:44% 56%!important;
+}
+.v8LatestPhoto,.v8LatestNoPhoto{
+  height:134px!important;
+  min-height:134px!important;
+}
+.v8LatestWeight{
+  font-size:32px!important;
+}
+.v8LatestTeam{
+  font-size:12px!important;
+}
+
+/* Sektory — čísla sú dôležitejšie než pomocný text */
+.sectorRowTop{
+  font-size:10px!important;
+}
+.sectorRowTop b{
+  font-size:11px!important;
+}
+.sectorRowSub{
+  font-size:8px!important;
+  opacity:.64!important;
+}
+.sectorBar{
+  height:8px!important;
+}
+
+/* Partneri */
+.partnerCard,.partnerItem{
+  min-height:36px!important;
+}
+.partnerCard img,.partnerItem img{
+  max-height:24px!important;
+}
+
+/* BOJUJ ako minimalistický podpis */
+.promoBox{
+  min-height:74px!important;
+  border-top:1px solid rgba(224,167,53,.13)!important;
+}
+.promoBig{
+  font-size:23px!important;
+}
+.promoSmall{
+  opacity:.7!important;
+}
+
+/* Vnútorné pohľady — už žiadne mikroskopické texty */
+.proViewPage thead th{
+  font-size:9px!important;
+}
+.proViewPage tbody td{
+  font-size:11px!important;
+}
+.proViewPage .sectionHead h2{
+  font-size:17px!important;
+}
+
+/* 2K / široký monitor */
+@media(min-width:1900px){
+  .wrap{max-width:2080px!important}
+  .rccDashboard{
+    grid-template-columns:minmax(320px,.70fr) minmax(1000px,2.12fr) minmax(320px,.70fr)!important;
+  }
+  .rccCenter tbody td:nth-child(3){
+    max-width:390px!important;
+  }
+}
+
+/* 1366–1600 px */
+@media(max-width:1600px) and (min-width:901px){
+  .rccDashboard{
+    grid-template-columns:minmax(270px,.72fr) minmax(650px,1.85fr) minmax(270px,.72fr)!important;
+  }
+  .rccCenter tbody td{
+    padding-left:6px!important;
+    padding-right:6px!important;
+  }
+}
+
+/* Mobil ostáva skladaný */
+@media(max-width:900px){
+  .rccDashboard{display:block!important}
+  .stat,#topFishCard{height:auto!important}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
