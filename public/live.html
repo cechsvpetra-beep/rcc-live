@@ -10196,6 +10196,44 @@ button:focus-visible,a:focus-visible{
 }
 </style>
 
+
+<style id="lk-premium-v56-detail-gap">
+.detailGapPanel{
+  margin:0 0 12px;
+  padding:16px;
+  border:1px solid rgba(255,190,73,.20);
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(11,25,18,.98),rgba(6,16,11,.98));
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+.detailGapHead{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.detailGapDot{width:9px;height:9px;flex:0 0 9px;margin-top:5px;border-radius:50%;background:#e23c42;box-shadow:0 0 10px rgba(226,60,66,.55)}
+.detailGapTitle{font-size:13px;font-weight:900;letter-spacing:1.4px;color:#e9b541}
+.detailGapSub{margin-top:5px;font-size:11px;color:#748078}
+.detailGapGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.detailGapBox{padding:15px;border-radius:11px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.018)}
+.detailGapBoxTitle{font-size:12px;font-weight:900;letter-spacing:1px;color:#b8c0ba}
+.detailGapBoxSub{font-size:10px;color:#68746c;margin:7px 0 14px}
+.detailGapRows{display:flex;flex-direction:column}
+.detailGapRow{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:7px;min-height:42px;border-bottom:1px solid rgba(255,255,255,.045)}
+.detailGapRow:last-child{border-bottom:0}
+.detailGapPlace{font-weight:900;color:#d5d9d6}
+.detailGapPlaceText{font-size:11px;font-weight:800;color:#9ba49e}
+.detailGapRow strong{font-size:12px;color:#f0ba42;font-variant-numeric:tabular-nums;white-space:nowrap}
+.detailGapRow.current strong{color:#20d46c}
+.detailGapRow.passed{opacity:.38}
+
+@media(max-width:900px){
+  .detailGapPanel{margin:0 0 10px;padding:12px;border-radius:10px}
+  .detailGapGrid{grid-template-columns:1fr;gap:9px}
+  .detailGapBox{padding:12px}
+  .detailGapTitle{font-size:12px}
+  .detailGapSub{font-size:10px;line-height:1.35}
+  .detailGapRow{min-height:40px}
+  .detailGapRow strong{font-size:12px}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -10385,6 +10423,29 @@ button:focus-visible,a:focus-visible{
       <div class="detailCard"><div class="detailLabel">Najväčšia ryba</div><div class="detailValue" id="detailBiggest">0.00 kg</div></div>
       <div class="detailCard"><div class="detailLabel">Súčet TOP 5</div><div class="detailValue" id="detailTop3Sum">0.00 kg</div></div>
     </div>
+
+    <div id="detailGapPanel" class="detailGapPanel">
+      <div class="detailGapHead">
+        <span class="detailGapDot"></span>
+        <div>
+          <div class="detailGapTitle">KOĽKO CHÝBA NA PRVÉ MIESTA</div>
+          <div class="detailGapSub" id="detailGapMode">Priebežný rozdiel podľa aktuálneho spôsobu hodnotenia</div>
+        </div>
+      </div>
+      <div class="detailGapGrid">
+        <div class="detailGapBox">
+          <div class="detailGapBoxTitle">BOJ V SEKTORE</div>
+          <div class="detailGapBoxSub" id="detailSectorRankText">Poradie v rámci sektora</div>
+          <div id="detailSectorGapRows" class="detailGapRows"></div>
+        </div>
+        <div class="detailGapBox">
+          <div class="detailGapBoxTitle">BOJ O CELKOVÉ PORADIE</div>
+          <div class="detailGapBoxSub" id="detailOverallRankText">Poradie všetkých tímov</div>
+          <div id="detailOverallGapRows" class="detailGapRows"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="section">
       <div class="sectionHead"><h2>Úlovky tímu</h2><div class="sectionSub">Zoradené podľa poradia úlovku</div></div>
       <div id="detailCatchesWrap" style="padding:14px;"></div>
@@ -11366,6 +11427,8 @@ function renderTeamDetail(teamId) {
   document.getElementById("detailTop3Sum").textContent =
     formatKg(Number(team.top5sum || team.top5Sum || team.top3sum || team.top3Sum || 0));
 
+  renderDetailGapPanel(team);
+
   const wrap = document.getElementById("detailCatchesWrap");
 
   if (!catches.length) {
@@ -11416,6 +11479,119 @@ function renderTeamDetail(teamId) {
       openImageModal(img.dataset.photo || img.src, img.dataset.caption || "");
     });
   });
+}
+
+
+function detailRankingValue(team) {
+  if (!team) return 0;
+  if (currentLeaderboardMode === "TOP5" || currentLeaderboardMode === "BOTH") {
+    return Number(team.top5sum || team.top5Sum || team.top3sum || team.top3Sum || 0);
+  }
+  return Number(team.total || team.totalWeight || 0);
+}
+
+function getDetailRankingTeams() {
+  const seen = new Set();
+  const teams = [];
+
+  if (lastRenderedTeamMap && typeof lastRenderedTeamMap.forEach === "function") {
+    lastRenderedTeamMap.forEach(team => {
+      const id = Number(getTeamId(team));
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      teams.push(team);
+    });
+  }
+
+  (lastRenderedLb || []).forEach(team => {
+    const id = Number(getTeamId(team));
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    teams.push(team);
+  });
+
+  return teams
+    .filter(team => Number.isFinite(detailRankingValue(team)))
+    .sort((a,b) => detailRankingValue(b) - detailRankingValue(a));
+}
+
+function detailGapRowsHtml(ranking, teamId) {
+  const ownIndex = ranking.findIndex(t => Number(getTeamId(t)) === Number(teamId));
+  const ownValue = ownIndex >= 0 ? detailRankingValue(ranking[ownIndex]) : 0;
+
+  if (ownIndex < 0) {
+    return `<div class="detailGapEmpty">Tím nie je v aktuálnom poradí.</div>`;
+  }
+
+  return [0,1,2].map(index => {
+    const target = ranking[index];
+    if (!target) return "";
+
+    if (index === ownIndex) {
+      return `
+        <div class="detailGapRow current">
+          <span class="detailGapPlace">${index + 1}.</span>
+          <span class="detailGapPlaceText">${index + 1}. miesto</span>
+          <strong>Aktuálne miesto</strong>
+        </div>`;
+    }
+
+    if (index > ownIndex) {
+      return `
+        <div class="detailGapRow passed">
+          <span class="detailGapPlace">${index + 1}.</span>
+          <span class="detailGapPlaceText">${index + 1}. miesto</span>
+          <strong>—</strong>
+        </div>`;
+    }
+
+    const gap = Math.max(0, detailRankingValue(target) - ownValue);
+    return `
+      <div class="detailGapRow">
+        <span class="detailGapPlace">${index + 1}.</span>
+        <span class="detailGapPlaceText">${index + 1}. miesto</span>
+        <strong>+ ${formatKg(gap)}</strong>
+      </div>`;
+  }).join("");
+}
+
+function renderDetailGapPanel(team) {
+  const panel = document.getElementById("detailGapPanel");
+  const overallRows = document.getElementById("detailOverallGapRows");
+  const sectorRows = document.getElementById("detailSectorGapRows");
+  const overallText = document.getElementById("detailOverallRankText");
+  const sectorText = document.getElementById("detailSectorRankText");
+  const modeText = document.getElementById("detailGapMode");
+
+  if (!panel || !overallRows || !sectorRows) return;
+
+  const teamId = Number(getTeamId(team));
+  const allTeams = getDetailRankingTeams();
+  const overallRank = allTeams.findIndex(t => Number(getTeamId(t)) === teamId) + 1;
+
+  const sectorCode = String(team.sectorCode || team.sector || "").trim();
+  const sectorTeams = allTeams.filter(t =>
+    String(t.sectorCode || t.sector || "").trim() === sectorCode
+  );
+  const sectorRank = sectorTeams.findIndex(t => Number(getTeamId(t)) === teamId) + 1;
+
+  modeText.textContent =
+    (currentLeaderboardMode === "TOP5" || currentLeaderboardMode === "BOTH")
+      ? "Počíta sa rozdiel podľa súčtu TOP 5 najťažších rýb."
+      : "Počíta sa rozdiel podľa celkovej váhy úlovkov.";
+
+  overallText.textContent = overallRank > 0
+    ? `Aktuálne ${overallRank}. miesto z ${allTeams.length} tímov`
+    : "Aktuálne poradie nie je dostupné";
+
+  sectorText.textContent = sectorRank > 0
+    ? `Sektor ${sectorCode || "–"} • aktuálne ${sectorRank}. miesto z ${sectorTeams.length} tímov`
+    : `Sektor ${sectorCode || "–"}`;
+
+  overallRows.innerHTML = detailGapRowsHtml(allTeams, teamId);
+  sectorRows.innerHTML = detailGapRowsHtml(sectorTeams, teamId);
+
+  panel.style.display = "block";
 }
 
 function getOverallRank(teamId) {
