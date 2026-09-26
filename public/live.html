@@ -12966,6 +12966,73 @@ body{
 }
 </style>
 
+
+<style id="lk-premium-v77-mobile-medal-text-fix">
+/* V77 — reálna LIVE tabuľka: mobilné medaily + odstránenie pomocných textov */
+
+/* Pomocné riadky pod názvami tabuliek preč */
+#mainLeaderboardSection .sectionHead .sub,
+#mainLeaderboardSection .sectionHead small,
+#mainLeaderboardSection .sectionHead p,
+#mainLeaderboardSection .sectionHead [class*="hint"],
+#mainLeaderboardSection .sectionHead [class*="desc"],
+#mainLeaderboardSection .sectionHead [class*="note"]{
+  display:none!important;
+}
+#mainLeaderboardSection .sectionHead::after{
+  content:none!important;
+  display:none!important;
+}
+
+@media(max-width:900px){
+  /* 1/2/3: vynútený kruh — žiadne vertikálne natiahnutie */
+  .v73Medal.v74Medal.v75Award{
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+    min-height:48px!important;
+    max-width:48px!important;
+    max-height:48px!important;
+    aspect-ratio:1/1!important;
+    border-radius:50%!important;
+    transform:translateX(-50%)!important;
+  }
+  .v73Place1 .v73Medal.v74Medal.v75Award{
+    width:56px!important;
+    height:56px!important;
+    min-width:56px!important;
+    min-height:56px!important;
+    max-width:56px!important;
+    max-height:56px!important;
+  }
+
+  .v75Award strong{
+    display:grid!important;
+    place-items:center!important;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    max-width:44px!important;
+    max-height:44px!important;
+    aspect-ratio:1/1!important;
+    border-radius:50%!important;
+    padding:0!important;
+    margin:0!important;
+    line-height:1!important;
+    transform:none!important;
+  }
+  .v73Place1 .v75Award strong{
+    width:52px!important;
+    height:52px!important;
+    min-width:52px!important;
+    min-height:52px!important;
+    max-width:52px!important;
+    max-height:52px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -13069,7 +13136,7 @@ body{
         <div class="section" id="top5Section">
           <div class="sectionHead">
             <h2 id="top5Title">Celkové poradie tímov</h2>
-            <div class="sectionSub">Klikni na tím a otvorí sa detail tímu</div>
+            <div class="sectionSub"></div>
           </div>
           <div class="tableWrap">
             <table>
@@ -13616,7 +13683,7 @@ currentRecentCatches = Array.isArray(data?.recentCatches)
   if (mainLeaderboardSub) {
     mainLeaderboardSub.textContent =
       currentLeaderboardMode === "BOTH"
-        ? "Hlavná tabuľka podľa celkovej váhy. TOP 5 je zobrazené ako doplnková tabuľka."
+        ? ""
         : "Prepínaj medzi celkovým poradím a jednotlivými sektormi.";
   }
 
